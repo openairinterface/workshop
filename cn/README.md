@@ -49,13 +49,7 @@ The aim of this tutorial is to explain:
 
 **TABLE OF CONTENTS**
 
-1.  [Creating the Environment](#1-creating-the-environment)
-2.  [Configuring OAI 5G Core Network Functions](#2-configuring-the-oai-5g-core-network-functions)
-3.  [Deploying OAI 5G Core Network](#3-deploying-oai-5g-core-network)
-4.  [Deploying OAI-GNB RFSIM](#4-deploying-oai-gnb-rfsim)
-5.  [Anaylse logs and PCAPs](#5-anaylse-logs-and-pcaps)
-6.  [Bonus I: Connect Second UE in different slice](#6-bonus-i-connect-second-ue-in-different-slice)
-7.  [Bonus II: Configure Static UE Ip-address](#7-bonus-ii-configure-static-ue-ip-address)
+[[_TOC_]]
 
 ## 1. Creating the Environment
 
