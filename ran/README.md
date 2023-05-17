@@ -41,20 +41,7 @@ none: we will install all the necessary software
 
 **TABLE OF CONTENTS**
 
-- [Preparation for RAN training session](.#preparation-for-ran-training-session)
-  - [Installation of dependencies and compilation](.#installation-of-dependencies-and-compilation)
-  - [The RAN repository](.#the-ran-repository)
-  - [How to contribute](.#how-to-contribute)
-  - [Repository structure](.#repository-structure)
-- [Hands-On](.#hands-on)
-  - [About the RFsimulator](.#about-the-rfsimulator)
-  - [How to build](.#how-to-build)
-  - [Basic end-to-end setup](.#basic-end-to-end-setup)
-  - [Scopes](.#scopes)
-  - [Channel Models](.#channel-models)
-  - [Multiple UEs](.#multiple-ues)
-  - [How to create a docker image](.#how-to-create-a-docker-image)
-  - [CU-DU split](.#cu-du-split)
+[[_TOC_]]
 
 
 # Preparation for RAN training session
