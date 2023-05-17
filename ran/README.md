@@ -27,8 +27,8 @@ The aim of this tutorial is to explain:
 
 1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 16GB of storage.  To avoid any problems, we expressly recommend the use of a physical machine, i.e., NO virtual machine.
 2. Make sure your laptop/remote server cpu supports `avx2`. You can check via `lscpu | grep avx2`
-3. Operating System: Ubuntu 20.04 or 22.04. Other operating systems might work (e.g., Fedora); some (Arch, ...) do not work
-4. Note: macOS and new M1/M2 laptops are not yet tested
+3. Operating System: Ubuntu 20.04 (preferred) or 22.04. Other operating systems might work (e.g., RHEL, Fedora); others (Arch, ...) are not tested and have no support in `build_oai`
+4. Note: macOS and new M1/M2 laptops as well as the Windows Subsystem for Linux are not tested and most likely won't work
 
 **Software Prerequisites**
 
@@ -67,7 +67,7 @@ This step should be done before the hands-on training, i.e., at least you should
 $ cd 
 $ git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
 $ cd openairinterface5g/cmake_targets
-$ git checkout develop
+$ git checkout 2023.w19                        # tested tag
 $ ./build_oai -I                               # install dependencies
 $ ./build_oai --ninja --gNB --nrUE -w SIMU     # compile gNB and nrUE
 ```
