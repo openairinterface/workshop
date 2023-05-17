@@ -1,92 +1,268 @@
-# summerworkshop2023
+<table style="border-collapse: collapse; border: none;">
+  <tr style="border-collapse: collapse; border: none;">
+    <td style="border-collapse: collapse; border: none;">
+      <a href="http://www.openairinterface.org/">
+         <img src="./resources/oai_final_logo.png" alt="" border=3 height=50 width=150>
+         </img>
+      </a>
+    </td>
+    <td style="border-collapse: collapse; border: none; vertical-align: center;">
+      <b><font size = "5">OpenAirInterface 5G Core Network Summer Workshop 2023</font></b>
+    </td>
+  </tr>
+</table>
 
 
+![SA Basic Demo](./resources/oaiworkshop.png)
 
-## Getting started
+The aim of this tutorial is to explain: 
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+1. How to configure OAI5G Core network
+2. How it works end to end with a RF Simulated `oai-gnb` and `oai-nr-ue`
+3. (Optional): Connect two UEs to the gNB in two different slices
+4. (Optional): Configure a static ip-address for a UE in the UDR database
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+**Hardware Requirements**
 
-## Add your files
+1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 4GB of storage. Most of the CPU and RAM is consumed by OAI gNB and NR-UE RFSimulator. Core network requires minimum 2vCPU and 4GB RAM.
+2. Make sure your laptop/remote server cpu supports `avx2`. You can check via `lscpu | grep avx2`
+3. Operating System: Ubuntu 20.04 or 22.04. 
+5. Note: macOS and new M1/M2 laptops are not yet tested
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+**Software Prerequisites**
 
+|Software      |Version                                       |
+|:-------------|:---------------------------------------------|
+|docker engine |Minimum 19.03.6                               |
+|docker-compose|Minimum 1.27.4                                |
+|tshark        |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
+|wireshark     |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
+
+**NOTE**: 
+
+1. If you are using docker engine version > 21 then `compose` command is included in `docker`. If you do not have docker installed [then follow the official link](https://docs.docker.com/engine/install/).
+2. It is recommended to use a docker account when you are pulling images. On dockerhub there is a limit for `anonymous` pull request. Probably at the day of the workshop not everyone will be able to pull the images. So it is good if you pull images in advance.
+
+**Reading time**: ~ 20mins
+
+**Tutorial replication time**: ~ 60mins
+
+**TABLE OF CONTENTS**
+
+1.  [Creating the Environment](#1-creating-the-environment)
+2.  [Configuring OAI 5G Core Network Functions](#2-configuring-the-oai-5g-core-network-functions)
+3.  [Deploying OAI 5G Core Network](#3-deploying-oai-5g-core-network)
+4.  [Deploying OAI-GNB RFSIM](#4-deploying-oai-gnb-rfsim)
+5.  [Anaylse logs and PCAPs](#5-anaylse-logs-and-pcaps)
+6.  [Bonus I: Connect Second UE in different slice](#6-bonus-i-connect-second-ue-in-different-slice)
+7.  [Bonus II: Configure Static UE Ip-address](#7-bonus-ii-configure-static-ue-ip-address)
+
+## 1. Creating the Environment
+
+1. Create a folder where you can store all the result files of the tutorial
+
+``` shell
+mkdir -p /tmp/oaisummerworkshop2023
 ```
-cd existing_repo
-git remote add origin https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023.git
-git branch -M main
-git push -uf origin main
+
+2. Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/)
+
+```bash
+curl -SL https://github.com/docker/compose/releases/download/v2.18.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
-## Integrate with your tools
+3. (Optional): Pull all the container images which are required in this tutorial. In case you do not want to pull the images now `docker-compose` will pull the images for you. 
 
-- [ ] [Set up project integrations](https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023/-/settings/integrations)
+```bash
+##Recommended to login to your docker hub account
+docker login
+## Pull images
+docker pull oaisoftwarealliance/oai-amf:v1.5.1
+docker pull oaisoftwarealliance/oai-smf:v1.5.1
+docker pull oaisoftwarealliance/oai-nrf:v1.5.1
+docker pull oaisoftwarealliance/oai-udr:v1.5.1
+docker pull oaisoftwarealliance/oai-udm:v1.5.1
+docker pull oaisoftwarealliance/oai-ausf:v1.5.1
+docker pull oaisoftwarealliance/oai-spgwu-tiny:v1.5.1
+## Your choice if you want to pull develop images for RAN then you can use develop
+docker pull oaisoftwarealliance/oai-nr-ue:2023.w19
+docker pull oaisoftwarealliance/oai-gnb:2023.w19
+```
 
-## Collaborate with your team
+4. (Optional) In case you do not have wireshark you can install 
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```bash
+sudo add-apt-repository ppa:wireshark-dev/stable
+sudo apt update
+sudo apt install wireshark
+```
 
-## Test and Deploy
+5. (Optional) if you want to run the gNB and core in different machines then you need some forwarding rules. 
 
-Use the built-in continuous integration in GitLab.
+```bash
+sudo sysctl net.ipv4.conf.all.forwarding=1
+sudo iptables -P FORWARD ACCEPT
+# You also need to add a route in the gNB to access the core network
+sudo ip route add route CORE_NETWORK_DOCKER_SUBNET via IP_ADDRESS_OF_CORE_NETWORK_HOST_MACHINE dev gNB_NIC_TOWARDS_CORE_NETWORK
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## 2. Configuring the OAI-5G Core Network Functions
 
-***
+The [docker-compose](./docker-compose.yml) file has configuration parameters for each core network component. The file is pre-configured with parameters related to this scenario. The table contains the location of the configuration files. These files contain allowed configurable parameters.
 
-# Editing this README
+| File Name   | Repository    |Location                                           |
+|:----------- |:-------------------------------------------- |:-------------------|
+| amf.conf    | (Gitlab) cn5g/oai-cn5g-amf                   | [etc/amf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf/-/blob/master/etc/amf.conf) |
+| smf.conf    | (Gitlab) cn5g/oai-cn5g-smf                   | [etc/smf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-smf/-/blob/master/etc/smf.conf) |
+| nrf.conf    | (Gitlab) cn5g/oai-cn5g-nrf                   | [etc/nrf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-nrf/-/blob/master/etc/nrf.conf)  |
+| spgw_u.conf | (Github) OPENAIRINTERFACE/openair-spgwu-tiny | [etc/spgw_u.conf](https://github.com/OPENAIRINTERFACE/openair-spgwu-tiny/blob/master/etc/spgw_u.conf) |
+| udr.conf    | (Gitlab) cn5g/oai-cn5g-udr                   | [etc/udr.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udr/-/blob/master/etc/udr.conf)            |
+| udm.conf    | (Gitlab) cn5g/oai-cn5g-udm                   | [etc/udm.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udm/-/blob/master/etc/udm.conf)            |
+| ausf.conf   | (Gitlab) cn5g/oai-cn5g-ausf                  | [etc/ausf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-ausf/-/blob/master/etc/ausf.conf)         |
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## 3. Deploying OAI 5g Core Network
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+1. Create docker network interface so that we can capture initial packets to understand what happens when core network starts
 
-## Name
-Choose a self-explaining name for your project.
+```bash
+docker network create --driver=bridge --subnet=192.168.70.128/26 -o "com.docker.network.bridge.name"="oaiworkshop" oaiworkshop
+```
+2. Run wireshark with `root` privileges select `oaiworkshop` interface or you can capture packets using `tshark` command. 
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+sudo tshark -i oaiworkshop -f "(not host 192.168.70.135 and not arp and not port 53 and not port 2152) or (host 192.168.70.135 and icmp)" -w /tmp/oaiworkshop'
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+3. Start the core network
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```bash
+docker compose -f docker-compose.yml up -d
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+4. Wait for the core network to be healthy. You can check the core network state using
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```bash
+docker-compose -f docker-compose.yml ps -a
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+5. In this configuration of core network:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+  - AMF subscribes to SMF registration event via NRF for SMF selection
+  - SMF registers to NRF
+  - SMF subscribes to UPF registration event via NRF for UPF discovery
+  - UPF registers to NRF
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+We can check all these requests from the PCAPs or logs. 
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+6. PFCP heartbeat exchange between SMF and UPF
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## 4. Deploying OAI-GNB RFSIM
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+In the RAN workshop you much have learned how to use oai-gnb. Here we are using oai-gnb rfsimulator in docker container. In case you want to run it without docker then you can do that. 
 
-## License
-For open source projects, say how it is licensed.
+Open three terminals and in one terminal type
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```bash
+docker logs oai-amf -f
+```
+
+Second terminal
+
+```bash
+docker logs oai-smf -f
+```
+
+Third terminal
+
+```bash
+docker compose -f docker-compose-ran.yml up -d oai-gnb
+```
+
+Wait for the gNB to be healthy and meanwhile you can check the logs of `oai-amf`.
+
+Open a fourth terminal and start the UE.
+
+```bash
+docker compose -f docker-compose-ran.yml up -d oai-nr-ue
+```
+Check the logs of `oai-amf` and `oai-smf`. You might have received an ip-address.
+
+Get inside the UE and try to ping `8.8.8.8` or `12.1.1.1` or `192.168.70.135`
+
+```bash
+docker exec -it rfsim5g-oai-nr-ue bash
+## ping towards internet
+ping -I oaitun_ue1 8.8.8.8 -c4
+## ping towards upf/spgwu
+ping -I oaitun_ue1 12.1.1.1 -c4
+## ping towards oai-traffic-generator
+ping -I oaitun_ue1 192.168.70.135 -c4
+## Iperf testing
+iperf3 -B <UE_IP_ADDRESS> -c 192.168.70.135 -u -R -b20M
+```
+
+(optional) Connect the second UE and check `oai-amf` and `oai-smf` logs
+
+```bash
+docker compose -f docker-compose-ran.yml up -d oai-nr-ue2
+```
+
+```bash
+docker exec -it rfsim5g-oai-nr-ue2 bash
+## ping towards internet
+ping -I oaitun_ue1 8.8.8.8 -c4
+## ping towards upf/spgwu
+ping -I oaitun_ue1 12.1.1.1 -c4
+## ping towards oai-traffic-generator
+ping -I oaitun_ue1 192.168.70.135 -c4
+```
+
+## 5. Anaylse logs and PCAPs
+
+To be updated with some questions
+
+## 6. Bonus I: Connect Second UE in different slice
+
+To be updated
+
+## 7. Bonus II: Configure Static UE Ip-address
+
+Make sure the core network is not running anymore as we have to update the configuration. 
+
+```bash
+docker compose -f docker-compose.yml down
+```
+
+Edit [docker-compose file](./docker-compose.yml), set the parameter `USE_LOCAL_SUBSCRIPTION_INFO` to `no` in the smf service configuration of the docker-compose file. This parameter controllers if SMF takes slicing and DNN information from configuration file or request UDM. 
+
+Another thing at the moment when SMF request UDM for the subscription information, SMF selection at AMF does not work. So you need to disable `SMF_SELECTION` in AMF configuration file. 
+
+``` shell
+sed -i 's/USE_LOCAL_SUBSCRIPTION_INFO=yes/USE_LOCAL_SUBSCRIPTION_INFO=no/g' docker-compose.yaml
+sed -i 's/SMF_SELECTION=yes/SMF_SELECTION=no/g' docker-compose.yaml
+```
+
+Then configure the [user subscription database sql file](../database/oai_db.sql) with IMSI and DNN information mapping. In the table `SessionManagementSubscriptionData` add below entries
+
+- Static UE ip-address allocation
+
+``` sql
+INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES
+('001010000000101', '00101', '{\"sst\": 1, \"sd\": \"16777215\"}','{\"oai\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 1,\"arp\":{\"priorityLevel\": 15,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"},\"staticIpAddress\":[{\"ipv4Addr\": \"12.1.1.200\"}]},\"ims\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4V6\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 2,\"arp\":{\"priorityLevel\": 15,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"}}}');
+```
+
+- Dynamic ip-address allocation
+``` sql
+INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES 
+('001010000000102', '00101', '{\"sst\": 1, \"sd\": \"1\"}','{\"oai\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"}}}');
+```
+
+Restart the core network, connect the gNB and start the UE1 and UE2. 
+
+## 8. Remove all the docker containers
+
+```bash
+docker compose -f docker-compose.yml down -t2
+docker compose -f docker-compose-ran.yml down -t2
+```
