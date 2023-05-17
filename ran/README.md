@@ -41,7 +41,20 @@ none: we will install all the necessary software
 
 **TABLE OF CONTENTS**
 
-TODO
+- [Preparation for RAN training session](.#preparation-for-ran-training-session)
+  - [Installation of dependencies and compilation](.#installation-of-dependencies-and-compilation)
+  - [The RAN repository](.#the-ran-repository)
+  - [How to contribute](.#how-to-contribute)
+  - [Repository structure](.#repository-structure)
+- [Hands-On](.#hands-on)
+  - [About the RFsimulator](.#about-the-rfsimulator)
+  - [How to build](.#how-to-build)
+  - [Basic end-to-end setup](.#basic-end-to-end-setup)
+  - [Scopes](.#scopes)
+  - [Channel Models](.#channel-models)
+  - [Multiple UEs](.#multiple-ues)
+  - [How to create a docker image](.#how-to-create-a-docker-image)
+  - [CU-DU split](.#cu-du-split)
 
 
 # Preparation for RAN training session
@@ -131,7 +144,7 @@ Once it is healthy, run Wireshark and capture NGAP traffic. Then, start the gNB:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/
+sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/conf/gnb.sa.band78.106prb.rfsim.conf
 ```
 
 Check that you see the NGAP Setup Request and Response messages in Wireshark.
@@ -139,28 +152,28 @@ Check that you see the NGAP Setup Request and Response messages in Wireshark.
 Run the nrUE from a second terminal:
 
 ```
-$ cd ~/openairinterface5g/cmake_targets/ran_build/build
-$ sudo -E RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O ~/oai_hand_on_session/ue.conf
+cd ~/openairinterface5g/cmake_targets/ran_build/build
+sudo -E RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O ~/summerworkshop2023/ran/conf/ue.conf
 ```
 
 Verify that it is connected: you should see the following output at gNB:
 ```
-[NR_RRC]   [gNB 0] Frame  0 : Logical Channel UL-DCCH, Received NR_RRCReconfigurationComplete from UE rnti a248, reconfiguring DRB 1
-[NR_RRC]   gnb_gtp_addr (msg index 0, pdu_sessions index 0, status 2, xid 1): nb_of_pdusessions 1,  pdusession_id 10, teid: 786179347
- [NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message: nb_of_pdusessions 1, total pdu_sessions 1, index 1
-[NGAP]   PDUSESSIONSetup successful message
+[NR_RRC]   [gNB 0] Frame  0 : Logical Channel UL-DCCH, Received NR_RRCReconfigurationComplete from UE rnti e7d2, reconfiguring DRB 1
+[NR_RRC]   msg index 0, pdu_sessions index 0, status 2, xid 3): nb_of_pdusessions 1,  pdusession_id 10, teid: 3222559093
+ [NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message
+[NGAP]   pdusession_setup_resp_p: pdusession ID 10, gnb_addr 192.168.70.129, SIZE 4
 ```
 and nrUE:
 ```
-[NAS]   Received PDU Session Establishment Accept, UE IP: 12.1.1.130
-[OIP]   Interface oaitun_ue1 successfully configured, ip address 12.1.1.130, mask 255.255.255.0 broadcast address 12.1.1.255
+[NAS]   Received PDU Session Establishment Accept, UE IP: 12.1.1.101
+[OIP]   Interface oaitun_ue1 successfully configured, ip address 12.1.1.101, mask 255.255.255.0 broadcast address 12.1.1.255
 ```
 
 Correspondingly, an interface should have been brought up:
 ```
 51: oaitun_ue1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none
-    inet 12.1.1.129/24 brd 12.1.1.255 scope global oaitun_ue1
+    inet 12.1.1.101/24 brd 12.1.1.255 scope global oaitun_ue1
        valid_lft forever preferred_lft forever
     inet6 fe80::5c44:5953:32ab:a130/64 scope link stable-privacy
        valid_lft forever preferred_lft forever
@@ -173,14 +186,14 @@ Some other things to check:
 
 - One terminal in the host, the other in the docker container `oai-ext-dn`
 ```
-docker exec -it demo-oai-ext-dn bash
+docker exec -it oai-ext-dn bash
 ```
 
 - Check the UE's IP address: interface `oaitun_ue1` using `ip address`
 - Ping:
 ```
-ping -I oaitun_ue1 12.1.1.1 # from host, "UL", to oai-ext-dn
-ping <UE IP address>        # from container, "DL"
+ping -I oaitun_ue1 192.168.70.135 # from host, "UL", to oai-ext-dn
+ping <UE IP address>              # from container, "DL"
 ```
 - iperf:
 ```
@@ -219,7 +232,7 @@ The scopes allow to see various channels.
   xhost +si:localuser:root
   ```
 
-![Screenshot of the nrscope](./resources/scope-screenshot)
+![Screenshot of the nrscope](./resources/scope-screenshot.png)
 
 
 ### QtScope
@@ -237,7 +250,7 @@ The scopes allow to see various channels.
   ```
 - Run the `nr-softmodem` and `nr-uesoftmodem` with `--dqt` switch
 
-![Screenshot of the nrqtscope](./resources/nrqtscope-screenshot)
+![Screenshot of the nrqtscope](./resources/nrqtscope-screenshot.png)
 
 ## Channel Models
 
@@ -269,19 +282,23 @@ The scopes allow to see various channels.
 - Follow instructions from [this link](https://open-cells.com/index.php/2021/02/08/rf-simulator-1-enb-2-ues-all-in-one/) or use the script [multi-ue.sh](./multi-ue.sh)
 - Start first UE as
   ```
-  ./multi-ue.sh -c1 -e
-  sudo -E RFSIMULATOR=10.201.1.100 ./nr-uesoftmodem ...
+  sudo ~/summerworkshop2023/ran/multi-ue.sh -c1 -e
+  sudo -E LD_LIBRARY_PATH=. RFSIMULATOR=10.201.1.100 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/summerworkshop2023/ran/conf/ue.conf
   ```
 - Check in Wireshark/UE output that everything is ok
 - Second UE *with different IMSI*
   ```
-  ./multi-ue.sh -c2 -e
-  sudo -E RFSIMULATOR=10.202.1.10 ./nr-uesoftmodem ...  --uicc0.imsi 208950000000032
+  sudo ~/summerworkshop2023/ran/multi-ue.sh -c3 -e
+  sudo -E LD_LIBRARY_PATH=. RFSIMULATOR=10.203.1.100 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/summerworkshop2023/ran/conf/ue.conf --uicc0.imsi 001010000000103
   ```
 - Exercise: Check in Wireshark that both are set up
 - Exercise: Create traffic from/to both UEs
+- At the end, remove network namespaces:
+  ```
+  sudo ~/summerworkshop2023/ran/multi-ue.sh -d1 -d3
+  ```
 
-## How to create a docker image?
+## How to create a docker image
 
 - Creating a docker image is a 3-step process (due to CI specificities):
   - `ran-base` for dependencies (shared image)
@@ -289,12 +306,12 @@ The scopes allow to see various channels.
   - Per-target (eNB, gNB, nrUE, lteUE, \dots) images
 - First, build the shared images:
   ```
-  docker build --target ran-base --tag ran-base:latest --file docker/Dockerfile.base.ubuntu18 .
-  docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.build.ubuntu18 .
+  docker build --target ran-base --tag ran-base:latest --file docker/Dockerfile.base.ubuntu20 .
+  docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.build.ubuntu20 .
   ```
 - Then, build the target images, e.g., gNB and nrUE (as used in the CN session):
   ```
-  docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu18 .
+  docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu20 .
   ```
 - see also `docker/README.md`
 
@@ -302,8 +319,9 @@ The scopes allow to see various channels.
 
 - We will show this separately in the demo session on Wednesday, but you can already run it today!
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
-- Start the gNB as follows, then the UE as before:
+- Start the gNB as follows
   ```
-  sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O gNB_SA_CU.conf
-  sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O gNB_SA_DU.conf
+  sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/conf/gnb-cu.sa.f1.conf
+  sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
   ```
+- Start the UE as before
