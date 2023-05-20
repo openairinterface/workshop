@@ -1,3 +1,7 @@
+% RAN Hands-On
+% Robert Schmidt
+% May 25, 2023
+
 <table style="border-collapse: collapse; border: none;">
   <tr style="border-collapse: collapse; border: none;">
     <td style="border-collapse: collapse; border: none;">
@@ -23,6 +27,14 @@ The aim of this tutorial is to explain:
 6. How to build docker containers of the RAN
 7. Individually, also covered in demo: How to start with the DU-CU/F1 split
 
+Note: this file can be converted to a presentation using
+
+```
+pandoc -t slidy --template ran.slidy -s README.md -o README.html
+```
+
+---
+
 **Hardware Requirements**
 
 1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 16GB of storage.  To avoid any problems, we expressly recommend the use of a physical machine, i.e., NO virtual machine.
@@ -38,6 +50,8 @@ none: we will install all the necessary software
 
 **Tutorial replication time**: ~90mins
 
+---
+
 
 **TABLE OF CONTENTS**
 
@@ -51,15 +65,17 @@ none: we will install all the necessary software
 This step should be done before the hands-on training, i.e., at least you should install the RAN dependencies and compile it, as this takes some time.
 
 ```
-$ cd 
-$ git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-$ cd openairinterface5g/cmake_targets
-$ git checkout 2023.w19                        # tested tag
-$ ./build_oai -I                               # install dependencies
-$ ./build_oai --ninja --gNB --nrUE -w SIMU     # compile gNB and nrUE
+cd
+git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
+cd openairinterface5g/cmake_targets
+git checkout 2023.w19                        # tested tag
+./build_oai -I                               # install dependencies
+./build_oai --ninja --gNB --nrUE -w SIMU     # compile gNB and nrUE
 ```
 
 Note: for USRP support, you have to give the switch `-w USRP`
+
+---
 
 ## The RAN repository
 
@@ -69,6 +85,8 @@ Note: for USRP support, you have to give the switch `-w USRP`
 - `master` for a known stable version
 - We plan to make a 2.0 release in the coming weeks
 
+---
+
 ## How to contribute
 
 - Anyone can contribute!
@@ -76,6 +94,8 @@ Note: for USRP support, you have to give the switch `-w USRP`
 - Contributions go through
   - Peer review on Gitlab
   - Continuous Integration Build and Testing
+
+---
 
 ## Repository structure
 
@@ -107,14 +127,21 @@ Note: for USRP support, you have to give the switch `-w USRP`
 - Large number of participants, no interference
 - Allows the use of channel models
 
+---
+
 ## How to build
 
 - Use of the `build_oai` script
   - Is a wrapper for `cmake`
   - Some useful options: `-h`, `--eNB`, `--gNB`, `--UE`, `--nrUE`, `-c`, `--ninja`, `--sanitize-address`, `-g`, `-w`, `-P`/`--physical_simulators`, ...
 - By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
-- To rebuild more quickly, issue `ninja nr-softmodem nr-uesoftmodem dfts ldpc params_libconfig coding rfsimulator`
+- To rebuild more quickly, issue
+  ```
+  ninja nr-softmodem nr-uesoftmodem dfts ldpc params_libconfig coding rfsimulator`
+  ```
 - Also interesting: `lte-softmodem`, `lte-uesoftmodem`
+
+---
 
 ## Basic end-to-end setup
 
@@ -136,6 +163,8 @@ sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/r
 
 Check that you see the NGAP Setup Request and Response messages in Wireshark.
 
+---
+
 Run the nrUE from a second terminal:
 
 ```
@@ -144,13 +173,16 @@ sudo -E RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -
 ```
 
 Verify that it is connected: you should see the following output at gNB:
+
 ```
 [NR_RRC]   [gNB 0] Frame  0 : Logical Channel UL-DCCH, Received NR_RRCReconfigurationComplete from UE rnti e7d2, reconfiguring DRB 1
 [NR_RRC]   msg index 0, pdu_sessions index 0, status 2, xid 3): nb_of_pdusessions 1,  pdusession_id 10, teid: 3222559093
  [NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message
 [NGAP]   pdusession_setup_resp_p: pdusession ID 10, gnb_addr 192.168.70.129, SIZE 4
 ```
+
 and nrUE:
+
 ```
 [NAS]   Received PDU Session Establishment Accept, UE IP: 12.1.1.101
 [OIP]   Interface oaitun_ue1 successfully configured, ip address 12.1.1.101, mask 255.255.255.0 broadcast address 12.1.1.255
@@ -169,6 +201,8 @@ Correspondingly, an interface should have been brought up:
 Some other things to check:
 - You see the RA procedure of the UE in the gNB logs
 
+---
+
 ### Inject traffic
 
 - One terminal in the host, the other in the docker container `oai-ext-dn`
@@ -186,6 +220,8 @@ ping <UE IP address>              # from container, "DL"
 ```
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -R -b50M # DL
 ```
+
+---
 
 ### A closer look at the config file
 
@@ -221,6 +257,8 @@ The scopes allow to see various channels.
 
 ![Screenshot of the nrscope](./resources/scope-screenshot.png)
 
+---
+
 
 ### QtScope
 
@@ -239,6 +277,8 @@ The scopes allow to see various channels.
 
 ![Screenshot of the nrqtscope](./resources/nrqtscope-screenshot.png)
 
+---
+
 ## Channel Models
 
 ### Enabling channels
@@ -251,6 +291,8 @@ The scopes allow to see various channels.
 - Add the options `--rfsimulator.options chanmod --rfsimulator.modelname AWGN` to the gNB and UE command lines and start
 - More info: `targets/ARCH/rfsimulator/README.md`, channel models defined in `openair1/SIMULATION/TOOLS/random_channel.c`
 
+---
+
 ### Dynamically modifying Channel Model Parameters using Telnet
 
 - Make sure the telnet shared library is compiled: `ninja telnetsrv`
@@ -261,6 +303,8 @@ The scopes allow to see various channels.
   - Use `channelmod help` to show available parameters to change
   - Example: change noise using `channelmod modify 1 noise_power_dB -5`, observe in scope!
 - More information: `common/utils/telnetsrv/DOC/telnetusage.md`
+
+---
 
 ## Multiple UEs
 
@@ -285,6 +329,8 @@ The scopes allow to see various channels.
   sudo ~/summerworkshop2023/ran/multi-ue.sh -d1 -d3
   ```
 
+---
+
 ## How to create a docker image
 
 - Creating a docker image is a 3-step process (due to CI specificities):
@@ -301,6 +347,8 @@ The scopes allow to see various channels.
   docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu20 .
   ```
 - see also `docker/README.md`
+
+---
 
 ## CU-DU split
 
