@@ -133,6 +133,7 @@ services:
             - AUSF_FQDN=oai-ausf
             - UDM_IPV4_ADDRESS=192.168.70.137
             - UDM_FQDN=oai-udm
+            - SMF_SELECTION=yes
         depends_on:
             - mysql
             - oai-nrf
@@ -157,7 +158,8 @@ services:
             - UPF_FQDN_0=oai-spgwu
             - NRF_IPV4_ADDRESS=192.168.70.130
             - NRF_FQDN=oai-nrf
-            - USE_LOCAL_SUBSCRIPTION_INFO=no  #Set to yes if SMF uses local subscription information instead of from an UDM, make sure SMF_SELECTION in AMF is no. 
+            ## Set to yes for Bonus II
+            - USE_LOCAL_SUBSCRIPTION_INFO=yes  #Set to yes if SMF uses local subscription information instead of from an UDM, make sure SMF_SELECTION in AMF is no. 
             - REGISTER_NRF=yes
             - DISCOVER_UPF=yes
             - USE_FQDN_DNS=yes

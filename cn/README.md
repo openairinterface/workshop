@@ -185,7 +185,7 @@ Check the logs of `oai-amf` and `oai-smf`. You might have received an ip-address
 Get inside the UE and try to ping `8.8.8.8` or `12.1.1.1` or `192.168.70.135`
 
 ```bash
-docker exec -it rfsim5g-oai-nr-ue bash
+docker exec -it oai-nr-ue bash
 ## ping towards internet
 ping -I oaitun_ue1 8.8.8.8 -c4
 ## ping towards upf/spgwu
@@ -203,7 +203,7 @@ docker compose -f docker-compose-ran.yml up -d oai-nr-ue2
 ```
 
 ```bash
-docker exec -it rfsim5g-oai-nr-ue2 bash
+docker exec -it oai-nr-ue2 bash
 ## ping towards internet
 ping -I oaitun_ue1 8.8.8.8 -c4
 ## ping towards upf/spgwu
@@ -211,18 +211,62 @@ ping -I oaitun_ue1 12.1.1.1 -c4
 ## ping towards oai-traffic-generator
 ping -I oaitun_ue1 192.168.70.135 -c4
 ```
+Once you are done with your experiment, please stop the two UEs and gNB in an order using below command, 
+
+```bash
+docker stop oai-nr-ue oai-nr-ue2 
+docker kill oai-nr-ue oai-nr-ue2
+```
+
+Stop the gNB
+
+```bash
+docker stop oai-gnb
+docker kill oai-gnb
+```
+
+Do not stop the core network. 
 
 ## 5. Anaylse logs and PCAPs
 
-To be updated with some questions
+Normally you will see below messages twice because we connected the 2 UEs and pinged 4 times for each UE.
+
+Below messages are from AMF pcap
+
+1. NGSetupRequest, NGSetupResponse
+2. InitialUEMessage, Registration request, Registration request
+3. DownlinkNASTransport, Identity request
+4. UplinkNASTransport, Identity response
+5. DownlinkNASTransport, Authentication request
+6. UplinkNASTransport, Authentication response
+7. DownlinkNASTransport, Security mode command
+8. UplinkNASTransport, Security mode complete, Registration request
+9. UERadioCapabilityInfoIndication
+10. UplinkNASTransport, Registration complete
+11. PDU session establishment request
+12. PDUSessionResourceSetupRequest, DL NAS transport, PDU session establishment accept
+13. PDUSessionResourceSetupResponse
+14. UplinkNASTransport, UL NAS transport, PDU session release request (Regular deactivation)
+15. PDUSessionResourceReleaseCommand, DL NAS transport, PDU session release command (Regular deactivation)
+16. PDUSessionResourceReleaseResponse
+17. UplinkNASTransport, UL NAS transport, PDU session release complete, UplinkNASTransport, Deregistration request (UE originating)
+18. SHUTDOWN
+19. SHUTDOWN ACK
+20. SHUTDOWN_COMPLETE
 
 ## 6. Bonus I: Connect Second UE in different slice
 
-To be updated
+Mount the configuration file of RF-Sim [docker-compose-ran.yml](./docker-compose-ran.yml). Follow the steps mention in the comment, uncomment `USE_VOLUMED_CONF` and `volumes` section to mount the configuration file. 
+
+Similarly for `oai-nr-ue2` uncomment `USE_VOLUMED_CONF` and `volumes` section. 
+
+Now start the gNB and then after couple of seconds once gNB is healthy you can start `oai-nr-ue` and then `oai-nr-ue2`. 
+
+What do you observe? Anything different? 
 
 ## 7. Bonus II: Configure Static UE Ip-address
 
-Make sure the core network is not running anymore as we have to update the configuration. 
+Make sure the core network is not running anymore as we have to update the configuration.
 
 ```bash
 docker compose -f docker-compose.yml down
@@ -233,8 +277,8 @@ Edit [docker-compose file](./docker-compose.yml), set the parameter `USE_LOCAL_S
 Another thing at the moment when SMF request UDM for the subscription information, SMF selection at AMF does not work. So you need to disable `SMF_SELECTION` in AMF configuration file. 
 
 ``` shell
-sed -i 's/USE_LOCAL_SUBSCRIPTION_INFO=yes/USE_LOCAL_SUBSCRIPTION_INFO=no/g' docker-compose.yaml
-sed -i 's/SMF_SELECTION=yes/SMF_SELECTION=no/g' docker-compose.yaml
+sed -i 's/USE_LOCAL_SUBSCRIPTION_INFO=yes/USE_LOCAL_SUBSCRIPTION_INFO=no/g' docker-compose.yml
+sed -i 's/SMF_SELECTION=yes/SMF_SELECTION=no/g' docker-compose.yml
 ```
 
 Then configure the [user subscription database sql file](../database/oai_db.sql) with IMSI and DNN information mapping. In the table `SessionManagementSubscriptionData` add below entries
@@ -249,7 +293,7 @@ INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singl
 - Dynamic ip-address allocation
 ``` sql
 INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES 
-('001010000000102', '00101', '{\"sst\": 1, \"sd\": \"1\"}','{\"oai\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"}}}');
+('001010000000102', '00101', '{\"sst\": 1, \"sd\": \"1\"}','{\"internet\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"}}}');
 ```
 
 Restart the core network, connect the gNB and start the UE1 and UE2. 
@@ -260,3 +304,8 @@ Restart the core network, connect the gNB and start the UE1 and UE2.
 docker compose -f docker-compose.yml down -t2
 docker compose -f docker-compose-ran.yml down -t2
 ```
+
+## 9. Extra
+
+1. If you want to see the resource consumption of `docker containers` you can use `docker stats`
+2. If you want to see the processes running inside a contianer you can do `docker top`

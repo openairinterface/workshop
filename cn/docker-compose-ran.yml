@@ -1,11 +1,11 @@
 version: '3.8'
 services:
     oai-gnb:
-        image: oaisoftwarealliance/oai-gnb:develop
+        image: oaisoftwarealliance/oai-gnb:2023.w19
         privileged: true
-        container_name: rfsim5g-oai-gnb
+        container_name: oai-gnb
         environment:
-            USE_VOLUMED_CONF: 'yes'
+            USE_VOLUMED_CONF: 'yes' #Bonus I
             RFSIMULATOR: server
             USE_SA_TDD_MONO: 'yes'
             GNB_NAME: gnb-rfsim
@@ -24,17 +24,18 @@ services:
         networks:
             public_net:
                 ipv4_address: 192.168.70.160
-        # volumes:
-        #     - ./conf/gnb.sa.bandn78.fr1.106PRB.rfsim.conf:/opt/oai-gnb/etc/mounted.conf
+        #Bonus I
+        volumes:
+            - ./conf/gnb.sa.bandn78.fr1.106PRB.rfsim.conf:/opt/oai-gnb/etc/mounted.conf
         healthcheck:
             test: /bin/bash -c "pgrep nr-softmodem"
             interval: 10s
             timeout: 5s
             retries: 5
     oai-nr-ue:
-        image: oaisoftwarealliance/oai-nr-ue:develop
+        image: oaisoftwarealliance/oai-nr-ue:2023.w19
         privileged: true
-        container_name: rfsim5g-oai-nr-ue
+        container_name: oai-nr-ue
         environment: 
             RFSIMULATOR: 192.168.70.160
             FULL_IMSI: '001010000000101'
@@ -52,11 +53,11 @@ services:
             timeout: 5s
             retries: 5
     oai-nr-ue2:
-        image: oaisoftwarealliance/oai-nr-ue:develop
+        image: oaisoftwarealliance/oai-nr-ue:2023.w19
         privileged: true
-        container_name: rfsim5g-oai-nr-ue2
+        container_name: oai-nr-ue2
         environment: 
-            # USE_VOLUMED_CONF: 'yes'
+            USE_VOLUMED_CONF: 'yes' #Bonus I 
             RFSIMULATOR: 192.168.70.160
             FULL_IMSI: '001010000000102'
             FULL_KEY: 'fec86ba6eb707ed08905757b1bb44b8f'
@@ -64,8 +65,9 @@ services:
             DNN: oai 
             NSSAI_SST: 1
             USE_ADDITIONAL_OPTIONS: -E --sa --rfsim -r 106 --numerology 1 -C 3619200000 --log_config.global_log_options level,nocolor,time
-        # volumes:
-        #     - ./conf/ue2.conf:/opt/oai-nr-ue/etc/mounted.conf
+        ##Bonus I
+        volumes:
+            - ./conf/ue2.conf:/opt/oai-nr-ue/etc/mounted.conf
         networks:
             public_net:
                 ipv4_address: 192.168.70.151
