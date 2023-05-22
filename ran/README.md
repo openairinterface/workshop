@@ -225,9 +225,43 @@ iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -R -b50M # DL
 
 ### A closer look at the config file
 
-- `plmn_list`: list of PLMNs, with MCC, MNC, and NSSAIs
+- Note: if an option is not given, a default is used (which might or might not
+prevent the gNB from starting)
+- You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
+
+#### `gNBs` section
+- `plmn_list`: list of PLMNs, with MCC, MNC, and NSSAIs; needs to match CN config
+- `tracking_area_code`: Tracking Area Code; needs to match CN
 - `amf_ip_address.[0].ipv4`: IP address of AMF
 - `NETWORK_INTERFACES.GNB_IPV4_ADDRESS_FOR_NG_AMF` and `NETWORK_INTERFACES.GNB_IPV4_ADDRESS_FOR_NGU`: IP address on which is the gNB
+- `min_rxtxtime`: minimum feedback time (e.g., PDSCH to PUCCH), is 5 for OAI UE
+  and 2 for commercial UE
+- `absoluteFrequencySSB` and `dl_absoluteFrequencyPointA`: frequencies for synchronization signal block and "PointA", in ARFCN; [use a calculator instead of getting mad](http://sqimway.com/nr_refA.php)
+- TDD configuration is in `nrofDownlinkSlots`, `nrofUplinkSlots`,
+  `nrofDownlinkSymbols` and `nrofUplinkSymbols`
+
+#### `MACRLCs` section
+
+- `ulsch_max_frame_inactivity`: maximum number of frames until UE is scheduled
+  automatically even without requesting it. Often at `0` or `1` for lower
+  latency, but this is "artificial"
+- `pusch_TargetSNRx10`, `pucch_TargetSNRx10`: target SNRs multiplied by ten for
+  these channels; increasing can sometimes stabilize a system
+- `dl_harq_round_max`, `ul_harq_round_max`: maximum number of MAC HARQ rounds
+- `dl_max_mcs`, `ul_max_mcs`: maximum MCS to be scheduled
+
+Other parameters: see `openair2/GNB_APP/MACRLC_nr_paramdef.h`
+
+### `RUs` section
+
+- `nb_tx`, `nb_rx`: number transmit/receive antennas to use
+- `max_rxgain`: maximum receive gain to be used, IIRC only used for USRP
+- `att_tx`, `att_rx`: attenuation for transmit/receive signals to be applied at
+  gNB. In many lab scenarios, the receiver of a UE is saturated if the gNB
+  sends with full power, hence you need a value greater than `0` (try, in
+  order: `6`, `12`, `18`)
+- `sdr_addrs`: arguments to be passed to search for SDR, e.g., IP address for
+  N310
 
 ## Scopes
 
@@ -360,3 +394,11 @@ The scopes allow to see various channels.
   sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
   ```
 - Start the UE as before
+- Compare the IP addresses in the config with what you have below to understand
+  the interfaces
+
+![Architecture of F1 and config](./resources/f1-arch.png)
+
+---
+
+![Screenshot of the Wireshark with NG and F1](./resources/f1.png)
