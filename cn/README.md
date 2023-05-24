@@ -27,7 +27,7 @@ The aim of this tutorial is to explain:
 1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 4GB of storage. Most of the CPU and RAM is consumed by OAI gNB and NR-UE RFSimulator. Core network requires minimum 2vCPU and 4GB RAM.
 2. Make sure your laptop/remote server cpu supports `avx2`. You can check via `lscpu | grep avx2`
 3. Operating System: Ubuntu 20.04 or 22.04. 
-5. Note: macOS and new M1/M2 laptops are not yet tested
+4. Note: macOS and new M1/M2 laptops are not yet tested and Windows Linux Subsystem (WSL) is not yet tested
 
 **Software Prerequisites**
 
@@ -134,9 +134,10 @@ docker network create --driver=bridge --subnet=192.168.70.128/26 -o "com.docker.
 sudo tshark -i oaiworkshop -f "(not host 192.168.70.135 and not arp and not port 53 and not port 2152) or (host 192.168.70.135 and icmp)" -w /tmp/oaiworkshop'
 ```
 
-3. Start the core network
+3. Start the core network (make sure you are in `summerworkshop2023/cn` repository)
 
 ```bash
+cd summerworkshop2023/cn
 docker compose -f docker-compose.yml up -d
 ```
 
@@ -305,6 +306,8 @@ INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singl
 Restart the core network, connect the gNB and start the UE1 and UE2. 
 
 ## 8. Remove all the docker containers
+
+Make sure you are always in `summerworkshop2023/cn` folder
 
 ```bash
 docker compose -f docker-compose.yml down -t2

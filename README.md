@@ -25,9 +25,8 @@ git clone https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023.git
 
 1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 4GB of storage. Most of the CPU and RAM is consumed by OAI gNB and NR-UE RFSimulator. Core network requires minimum 2vCPU and 4GB RAM.
 2. Make sure your laptop/remote server cpu supports `avx2`. You can check via `lscpu | grep avx2`
-3. Operating System: Ubuntu 20.04 or 22.04.  
+3. Operating System: Ubuntu 20.04 or 22.04.
 4. Note: macOS and new M1/M2 laptops are not yet tested and Windows Linux Subsystem (WSL) is not yet tested
-5. It is prefered to use linux
 
 **Software Prerequisites**
 
