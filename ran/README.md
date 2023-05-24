@@ -252,7 +252,7 @@ prevent the gNB from starting)
 
 Other parameters: see `openair2/GNB_APP/MACRLC_nr_paramdef.h`
 
-### `RUs` section
+#### `RUs` section
 
 - `nb_tx`, `nb_rx`: number transmit/receive antennas to use
 - `max_rxgain`: maximum receive gain to be used, IIRC only used for USRP
@@ -329,8 +329,13 @@ The scopes allow to see various channels.
 
 ### Dynamically modifying Channel Model Parameters using Telnet
 
-- Make sure the telnet shared library is compiled: `ninja telnetsrv`
+- Make sure the telnet shared library is compiled:
+  ```
+  ./build_oai --build-lib telnetsrv --ninja
+  cmake ../../..  -DENABLE_TELNETSRV=ON && ninja telnetsrv
+  ```
 - Start the `nr-softmodem`/`nr-uesoftmodem` with parameter `--telnetsrv`
+- Note: configure UE telnet port to be different from gNB: `--telnetsrv.listenport 9091`
 - New terminal: connect to gNB/UE: `telnet 127.0.0.1 9090`
   - Use `help` to show available commands
   - Use `channelmod show current` to show current channel model configuration
