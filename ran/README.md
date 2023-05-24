@@ -69,8 +69,8 @@ cd
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
 cd openairinterface5g/cmake_targets
 git checkout 2023.w19                        # tested tag
-./build_oai -I                               # install dependencies
-./build_oai --ninja --gNB --nrUE -w SIMU     # compile gNB and nrUE
+./build_oai --ninja -I                       # install dependencies
+./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
 ```
 
 Note: for USRP support, you have to give the switch `-w USRP`
