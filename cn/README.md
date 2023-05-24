@@ -53,16 +53,13 @@ The aim of this tutorial is to explain:
 
 ## 1. Creating the Environment
 
-0. Clone this repository
-
-```bash
-git clone https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023.git
-```
-
-1. Create a folder where you can store all the result files of the tutorial
+1. Create a folder where you can store all the result files of the tutorial and this repository
 
 ``` shell
 mkdir -p /tmp/oaisummerworkshop2023
+cd /tmp/oaisummerworkshop2023
+git clone https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023.git
+cd /tmp/oaisummerworkshop2023/summerworkshop2023/cn
 ```
 
 2. Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/)
