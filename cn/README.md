@@ -53,6 +53,12 @@ The aim of this tutorial is to explain:
 
 ## 1. Creating the Environment
 
+0. Clone this repository
+
+```bash
+git clone https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023.git
+```
+
 1. Create a folder where you can store all the result files of the tutorial
 
 ``` shell
