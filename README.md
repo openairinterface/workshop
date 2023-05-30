@@ -59,3 +59,4 @@ To follow the hands-on tutorial:
 
 1. [Core Network Hands-on Tutorial](./cn/README.md)
 2. [RAN Hands-on Tutorial](./ran/README.md)
+3. [OAM Hands-on Tutorial](./oam/README.md)
