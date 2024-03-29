@@ -61,6 +61,7 @@ cd /tmp/oai-spring-of-code
 git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git .
 git checkout main
 git rebase origin/main
+cd cn
 ```
 
 2. Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/)
@@ -76,14 +77,17 @@ sudo chmox +x /usr/local/bin/docker-compose
 ```bash
 ##Recommended to login to your docker hub account
 docker login
-## Pull images
-docker pull oaisoftwarealliance/oai-amf:v2.0.1
-docker pull oaisoftwarealliance/oai-smf:v2.0.1
-docker pull oaisoftwarealliance/oai-nrf:v2.0.1
-docker pull oaisoftwarealliance/oai-udr:v2.0.1
-docker pull oaisoftwarealliance/oai-udm:v2.0.1
-docker pull oaisoftwarealliance/oai-ausf:v2.0.1
-docker pull oaisoftwarealliance/oai-upf:v2.0.1
+## Pull images v2.0.1 Core Network images
+docker compose pull
+  Pulling mysql              ... done
+  Pulling oai-nrf            ... done
+  Pulling oai-udr            ... done
+  Pulling oai-udm            ... done
+  Pulling oai-ausf           ... done
+  Pulling oai-amf            ... done
+  Pulling oai-smf            ... done
+  Pulling oai-upf            ... done
+  Pulling oai-traffic-server ... done
 ## Your choice if you want to pull develop images for RAN then you can use develop
 docker pull oaisoftwarealliance/oai-nr-ue:2024.w11
 docker pull oaisoftwarealliance/oai-gnb:2024.w11
@@ -108,42 +112,63 @@ sudo ip route add route CORE_NETWORK_DOCKER_SUBNET via IP_ADDRESS_OF_CORE_NETWOR
 
 ## 2. Configuring the OAI-5G Core Network Functions
 
-The [docker-compose](./docker-compose.yml) file has configuration parameters for each core network component. The file is pre-configured with parameters related to this scenario. The table contains the location of the configuration files. These files contain allowed configurable parameters.
+Since `v2.0.0` release of the 5G Core Network, the deployment files have been simplified:
 
-| File Name   | Repository    |Location                                           |
-|:----------- |:-------------------------------------------- |:-------------------|
-| amf.conf    | (Gitlab) cn5g/oai-cn5g-amf                   | [etc/amf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf/-/blob/master/etc/amf.conf) |
-| smf.conf    | (Gitlab) cn5g/oai-cn5g-smf                   | [etc/smf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-smf/-/blob/master/etc/smf.conf) |
-| nrf.conf    | (Gitlab) cn5g/oai-cn5g-nrf                   | [etc/nrf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-nrf/-/blob/master/etc/nrf.conf)  |
-| spgw_u.conf | (Github) OPENAIRINTERFACE/openair-spgwu-tiny | [etc/spgw_u.conf](https://github.com/OPENAIRINTERFACE/openair-spgwu-tiny/blob/master/etc/spgw_u.conf) |
-| udr.conf    | (Gitlab) cn5g/oai-cn5g-udr                   | [etc/udr.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udr/-/blob/master/etc/udr.conf)            |
-| udm.conf    | (Gitlab) cn5g/oai-cn5g-udm                   | [etc/udm.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udm/-/blob/master/etc/udm.conf)            |
-| ausf.conf   | (Gitlab) cn5g/oai-cn5g-ausf                  | [etc/ausf.conf](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-ausf/-/blob/master/etc/ausf.conf)         |
+1. The [docker-compose](./docker-compose.yml) file has containers/images related parameters:
+  * Which version of the images to use
+  * Name and IP addresses of the containers
+2. The [config.yaml](./conf/config.yaml) file has the real network configuration parameters such as:
+  * PLMN / Slices
+  * DNN
+  * ...
 
 ## 3. Deploying OAI 5g Core Network
 
 1. Create docker network interface so that we can capture initial packets to understand what happens when core network starts
 
 ```bash
+cd /tmp/oai-spring-of-code/cn
 docker network create --driver=bridge --subnet=192.168.70.128/26 -o "com.docker.network.bridge.name"="oaiworkshop" oaiworkshop
 ```
+
+or an easier way, just deploy the mysql database:
+
+```bash
+cd /tmp/oai-spring-of-code/cn
+docker-compose up -f docker-compose.yml -d mysql
+```
+
 2. Run wireshark with `root` privileges select `oaiworkshop` interface or you can capture packets using `tshark` command. 
 
 ```bash
-sudo tshark -i oaiworkshop -f "(not host 192.168.70.135 and not arp and not port 53 and not port 2152) or (host 192.168.70.135 and icmp)" -w /tmp/oaiworkshop'
+sudo tshark -i oaiworkshop -f "sctp or port 80 or port 8080 or port 8805 or icmp or port 3306" -w /tmp/oaiworkshop.pcap
 ```
 
-3. Start the core network (make sure you are in `summerworkshop2023/cn` repository)
+3. Start the core network (make sure you are in `oai-spring-of-code/cn` folder)
 
 ```bash
-cd summerworkshop2023/cn
-docker compose -f docker-compose.yml up -d
+cd /tmp/oai-spring-of-code/cn
+docker-compose -f docker-compose.yml up -d
 ```
 
 4. Wait for the core network to be healthy. You can check the core network state using
 
 ```bash
-docker-compose -f docker-compose.yml ps -a
+watch docker-compose -f docker-compose.yml ps -a
+
+Every 2,0s: docker-compose -f docker-compose.yml ps -a
+
+   Name                 Command                  State                       Ports
+---------------------------------------------------------------------------------------------------
+mysql        docker-entrypoint.sh mysqld      Up (healthy)   3306/tcp, 33060/tcp
+oai-amf      /openair-amf/bin/oai_amf - ...   Up (healthy)   38412/sctp, 80/tcp, 8080/tcp, 9090/tcp
+oai-ausf     /openair-ausf/bin/oai_ausf ...   Up (healthy)   80/tcp, 8080/tcp
+oai-ext-dn   /bin/bash -c  ip route add ...   Up (healthy)
+oai-nrf      /openair-nrf/bin/oai_nrf - ...   Up (healthy)   80/tcp, 8080/tcp, 9090/tcp
+oai-smf      /openair-smf/bin/oai_smf - ...   Up (healthy)   80/tcp, 8080/tcp, 8805/udp
+oai-udm      /openair-udm/bin/oai_udm - ...   Up (healthy)   80/tcp, 8080/tcp
+oai-udr      /openair-udr/bin/oai_udr - ...   Up (healthy)   80/tcp, 8080/tcp
+oai-upf      /openair-upf/bin/oai_upf - ...   Up (healthy)   2152/udp, 8805/udp
 ```
 
 5. In this configuration of core network:
@@ -275,7 +300,7 @@ What do you observe? Anything different?
 Make sure the core network is not running anymore as we have to update the configuration.
 
 ```bash
-docker compose -f docker-compose.yml down
+docker compose -f docker-compose.yml down -t 5 -v
 ```
 
 Edit [docker-compose file](./docker-compose.yml), set the parameter `USE_LOCAL_SUBSCRIPTION_INFO` to `no` in the smf service configuration of the docker-compose file. This parameter controllers if SMF takes slicing and DNN information from configuration file or request UDM. 
@@ -309,8 +334,8 @@ Restart the core network, connect the gNB and start the UE1 and UE2.
 Make sure you are always in `summerworkshop2023/cn` folder
 
 ```bash
-docker compose -f docker-compose.yml down -t2
-docker compose -f docker-compose-ran.yml down -t2
+docker compose -f docker-compose-ran.yml down -t2 -v
+docker compose -f docker-compose.yml down -t2 -v
 ```
 
 ## 9. Extra
