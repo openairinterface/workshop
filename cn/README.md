@@ -78,7 +78,7 @@ sudo chmox +x /usr/local/bin/docker-compose
 ##Recommended to login to your docker hub account
 docker login
 ## Pull images v2.0.1 Core Network images
-docker compose pull
+docker-compose pull
   Pulling mysql              ... done
   Pulling oai-nrf            ... done
   Pulling oai-udr            ... done
@@ -201,7 +201,7 @@ docker logs oai-smf -f
 Third terminal
 
 ```bash
-docker compose -f docker-compose-ran.yml up -d oai-gnb
+docker-compose -f docker-compose-ran.yml up -d oai-gnb
 ```
 
 Wait for the gNB to be healthy and meanwhile you can check the logs of `oai-amf`.
@@ -209,18 +209,35 @@ Wait for the gNB to be healthy and meanwhile you can check the logs of `oai-amf`
 Open a fourth terminal and start the UE.
 
 ```bash
-docker compose -f docker-compose-ran.yml up -d oai-nr-ue
+docker-compose -f docker-compose-ran.yml up -d oai-nr-ue
 ```
+
 Check the logs of `oai-amf` and `oai-smf`. You might have received an ip-address.
 
-Get inside the UE and try to ping `8.8.8.8` or `12.1.1.1` or `192.168.70.135`
+But the best way to see if the UE got connected:
+
+```bash
+docker exec oai-nr-ue ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.70.150  netmask 255.255.255.192  broadcast 192.168.70.191
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+
+oaitun_ue1: flags=4305<UP,POINTOPOINT,RUNNING,NOARP,MULTICAST>  mtu 1500
+        inet 10.0.0.2  netmask 255.255.255.0  destination 10.0.0.2
+```
+
+==> `10.0.0.2` has been allocated to the UE tunnell.
+
+Get inside the UE and try to ping `8.8.8.8` or `10.0.0.1` or `192.168.70.135`
 
 ```bash
 docker exec -it oai-nr-ue bash
 ## ping towards internet
 ping -I oaitun_ue1 8.8.8.8 -c4
-## ping towards upf/spgwu
-ping -I oaitun_ue1 12.1.1.1 -c4
+## ping towards upf
+ping -I oaitun_ue1 10.0.0.1 -c4
 ## ping towards oai-traffic-generator
 ping -I oaitun_ue1 192.168.70.135 -c4
 ## Iperf testing
@@ -230,30 +247,34 @@ iperf3 -B <UE_IP_ADDRESS> -c 192.168.70.135 -u -R -b20M
 (optional) Connect the second UE and check `oai-amf` and `oai-smf` logs
 
 ```bash
-docker compose -f docker-compose-ran.yml up -d oai-nr-ue2
+docker-compose -f docker-compose-ran.yml up -d oai-nr-ue2
+```
+
+```
+$ docker exec oai-nr-ue2 ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.70.151  netmask 255.255.255.192  broadcast 192.168.70.191
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+
+oaitun_ue1: flags=4305<UP,POINTOPOINT,RUNNING,NOARP,MULTICAST>  mtu 1500
+        inet 10.0.0.3  netmask 255.255.255.0  destination 10.0.0.3
 ```
 
 ```bash
 docker exec -it oai-nr-ue2 bash
 ## ping towards internet
 ping -I oaitun_ue1 8.8.8.8 -c4
-## ping towards upf/spgwu
-ping -I oaitun_ue1 12.1.1.1 -c4
+## ping towards upf
+ping -I oaitun_ue1 10.0.0.1 -c4
 ## ping towards oai-traffic-generator
 ping -I oaitun_ue1 192.168.70.135 -c4
 ```
 Once you are done with your experiment, please stop the two UEs and gNB in an order using below command, 
 
 ```bash
-docker stop oai-nr-ue oai-nr-ue2 
-docker kill oai-nr-ue oai-nr-ue2
-```
-
-Stop the gNB
-
-```bash
-docker stop oai-gnb
-docker kill oai-gnb
+docker-compose -f docker-compose-ran.yml down -t 0 -v
 ```
 
 Do not stop the core network. 
@@ -285,57 +306,13 @@ Below messages are from AMF pcap
 19. SHUTDOWN ACK
 20. SHUTDOWN_COMPLETE
 
-## 6. Bonus I: Connect Second UE in different slice
-
-Mount the configuration file of RF-Sim [docker-compose-ran.yml](./docker-compose-ran.yml). Follow the steps mention in the comment, uncomment `USE_VOLUMED_CONF` and `volumes` section to mount the configuration file. 
-
-Similarly for `oai-nr-ue2` uncomment `USE_VOLUMED_CONF` and `volumes` section. 
-
-Now start the gNB and then after couple of seconds once gNB is healthy you can start `oai-nr-ue` and then `oai-nr-ue2`. 
-
-What do you observe? Anything different? 
-
-## 7. Bonus II: Configure Static UE Ip-address
-
-Make sure the core network is not running anymore as we have to update the configuration.
-
-```bash
-docker compose -f docker-compose.yml down -t 5 -v
-```
-
-Edit [docker-compose file](./docker-compose.yml), set the parameter `USE_LOCAL_SUBSCRIPTION_INFO` to `no` in the smf service configuration of the docker-compose file. This parameter controllers if SMF takes slicing and DNN information from configuration file or request UDM. 
-
-Another thing at the moment when SMF request UDM for the subscription information, SMF selection at AMF does not work. So you need to disable `SMF_SELECTION` in AMF configuration file. 
-
-``` shell
-sed -i 's/USE_LOCAL_SUBSCRIPTION_INFO=yes/USE_LOCAL_SUBSCRIPTION_INFO=no/g' docker-compose.yml
-sed -i 's/SMF_SELECTION=yes/SMF_SELECTION=no/g' docker-compose.yml
-```
-
-Then configure the [user subscription database sql file](../database/oai_db.sql) with IMSI and DNN information mapping. In the table `SessionManagementSubscriptionData` add below entries
-
-- Static UE ip-address allocation
-
-``` sql
-INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES
-('001010000000101', '00101', '{\"sst\": 1, \"sd\": \"16777215\"}','{\"oai\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 1,\"arp\":{\"priorityLevel\": 15,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"},\"staticIpAddress\":[{\"ipv4Addr\": \"12.1.1.200\"}]},\"ims\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4V6\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 2,\"arp\":{\"priorityLevel\": 15,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"}}}');
-```
-
-- Dynamic ip-address allocation
-``` sql
-INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES 
-('001010000000102', '00101', '{\"sst\": 1, \"sd\": \"1\"}','{\"internet\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"1000Mbps\", \"downlink\":\"1000Mbps\"}}}');
-```
-
-Restart the core network, connect the gNB and start the UE1 and UE2. 
-
 ## 8. Remove all the docker containers
 
 Make sure you are always in `summerworkshop2023/cn` folder
 
 ```bash
-docker compose -f docker-compose-ran.yml down -t2 -v
-docker compose -f docker-compose.yml down -t2 -v
+docker-compose -f docker-compose-ran.yml down -t2 -v
+docker-compose -f docker-compose.yml down -t2 -v
 ```
 
 ## 9. Extra
