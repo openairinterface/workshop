@@ -89,8 +89,8 @@ docker compose pull
   Pulling oai-upf            ... done
   Pulling oai-traffic-server ... done
 ## Your choice if you want to pull develop images for RAN then you can use develop
-docker pull oaisoftwarealliance/oai-nr-ue:2024.w11
-docker pull oaisoftwarealliance/oai-gnb:2024.w11
+docker pull oaisoftwarealliance/oai-nr-ue:2024.w12
+docker pull oaisoftwarealliance/oai-gnb:2024.w12
 ```
 
 4. (Optional) In case you do not have wireshark you can install 
