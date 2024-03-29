@@ -56,17 +56,19 @@ The aim of this tutorial is to explain:
 1. Create a folder where you can store all the result files of the tutorial and this repository
 
 ``` shell
-mkdir -p /tmp/oaisummerworkshop2023
-cd /tmp/oaisummerworkshop2023
-git clone https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023.git
-cd /tmp/oaisummerworkshop2023/summerworkshop2023/cn
+mkdir -p /tmp/oai-spring-of-code
+cd /tmp/oai-spring-of-code
+git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git .
+git checkout main
+git rebase origin/main
 ```
 
 2. Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/)
 
 ```bash
-curl -SL https://github.com/docker/compose/releases/download/v2.18.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+curl -SL https://github.com/docker/compose/releases/download/v2.26.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+sudo chmox +x /usr/local/bin/docker-compose
 ```
 
 3. (Optional): Pull all the container images which are required in this tutorial. In case you do not want to pull the images now `docker-compose` will pull the images for you. 
@@ -75,16 +77,16 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ##Recommended to login to your docker hub account
 docker login
 ## Pull images
-docker pull oaisoftwarealliance/oai-amf:v1.5.1
-docker pull oaisoftwarealliance/oai-smf:v1.5.1
-docker pull oaisoftwarealliance/oai-nrf:v1.5.1
-docker pull oaisoftwarealliance/oai-udr:v1.5.1
-docker pull oaisoftwarealliance/oai-udm:v1.5.1
-docker pull oaisoftwarealliance/oai-ausf:v1.5.1
-docker pull oaisoftwarealliance/oai-spgwu-tiny:v1.5.1
+docker pull oaisoftwarealliance/oai-amf:v2.0.1
+docker pull oaisoftwarealliance/oai-smf:v2.0.1
+docker pull oaisoftwarealliance/oai-nrf:v2.0.1
+docker pull oaisoftwarealliance/oai-udr:v2.0.1
+docker pull oaisoftwarealliance/oai-udm:v2.0.1
+docker pull oaisoftwarealliance/oai-ausf:v2.0.1
+docker pull oaisoftwarealliance/oai-upf:v2.0.1
 ## Your choice if you want to pull develop images for RAN then you can use develop
-docker pull oaisoftwarealliance/oai-nr-ue:2023.w19
-docker pull oaisoftwarealliance/oai-gnb:2023.w19
+docker pull oaisoftwarealliance/oai-nr-ue:2024.w11
+docker pull oaisoftwarealliance/oai-gnb:2024.w11
 ```
 
 4. (Optional) In case you do not have wireshark you can install 

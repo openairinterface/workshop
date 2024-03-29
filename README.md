@@ -7,7 +7,7 @@
       </a>
     </td>
     <td style="border-collapse: collapse; border: none; vertical-align: center;">
-      <b><font size = "5">OpenAirInterface Summer Workshop 2023</font></b>
+      <b><font size = "5">OpenAirInterface Training Material</font></b>
     </td>
   </tr>
 </table>
@@ -18,7 +18,7 @@ Hello everyone, welcome to the home page of the hands-on tutorial. Here you will
 As a prerequisite you have to clone this repository: 
 
 ```bash
-git clone https://gitlab.eurecom.fr/oaiworkshop/summerworkshop2023.git
+git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git
 ```
 
 **Hardware Requirements**
