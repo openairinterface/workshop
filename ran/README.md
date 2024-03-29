@@ -174,26 +174,26 @@ sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim -
 Verify that it is connected: you should see the following output at gNB:
 
 ```
-[NR_RRC]   [gNB 0] Frame  0 : Logical Channel UL-DCCH, Received NR_RRCReconfigurationComplete from UE rnti e7d2, reconfiguring DRB 1
-[NR_RRC]   msg index 0, pdu_sessions index 0, status 2, xid 3): nb_of_pdusessions 1,  pdusession_id 10, teid: 3222559093
+[NR_RRC]   UE 1: Receive RRC Reconfiguration Complete message (xid 3)
+[NR_RRC]   msg index 0, pdu_sessions index 0, status 2, xid 3): nb_of_pdusessions 1,  pdusession_id 10, teid: 2466254620
  [NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message
 ```
 
 and nrUE:
 
 ```
-[NAS]   [UE 0] Received NAS_CONN_ESTABLI_CNF: errCode 1, length 87
+[NAS]   [UE 0] Received NAS_CONN_ESTABLI_CNF: errCode 1, length 99
 [LIBCONFIG] nas.noS1: 3/3 parameters successfully set, (3 to default value)
-[OIP]   Interface oaitun_ue1 successfully configured, ip address 12.1.1.151, mask 255.255.255.0 broadcast address 12.1.1.255
+[OIP]   Interface oaitun_ue1 successfully configured, ip address 10.0.0.2, mask 255.255.255.0 broadcast address 10.0.0.255
 ```
 
 Correspondingly, an interface should have been brought up:
 ```
-28: oaitun_ue1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
+113: oaitun_ue1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none
-    inet 12.1.1.151/24 brd 12.1.1.255 scope global oaitun_ue1
+    inet 10.0.0.2/24 brd 10.0.0.255 scope global oaitun_ue1
        valid_lft forever preferred_lft forever
-    inet6 fe80::7405:44cf:68f3:6d89/64 scope link stable-privacy
+    inet6 fe80::b732:d985:ef8b:4f9f/64 scope link stable-privacy
        valid_lft forever preferred_lft forever
 ```
 
