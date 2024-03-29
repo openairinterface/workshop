@@ -1,6 +1,6 @@
 % RAN Hands-On
 % Robert Schmidt
-% May 25, 2023
+% March 29, 2024
 
 <table style="border-collapse: collapse; border: none;">
   <tr style="border-collapse: collapse; border: none;">
@@ -68,7 +68,7 @@ This step should be done before the hands-on training, i.e., at least you should
 cd
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
 cd openairinterface5g/cmake_targets
-git checkout 2023.w19                        # tested tag
+git checkout 2024.w12                        # tested tag
 ./build_oai --ninja -I                       # install dependencies
 ./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
 ```
@@ -81,10 +81,9 @@ Note: for USRP support, you have to give the switch `-w USRP`
 
 - https://gitlab.eurecom.fr/oai/openairinterface5g
 - Work happens in the `develop` branch
-- Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2023.w19`
-- `master` for a known stable version
-- We plan to make a 2.0 release in the coming weeks
-
+- Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2024.w12`
+- `master` for a known stable version - release v2.0.0
+- latest release: v2.1.0 (February 2024)
 ---
 
 ## How to contribute
@@ -149,7 +148,7 @@ Note: for USRP support, you have to give the switch `-w USRP`
 
 Start the core network:
 ```
-cd ~/summerworkshop2023/cn/
+cd ~/oai-workshops/cn/
 docker-compose -f docker-compose.yml up -d
 docker-compose -f docker-compose.yml ps -a
 ```
@@ -158,7 +157,7 @@ Once it is healthy, run Wireshark and capture NGAP traffic. Then, start the gNB:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/conf/gnb.sa.band78.106prb.rfsim.conf
+sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsimulator.serveraddr server
 ```
 
 Check that you see the NGAP Setup Request and Response messages in Wireshark.
@@ -169,7 +168,7 @@ Run the nrUE from a second terminal:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O ~/summerworkshop2023/ran/conf/ue.conf
+sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O ~/oai-workshops/ran/conf/ue.conf --rfsimulator.serveraddr 127.0.0.1
 ```
 
 Verify that it is connected: you should see the following output at gNB:
@@ -178,23 +177,23 @@ Verify that it is connected: you should see the following output at gNB:
 [NR_RRC]   [gNB 0] Frame  0 : Logical Channel UL-DCCH, Received NR_RRCReconfigurationComplete from UE rnti e7d2, reconfiguring DRB 1
 [NR_RRC]   msg index 0, pdu_sessions index 0, status 2, xid 3): nb_of_pdusessions 1,  pdusession_id 10, teid: 3222559093
  [NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message
-[NGAP]   pdusession_setup_resp_p: pdusession ID 10, gnb_addr 192.168.70.129, SIZE 4
 ```
 
 and nrUE:
 
 ```
-[NAS]   Received PDU Session Establishment Accept, UE IP: 12.1.1.101
-[OIP]   Interface oaitun_ue1 successfully configured, ip address 12.1.1.101, mask 255.255.255.0 broadcast address 12.1.1.255
+[NAS]   [UE 0] Received NAS_CONN_ESTABLI_CNF: errCode 1, length 87
+[LIBCONFIG] nas.noS1: 3/3 parameters successfully set, (3 to default value)
+[OIP]   Interface oaitun_ue1 successfully configured, ip address 12.1.1.151, mask 255.255.255.0 broadcast address 12.1.1.255
 ```
 
 Correspondingly, an interface should have been brought up:
 ```
-51: oaitun_ue1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
+28: oaitun_ue1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none
-    inet 12.1.1.101/24 brd 12.1.1.255 scope global oaitun_ue1
+    inet 12.1.1.151/24 brd 12.1.1.255 scope global oaitun_ue1
        valid_lft forever preferred_lft forever
-    inet6 fe80::5c44:5953:32ab:a130/64 scope link stable-privacy
+    inet6 fe80::7405:44cf:68f3:6d89/64 scope link stable-privacy
        valid_lft forever preferred_lft forever
 ```
 
@@ -218,7 +217,8 @@ ping <UE IP address>              # from container, "DL"
 ```
 - iperf:
 ```
-iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -R -b50M # DL
+iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R # DL
+iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 10M    # UL
 ```
 
 ---
@@ -275,7 +275,9 @@ The scopes allow to see various channels.
   ```
 - Build scope:
   ```
+  cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib nrscope --ninja
+  cd ran_build/build/
   cmake -DENABLE_NRSCOPE=ON ../../../ && ninja nrscope
   ```
 - Run `nr-softmodem` and `nr-uesoftmodem` with `-d` switch
@@ -304,7 +306,9 @@ The scopes allow to see various channels.
   ```
 - Build scope
   ```
+  cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib nrqtscope --ninja
+  cd ran_build/build/
   cmake -DENABLE_NRQTSCOPE=ON ../../../ && ninja nrqtscope
   ```
 - Run the `nr-softmodem` and `nr-uesoftmodem` with `--dqt` switch
@@ -331,7 +335,9 @@ The scopes allow to see various channels.
 
 - Make sure the telnet shared library is compiled:
   ```
+  cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib telnetsrv --ninja
+  cd ran_build/build/
   cmake ../../..  -DENABLE_TELNETSRV=ON && ninja telnetsrv
   ```
 - Start the `nr-softmodem`/`nr-uesoftmodem` with parameter `--telnetsrv`
@@ -343,6 +349,19 @@ The scopes allow to see various channels.
   - Example: change noise using `channelmod modify 1 noise_power_dB -5`, observe in scope!
 - More information: `common/utils/telnetsrv/DOC/telnetusage.md`
 
+Example commands:
+- gNB
+```
+sudo -E ./nr-softmodem --rfsim --sa -O ~/MR/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf -d --rfsimulator.serveraddr server --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv
+```
+- UE
+```
+sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O ~/MR/oai-workshops/ran/conf/ue.conf --rfsimulator.serveraddr 127.0.0.1 -d --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
+```
+- telnet
+```
+telnet 127.0.0.1 9090
+```
 ---
 
 ## Multiple UEs
@@ -352,20 +371,20 @@ The scopes allow to see various channels.
 - Follow instructions from [this link](https://open-cells.com/index.php/2021/02/08/rf-simulator-1-enb-2-ues-all-in-one/) or use the script [multi-ue.sh](./multi-ue.sh)
 - Start first UE as
   ```
-  sudo ~/summerworkshop2023/ran/multi-ue.sh -c1 -e
-  sudo -E LD_LIBRARY_PATH=. RFSIMULATOR=10.201.1.100 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/summerworkshop2023/ran/conf/ue.conf
+  sudo ~/oai-workshops/ran/multi-ue.sh -c1 -e
+  sudo -E LD_LIBRARY_PATH=. ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/oai-workshops/ran/conf/ue.conf --rfsimulator.serveraddr 10.201.1.100
   ```
 - Check in Wireshark/UE output that everything is ok
 - Second UE *with different IMSI*
   ```
-  sudo ~/summerworkshop2023/ran/multi-ue.sh -c3 -e
-  sudo -E LD_LIBRARY_PATH=. RFSIMULATOR=10.203.1.100 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/summerworkshop2023/ran/conf/ue.conf --uicc0.imsi 001010000000103
+  sudo ~/oai-workshops/ran/multi-ue.sh -c3 -e
+  sudo -E LD_LIBRARY_PATH=. ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/oai-workshops/ran/conf/ue.conf --uicc0.imsi 001010000000103 --rfsimulator.serveraddr 10.203.1.100
   ```
 - Exercise: Check in Wireshark that both are set up
 - Exercise: Create traffic from/to both UEs
 - At the end, remove network namespaces:
   ```
-  sudo ~/summerworkshop2023/ran/multi-ue.sh -d1 -d3
+  sudo ~/oai-workshops/ran/multi-ue.sh -d1 -d3
   ```
 
 ---
@@ -395,8 +414,8 @@ The scopes allow to see various channels.
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
 - Start the gNB as follows
   ```
-  sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/conf/gnb-cu.sa.f1.conf
-  sudo -E RFSIMULATOR=server ./nr-softmodem --rfsim --sa -O ~/summerworkshop2023/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
+  sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf --rfsimulator.serveraddr server
+  sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsimulator.serveraddr server
   ```
 - Start the UE as before
 - Compare the IP addresses in the config with what you have below to understand
