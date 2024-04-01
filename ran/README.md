@@ -215,7 +215,12 @@ docker exec -it oai-ext-dn bash
 ping -I oaitun_ue1 192.168.70.135 # from host, "UL", to oai-ext-dn
 ping <UE IP address>              # from container, "DL"
 ```
-- iperf:
+- Iperf:
+- on `oai-ext-dn` container run iperf3 server:
+```
+iperf3 -s
+```
+- on host run iperf3 client, bind UE IP address:
 ```
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R # DL
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 10M    # UL
