@@ -18,14 +18,14 @@
 
 **What do we cover in the RAN Hands-On?**
 
-The aim of this tutorial is to explain: 
+The aim of this tutorial is to:
 
 1. Understand the code repository organization
 2. Set-up of end-to-end 5G/NR SA setup with RFsimulator from source
 4. Use of the scope(s) + basic channel modelling
-5. Connection of multiple UEs
-6. How to build docker containers of the RAN
-7. Individually, also covered in demo: How to start with the DU-CU/F1 split
+5. Connect multiple UEs
+6. Build docker containers of the RAN
+7. Start with the DU-CU/F1 split
 
 Note: this file can be converted to a presentation using
 
@@ -39,7 +39,7 @@ pandoc -t slidy --template ran.slidy -s README.md -o README.html
 
 1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 16GB of storage.  To avoid any problems, we expressly recommend the use of a physical machine, i.e., NO virtual machine.
 2. Make sure your laptop/remote server cpu supports `avx2`. You can check via `lscpu | grep avx2`
-3. Operating System: Ubuntu 20.04 (preferred) or 22.04. Other operating systems might work (e.g., RHEL, Fedora); others (Arch, ...) are not tested and have no support in `build_oai`
+3. Operating System: Ubuntu 22.04.04. Other operating systems might work (e.g., RHEL, Fedora); others (Arch, ...) are not tested and have no support in `build_oai`
 4. Note: macOS and new M1/M2 laptops as well as the Windows Subsystem for Linux are not tested and most likely won't work
 
 **Software Prerequisites**
@@ -60,9 +60,14 @@ none: we will install all the necessary software
 
 # Preparation for RAN training session
 
-## Installation of dependencies and compilation
+- We will have a general overview of the RAN repository
+- Please don't hesitate to ask questions!
 
-This step should be done before the hands-on training, i.e., at least you should install the RAN dependencies and compile it, as this takes some time.
+---
+
+## Before: Installation of dependencies and compilation
+
+Install the RAN dependencies and compile it, as this takes some time.
 
 ```
 cd
@@ -79,16 +84,17 @@ Note: for USRP support, you have to give the switch `-w USRP`
 
 ## The RAN repository
 
-- https://gitlab.eurecom.fr/oai/openairinterface5g
+- `https://gitlab.eurecom.fr/oai/openairinterface5g`
 - Work happens in the `develop` branch
 - Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2024.w12`
 - `master` for a known stable version - release v2.0.0
-- latest release: v2.1.0 (February 2024)
+- latest release: `v2.1.0` (February 2024)
+
 ---
 
 ## How to contribute
 
-- Anyone can contribute!
+- Anyone can contribute! You are here to contribute!
 - You have to sign a [Contributor License Agreement](https://openairinterface.org/legal/oai-license-model/)
 - Contributions go through
   - Peer review on Gitlab
@@ -99,7 +105,7 @@ Note: for USRP support, you have to give the switch `-w USRP`
 ## Repository structure
 
 - `openair1`: Layer 1 (3GPP LTE Rel-10/12 PHY, NR Rel-15 PHY)
-- `openair2`: Layer 2 (3GPP LTE Rel-10 MAC/RLC/PDCP/RRC/X2AP, NR Rel-15 MAC/RLC/PDCP/SDAP/RRC/X2AP)
+- `openair2`: Layer 2 (3GPP LTE Rel-10 MAC/RLC/PDCP/RRC/X2AP, NR Rel-15+ MAC/RLC/PDCP/SDAP/RRC/X2AP/F1AP/E1AP), E2AP!
 - `openair3`: Layer 3 (3GPP LTE Rel-10 S1AP/GTP)
 - `charts`/`docker`/`openshift`: for building images
 - `ci-scripts`: everything related to continuous integration/testing, configuration files
@@ -107,7 +113,8 @@ Note: for USRP support, you have to give the switch `-w USRP`
 - `common`: common code, generic libraries (Tpool, logging, configuration modules, \dots)
 - `doc`: some documentation
 - `executables`: LTE and NR executables
-- `radio`: SDR drivers (`ARCH`)
+- `nfapi`: (n)FAPI split
+- `radio`: radios and SDRs
 - `targets`: configuration files (`PROJECTS`)
 
 - Deep dive:
@@ -115,8 +122,12 @@ Note: for USRP support, you have to give the switch `-w USRP`
   - Where is the NR PDSCH/DLSCH scheduler? See `gNB_dlsch_ulsch_scheduler()`
   - Where is the NR RRC Reconfiguration message sent? See `rrc_gNB_generate_dedicatedRRCReconfiguration()`
   - Where is the PDSCH simulation? See `dlschsim.c`
+  - Where is the E2 agent? -> next training
 
 # Hands-On
+
+- Setup of a working system using simulated SDR
+- Basic understanding, so we can go through E2 agent later
 
 ## About the RFsimulator
 
@@ -136,7 +147,7 @@ Note: for USRP support, you have to give the switch `-w USRP`
 - By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
 - To rebuild more quickly, issue
   ```
-  ninja nr-softmodem nr-uesoftmodem dfts ldpc params_libconfig coding rfsimulator`
+  ninja nr-softmodem nr-uesoftmodem dfts ldpc params_libconfig coding rfsimulator
   ```
 - Also interesting: `lte-softmodem`, `lte-uesoftmodem`
 
@@ -157,7 +168,7 @@ Once it is healthy, run Wireshark and capture NGAP traffic. Then, start the gNB:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsimulator.serveraddr server
+sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf
 ```
 
 Check that you see the NGAP Setup Request and Response messages in Wireshark.
@@ -168,7 +179,7 @@ Run the nrUE from a second terminal:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O ~/oai-workshops/ran/conf/ue.conf --rfsimulator.serveraddr 127.0.0.1
+sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O ~/oai-workshops/ran/conf/ue.conf
 ```
 
 Verify that it is connected: you should see the following output at gNB:
@@ -268,6 +279,8 @@ Other parameters: see `openair2/GNB_APP/MACRLC_nr_paramdef.h`
 - `sdr_addrs`: arguments to be passed to search for SDR, e.g., IP address for
   N310
 
+---
+
 ## Scopes
 
 The scopes allow to see various channels.
@@ -283,7 +296,7 @@ The scopes allow to see various channels.
   cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib nrscope --ninja
   cd ran_build/build/
-  cmake -DENABLE_NRSCOPE=ON ../../../ && ninja nrscope
+  cmake -DENABLE_NRSCOPE=ON ../../../ && ninja nrscope # alternative
   ```
 - Run `nr-softmodem` and `nr-uesoftmodem` with `-d` switch
 - The error
@@ -303,9 +316,7 @@ The scopes allow to see various channels.
 
 ### QtScope
 
-**This works only in Ubuntu 20 because the Qt5 dependency cannot be fulfilled in U22 (it has Qt6)**
-
-- Install dependencies
+- Install dependencies (note: you need Qt5, not Qt6!)
   ```
   sudo apt-get install libqt5charts5-dev
   ```
@@ -314,7 +325,7 @@ The scopes allow to see various channels.
   cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib nrqtscope --ninja
   cd ran_build/build/
-  cmake -DENABLE_NRQTSCOPE=ON ../../../ && ninja nrqtscope
+  cmake -DENABLE_NRQTSCOPE=ON ../../../ && ninja nrqtscope # alternative
   ```
 - Run the `nr-softmodem` and `nr-uesoftmodem` with `--dqt` switch
 
@@ -332,7 +343,7 @@ The scopes allow to see various channels.
   @include "channelmod_rfsimu.conf"
   ```
 - Add the options `--rfsimulator.options chanmod --rfsimulator.modelname AWGN` to the gNB and UE command lines and start
-- More info: `targets/ARCH/rfsimulator/README.md`, channel models defined in `openair1/SIMULATION/TOOLS/random_channel.c`
+- More info: `openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`, channel models defined in `openair1/SIMULATION/TOOLS/random_channel.c`
 
 ---
 
@@ -352,7 +363,7 @@ The scopes allow to see various channels.
   - Use `channelmod show current` to show current channel model configuration
   - Use `channelmod help` to show available parameters to change
   - Example: change noise using `channelmod modify 1 noise_power_dB -5`, observe in scope!
-- More information: `common/utils/telnetsrv/DOC/telnetusage.md`
+- More information: `openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`
 
 Example commands:
 - gNB
@@ -382,14 +393,14 @@ telnet 127.0.0.1 9090
 - Check in Wireshark/UE output that everything is ok
 - Second UE *with different IMSI*
   ```
-  sudo ~/oai-workshops/ran/multi-ue.sh -c3 -e
-  sudo -E LD_LIBRARY_PATH=. ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/oai-workshops/ran/conf/ue.conf --uicc0.imsi 001010000000103 --rfsimulator.serveraddr 10.203.1.100
+  sudo ~/oai-workshops/ran/multi-ue.sh -c2 -e
+  sudo -E LD_LIBRARY_PATH=. ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/oai-workshops/ran/conf/ue.conf --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100
   ```
 - Exercise: Check in Wireshark that both are set up
 - Exercise: Create traffic from/to both UEs
 - At the end, remove network namespaces:
   ```
-  sudo ~/oai-workshops/ran/multi-ue.sh -d1 -d3
+  sudo ~/oai-workshops/ran/multi-ue.sh -d1 -d2
   ```
 
 ---
@@ -415,7 +426,6 @@ telnet 127.0.0.1 9090
 
 ## CU-DU split
 
-- We will show this separately in the demo session on Wednesday, but you can already run it today!
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
 - Start the gNB as follows
   ```
