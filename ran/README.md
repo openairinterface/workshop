@@ -429,8 +429,8 @@ telnet 127.0.0.1 9090
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
 - Start the gNB as follows
   ```
-  sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf --rfsimulator.serveraddr server
-  sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsimulator.serveraddr server
+  sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
+  sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
   ```
 - Start the UE as before
 - Compare the IP addresses in the config with what you have below to understand
