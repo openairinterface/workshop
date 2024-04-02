@@ -52,7 +52,9 @@ sudo apt install -y docker docker-ce
 
 # Add your username to the docker group, otherwise you will have to run in sudo mode.
 sudo usermod -a -G docker $(whoami)
-reboot
+
+# login / logout
+
 ```
 
 To follow the hands-on tutorial:
