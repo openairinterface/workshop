@@ -227,6 +227,16 @@ Within E2 Setup Request message, E2 node sends his own capabilities, such are KP
 ![RAN Control SM capabilities](./resources/wireshark_rc.png)
 
 
+* open server port for UE
+  ```bash
+  iperf3 -i1 -s
+  ```
+
+* start iperf3 traffic from traffic container within CN
+  ```bash
+  docker exec -t oai-ext-dn iperf3 -c <IP-address_UE> -t60 -B 192.168.70.135 -i1
+  ```
+
 * Start different xApps
 
   * start the KPM monitor xApp - measurements stated in [3.1.1 E2SM-KPM](#311-e2sm-kpm) for each UE that matches S-NSSAI common criteria
