@@ -115,7 +115,7 @@ git checkout 34d6810f9ab435ac3a4023d5e1917669e24341da
 
 ### 2.2.2 Build FlexRIC
 ```bash
-mkdir build && cd build && cmake .. && make -j8
+mkdir build && cd build && cmake -DXAPP_MULTILANGUAGE=OFF .. && make -j8
 ```
 
 ### 2.2.3 Installation of Service Models (SMs)
