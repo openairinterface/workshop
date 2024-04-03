@@ -19,6 +19,15 @@ This tutorial describes the steps of deployment 5G OAI RAN, with integrated E2 a
 
 ## 1.1 Install prerequisites
 
+- Please make sure you have gcc-10 installed (gcc-12 and 13 should also work but we recommend gcc-10). Follow the next steps:
+  ```bash
+  sudo apt update -y
+  sudo apt upgrade -y
+  sudo apt install -y build-essential
+  sudo apt install -y gcc-10 g++-10 cpp-10
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+  ```
+
 - A *recent* CMake (at least v3.15). 
 
   On Ubuntu, you might want to use [this PPA](https://apt.kitware.com/) to install an up-to-date version.
