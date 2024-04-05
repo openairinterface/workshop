@@ -122,7 +122,7 @@ By default, FlexRIC will build the nearRT-RIC with E2AP v2 and KPM v2. If you wa
   ```
 
 ### 2.2.2 Build FlexRIC
-  If you have installed optional libraries from section [1.2.2 Mutli-language xApp requirements (optional)](#122-mutli-language-xApp-requirements-(optional)), run this command:
+  If you have installed optional libraries from section [1.2.2 Multi-language xApp requirements (optional)](#122-multi-language-xapp-requirements-optional), run this command:
   ```bash
   mkdir build && cd build && cmake .. && make -j8
   ```
@@ -383,7 +383,7 @@ Please, take a look at https://gitlab.eurecom.fr/mosaic5g/flexric/-/tree/dev?ref
   cd flexric
   git checkout slicing-spring-of-code
   ```
-  If you have installed optional libraries from section [1.2.2 Multi-language xApp requirements (optional)](#122-mutli-language-xapp-requirements-optional), run this command:
+  If you have installed optional libraries from section [1.2.2 Multi-language xApp requirements (optional)](#122-multi-language-xapp-requirements-optional), run this command:
   ```bash
   mkdir build && cd build && cmake .. && make -j8 && sudo make install
   ```
