@@ -19,87 +19,95 @@ This tutorial describes the steps of deployment 5G OAI RAN, with integrated E2 a
 
 ## 1.1 Install prerequisites
 
-- Please make sure you have gcc-10 installed (gcc-12 and 13 should also work but we recommend gcc-10). Follow the next steps:
-  ```bash
-  sudo apt update -y
-  sudo apt upgrade -y
-  sudo apt install -y build-essential
-  sudo apt install -y gcc-10 g++-10 cpp-10
-  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
-  sudo update-alternatives --config gcc # chose gcc-10
-  ```
+### 1.1.1 GCC compiler
+  - Please make sure you have gcc-10 installed (gcc-12 and 13 should also work but we recommend gcc-10). Follow the next steps:
+    ```bash
+    sudo apt update -y
+    sudo apt upgrade -y
+    sudo apt install -y build-essential
+    sudo apt install -y gcc-10 g++-10 cpp-10
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+    sudo update-alternatives --config gcc # chose gcc-10
+    ```
+    Note: gcc-11 is not supported in FlexRIC
 
-- A *recent* CMake (at least v3.15). 
+### 1.1.2 CMake (at least v3.15). 
 
   On Ubuntu, you might want to use [this PPA](https://apt.kitware.com/) to install an up-to-date version.
 
-- SWIG (at least  v.4.1). 
-
-  We use SWIG as an interface generator to enable the multi-language feature (i.e., C/C++ and Python) for the xApps. Please, check your SWIG version (i.e, `swig
-  -version`) and install it from scratch if necessary as described here: https://swig.org/svn.html or via the code below: 
-  
-  ```bash
-  git clone https://github.com/swig/swig.git
-  cd swig
-  git checkout release-4.1 
-  ./autogen.sh
-  ./configure --prefix=/usr/
-  make -j8
-  make install
-  ```
-
-- Flatbuffer encoding(optional). 
+### 1.1.3 Flatbuffer encoding (optional)
   
   We also provide a flatbuffers encoding/decoding scheme as alternative to ASN.1. In case that you want to use it  follow the
   instructions at https://github.com/dvidelabs/flatcc and provide the path for the lib and include when selecting it at `ccmake ..` from the build directory 
 
-## 1.2 Download the required dependencies. 
+## 1.2 Download the required dependencies
 
-Below an example of how to install it in ubuntu
-```bash
-sudo apt install libsctp-dev python3.8 cmake-curses-gui libpcre2-dev python-dev
-```
+### 1.2.1 Mandatory dependencies
+  ```bash
+  sudo apt install libsctp-dev cmake-curses-gui libpcre2-dev
+  ```
+
+### 1.2.2 Mutli-language xApp requirements (optional)
+  - SWIG (at least  v.4.1). 
+
+    We use SWIG as an interface generator to enable the multi-language feature (i.e., C/C++ and Python) for the xApps. Please, check your SWIG version (i.e, `swig
+    -version`) and install it from scratch if necessary as described here: https://swig.org/svn.html or via the code below: 
+
+    ```bash
+    git clone https://github.com/swig/swig.git
+    cd swig
+    git checkout release-4.1 
+    ./autogen.sh
+    ./configure --prefix=/usr/
+    make -j8
+    make install
+    ```
+
+  - Python dependencies
+    ```bash
+    sudo apt install python3.8 python-dev
+    ```
 
 # 2. Deployment
 
 ## 2.1 OAI RAN
 
 ### 2.1.1 Clone the OAI repository
-```bash
-git clone https://gitlab.eurecom.fr/oai/openairinterface5g oai
-cd oai/
-```
+  ```bash
+  git clone https://gitlab.eurecom.fr/oai/openairinterface5g oai
+  cd oai/
+  ```
 
 ### 2.1.2 Build OAI with E2 Agent
 
-- By default, OAI will build the E2 Agent with E2AP v2 and KPM v2. If you want a different version, edit the variable E2AP\_VERSION and KPM\_VERSION at OAI's CMakeLists.txt file.
+  - By default, OAI will build the E2 Agent with E2AP v2 and KPM v2. If you want a different version, edit the variable E2AP\_VERSION and KPM\_VERSION at OAI's CMakeLists.txt file.
 
-Currently available versions:
-|            |KPM v2.03|KPM v3.00|
-|:-----------|:--------|:--------|
-| E2AP v1.01 | Y       | Y       |
-| E2AP v2.03 | Y       | Y       |
-| E2AP v3.01 | Y       | Y       |
+  Currently available versions:
+  |            |KPM v2.03|KPM v3.00|
+  |:-----------|:--------|:--------|
+  | E2AP v1.01 | Y       | Y       |
+  | E2AP v2.03 | Y       | Y       |
+  | E2AP v3.01 | Y       | Y       |
 
-Please note that KPM SM v2.01 is supported only in FlexRIC, but not in OAI.
+  Please note that KPM SM v2.01 is supported only in FlexRIC, but not in OAI.
 
-```bash
-cd cmake_targets/
-./build_oai -I -w SIMU --gNB --nrUE --build-e2 --ninja
-```
+  ```bash
+  cd cmake_targets/
+  ./build_oai -I -w SIMU --gNB --nrUE --build-e2 --ninja
+  ```
 
- * `-I` option is to install pre-requisites, you only need it the first time you build the softmodem or when some oai dependencies have changed.
- * `-w` option is to select the radio head support you want to include in your build. Radio head support is provided via a shared library, which is called the "oai device" The build script creates a soft link from `liboai_device.so` to the true device which will be used at run-time (here the USRP one, liboai_usrpdevif.so). The RF simulatorRF simulator is implemented as a specific device replacing RF hardware, it can be specifically built using `-w SIMU` option, but is also built during any softmodem build.
- * `--gNB` is to build the `nr-softmodem` and `nr-cuup` executables and all required shared libraries
- * `--nrUE` is to build the `nr-uesoftmodem` executable and all required shared libraries
- * `--ninja` is to use the ninja build tool, which speeds up compilation
- * `--build-e2` option is to use the E2 agent, integrated within RAN.
+  * `-I` option is to install pre-requisites, you only need it the first time you build the softmodem or when some oai dependencies have changed.
+  * `-w` option is to select the radio head support you want to include in your build. Radio head support is provided via a shared library, which is called the "oai device" The build script creates a soft link from `liboai_device.so` to the true device which will be used at run-time (here the USRP one, liboai_usrpdevif.so). The RF simulatorRF simulator is implemented as a specific device replacing RF hardware, it can be specifically built using `-w SIMU` option, but is also built during any softmodem build.
+  * `--gNB` is to build the `nr-softmodem` and `nr-cuup` executables and all required shared libraries
+  * `--nrUE` is to build the `nr-uesoftmodem` executable and all required shared libraries
+  * `--ninja` is to use the ninja build tool, which speeds up compilation
+  * `--build-e2` option is to use the E2 agent, integrated within RAN.
 
-If the openair2/E2AP/flexric folder is empty, try manually the following commands:
-```bash
-git submodule init
-git submodule update
-```
+  If the openair2/E2AP/flexric folder is empty, try manually the following commands:
+  ```bash
+  git submodule init
+  git submodule update
+  ```
 
 ## 2.2 FlexRIC
 
@@ -107,23 +115,28 @@ By default, FlexRIC will build the nearRT-RIC with E2AP v2 and KPM v2. If you wa
 
 
 ### 2.2.1 Clone the FlexRIC repository
-```bash
-git clone https://gitlab.eurecom.fr/mosaic5g/flexric flexric
-cd flexric/
-git checkout 34d6810f9ab435ac3a4023d5e1917669e24341da
-```
+  ```bash
+  git clone https://gitlab.eurecom.fr/mosaic5g/flexric flexric
+  cd flexric/
+  git checkout 34d6810f9ab435ac3a4023d5e1917669e24341da
+  ```
 
 ### 2.2.2 Build FlexRIC
-```bash
-mkdir build && cd build && cmake -DXAPP_MULTILANGUAGE=OFF .. && make -j8
-```
+  If you have installed optional libraries from section [1.2.2 Mutli-language xApp requirements (optional)](#122-mutli-language-xApp-requirements-(optional)), run this command:
+  ```bash
+  mkdir build && cd build && cmake .. && make -j8
+  ```
+  otherwise:
+  ```bash
+  mkdir build && cd build && cmake -DXAPP_MULTILANGUAGE=OFF .. && make -j8
+  ```
 
 ### 2.2.3 Installation of Service Models (SMs)
-```bash
-sudo make install
-```
+  ```bash
+  sudo make install
+  ```
 
-By default the service model libraries will be installed in the path `/usr/local/lib/flexric` while the configuration file in `/usr/local/etc/flexric`.
+  By default the service model libraries will be installed in the path `/usr/local/lib/flexric` while the configuration file in `/usr/local/etc/flexric`.
 
 # 3. Service Models available in OAI RAN
 
@@ -133,29 +146,29 @@ We assume that user is familiar with O-RAN WG3 specifications that can be found 
 
 ### 3.1.1 E2SM-KPM
 
-As mentioned in section [2.1.2 Build OAI with E2 Agent](#212-build-oai-with-e2-agent), we support KPM v2.03/v3.00. Uses ASN.1 encoding.
+  As mentioned in section [2.1.2 Build OAI with E2 Agent](#212-build-oai-with-e2-agent), we support KPM v2.03/v3.00. Uses ASN.1 encoding.
 
-Per O-RAN specifications, 5G measurements supported by KPM are specified in 3GPP TS 28.552.
+  Per O-RAN specifications, 5G measurements supported by KPM are specified in 3GPP TS 28.552.
 
-From 3GPP TS 28.552, we support the following list:
-  * "DRB.PdcpSduVolumeDL"
-  * "DRB.PdcpSduVolumeUL"
-  * "DRB.RlcSduDelayDl"
-  * "DRB.UEThpDl"
-  * "DRB.UEThpUl"
-  * "RRU.PrbTotDl"
-  * "RRU.PrbTotUl"
+  From 3GPP TS 28.552, at the moment, we support the following list:
+    * "DRB.PdcpSduVolumeDL"
+    * "DRB.PdcpSduVolumeUL"
+    * "DRB.RlcSduDelayDl"
+    * "DRB.UEThpDl"
+    * "DRB.UEThpUl"
+    * "RRU.PrbTotDl"
+    * "RRU.PrbTotUl"
 
-From O-RAN.WG3.E2SM-KPM-version specification, we implemented:
-  * REPORT Service Style 4 ("Common condition-based, UE-level" - section 7.4.5) - fetch above measurements per each UE that matches common criteria (e.g. S-NSSAI).
+  From O-RAN.WG3.E2SM-KPM-version specification, we implemented:
+    * REPORT Service Style 4 ("Common condition-based, UE-level" - section 7.4.5) - fetch above measurements per each UE that matches common criteria (e.g. S-NSSAI).
 
 ### 3.1.2 E2SM-RC
 
-We support RC v1.03. Uses ASN.1 encoding.
+  We support RC v1.03. Uses ASN.1 encoding.
 
-From ORAN.WG3.E2SM-RC-v01.03 specification, we implemented:
-  * REPORT Service Style 4 ("UE Information" - section 7.4.5) - aperiodic subscription for "UE RRC State Change"
-  * CONTROL Service Style 1 ("Radio Bearer Control" - section 7.6.2) - "QoS flow mapping configuration" (e.g creating a new DRB)
+  From ORAN.WG3.E2SM-RC-v01.03 specification, we implemented:
+    * REPORT Service Style 4 ("UE Information" - section 7.4.5) - aperiodic subscription for "UE RRC State Change"
+    * CONTROL Service Style 1 ("Radio Bearer Control" - section 7.6.2) - "QoS flow mapping configuration" (e.g creating a new DRB)
 
 ## 3.2 Custom Service Models
 
@@ -165,18 +178,69 @@ If you are interested in TC and SLICE SMs, please follow the instructions at htt
 
 # 4. Start the process
 
-At this point, we assume the 5G Core Network is already running in the background.
+## 4.1 Test with emulators
 
-In order to configure E2 agent, please, add the following block in OAI's configuration file:
-```bash
-e2_agent = {
-  near_ric_ip_addr = "127.0.0.1";
-  sm_dir = "/usr/local/lib/flexric/"
-}
-```
+  * Start the nearRT-RIC
+
+    ```bash
+    $ ./build/examples/ric/nearRT-RIC
+    ```
+
+  * Start E2 Node agents
+
+    * gNB-mono
+      ```bash
+      $ ./build/examples/emulator/agent/emu_agent_gnb
+      ```
+    * if CU/DU split is used, start the gNB as follows
+      ```bash
+      $ ./build/examples/emulator/agent/emu_agent_gnb_cu
+      $ ./build/examples/emulator/agent/emu_agent_gnb_du
+      ```
+
+  * Start different xApps
+
+    * start the KPM monitor xApp - measurements stated in [3.1.1 E2SM-KPM](#311-e2sm-kpm) for each UE that matches S-NSSAI common criteria
+      ```bash
+      cd flexric
+      ./build/examples/xApp/c/monitor/xapp_kpm_moni
+      ```
+      Note: we assume that each UE has only 1 DRB; CU-UP does not store the slices, therefore "coarse filtering" is used
+
+  * start the RC monitor xApp - aperiodic subscription for "UE RRC State Change"
+      ```bash
+      cd flexric
+      ./build/examples/xApp/c/monitor/xapp_rc_moni
+      ```
+
+  * start the RC control xApp - RAN control function "QoS flow mapping configuration" (e.g. creating a new DRB)
+      ```bash
+      cd flexric
+      ./build/examples/xApp/c/kpm_rc/xapp_kpm_rc
+      ```
+
+    * start the (MAC + RLC + PDCP + GTP) monitor xApp
+      ```bash
+      cd flexric
+      ./build/examples/xApp/c/monitor/xapp_gtp_mac_rlc_pdcp_moni
+      ```
+  The latency that you observe in your monitor xApp is the latency from the E2 Agent to the nearRT-RIC and xApp. 
+  Therefore, FlexRIC is well suited for use cases with ultra low-latency requirements.
+
+## 4.2 Test with OAI RAN
+
+  At this point, we assume the 5G Core Network is already running in the background. Please follow CN tutorial https://gitlab.eurecom.fr/oai/trainings/oai-workshops/-/blob/main/cn/README.md?ref_type=heads for more information.
+
+  In order to configure E2 agent, please, add the following block in OAI's configuration file (gnb.conf, du.conf, cu.conf,...):
+    ```bash
+    e2_agent = {
+      near_ric_ip_addr = "127.0.0.1";
+      sm_dir = "/usr/local/lib/flexric/"
+    }
+    ```
 * start E2 Node agents
 
-  As per O-RAN.WG3.E2SM-v02.00 specifications, UE ID (section 6.2.2.6) representation in OAI is:
+  As per O-RAN.WG3.E2SM-v02.00 specifications, UE ID (section 6.2.2.6) representation in OAI is following (ran_e2sm_ue_id.c):
   |                       | gNB-mono        | CU              | CU-CP           | CU-UP                 | DU                 |
   |:----------------------|:----------------|:----------------|:----------------|:----------------------|:-------------------|
   | CHOICE UE ID case     | GNB_UE_ID_E2SM  | GNB_UE_ID_E2SM  | GNB_UE_ID_E2SM  | GNB_CU_UP_UE_ID_E2SM  | GNB_DU_UE_ID_E2SM  |
@@ -189,13 +253,13 @@ e2_agent = {
   * start the gNB-mono
     ```bash
     cd oai/cmake_targets/ran_build/build
-    sudo ./nr-softmodem -O <path-to/gnb.sa.band78.fr1.106PRB.usrpb210.conf> --rfsim --sa -E
+    sudo ./nr-softmodem -O <path-to/oai-workshops/oam/conf/gnb.sa.band78.fr1.106PRB.usrpb210.conf> --rfsim --sa -E
     ```
 
   * if CU/DU split is used, start the gNB as follows
     ```bash
-    sudo ./nr-softmodem -O <path-to/du_gnb.conf> --rfsim --sa -E
-    sudo ./nr-softmodem -O <path-to/cu_gnb.conf> --sa
+    sudo ./nr-softmodem -O <path-to/oai-workshops/oam/conf/gnb-du.sa.band78.106prb.rfsim.conf> --rfsim --sa -E
+    sudo ./nr-softmodem -O <path-to/oai-workshops/oam/conf/gnb-cu.sa.f1.conf> --sa
     ```
 
   * if CU-CP/CU-UP/DU split is used, start the gNB as follows
@@ -208,7 +272,7 @@ e2_agent = {
 * start the nrUE
   ```bash
   cd oai/cmake_targets/ran_build/build
-  sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/ue.conf> -E
+  sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/ue.conf> -E
   ```
 
 Run Wireshark and capture E2AP traffic.
@@ -227,15 +291,18 @@ Within E2 Setup Request message, E2 node sends his own capabilities, such are KP
 ![RAN Control SM capabilities](./resources/wireshark_rc.png)
 
 
-* open server port for UE
-  ```bash
-  iperf3 -i1 -s
-  ```
+* Start iperf3 traffic
+  * get UE IP address and open server port
+    ```bash
+    ifconfig  # get UE IP address on interface oaitun_ue1
+    iperf3 -i1 -s
+    ```
 
-* start iperf3 traffic from traffic container within CN
-  ```bash
-  docker exec -t oai-ext-dn iperf3 -c <IP-address_UE> -t60 -B 192.168.70.135 -i1
-  ```
+  * start DL traffic from traffic container `oai-ext-dn` within CN
+    ```bash
+    docker exec -t oai-ext-dn iperf3 -c <UE-IP-address> -t60 -B 192.168.70.135 -i1
+    ```
+    Note: for the UL traffic, add option `-R`
 
 * Start different xApps
 
@@ -270,6 +337,241 @@ Please note:
 * KPM SM database is not been updated, therefore commented in `flexric/src/xApp/db/sqlite3/sqlite3_wrapper.c:1152`
 * RC SM database is not yet implemented.
 
-# Optional - Multiple UEs
+## 4.3 Mapping between emulator and RAN E2 agent code
 
-If you are interested in having multiple UEs in rfsim mode, please, follow the instructions at https://gitlab.eurecom.fr/oai/trainings/oai-workshops/-/blob/main/ran/README.md#multiple-ues.
+  |                                                     | Emulator           | OAI E2 agent         |
+  |:----------------------------------------------------|:-------------------|:---------------------|
+  | E2 Setup Request (E2 node Component Configuration)  | read_setup_ran.c   | read_setup_ran.c     |
+  | E2 Setup Request (RAN Functions added)              | test_agent.c       | init_ran_func.c      |
+  | general KPM SM source file                          | sm_kpm.c           | ran_func_kpm.c       |
+  | KPM SM REPORT Service                               |                    | ran_func_kpm_subs.c  |
+  | general RC SM source file                           | sm_rc.c            | ran_func_rc.c        |
+  | RC SM REPORT Service                                |                    | ran_func_rc_subs.c   |
+
+# 5. Optional - Multiple UEs
+
+  If you are interested in having multiple UEs in rfsim mode, please, follow the instructions at https://gitlab.eurecom.fr/oai/trainings/oai-workshops/-/blob/main/ran/README.md#multiple-ues.
+
+
+# 6. Showcased demos
+
+## 6.1 QoS demos
+
+### 6.1.1 Keysight RAN Simulator && OAI FlexRIC
+
+Please, take a look at https://gitlab.eurecom.fr/mosaic5g/flexric/-/tree/dev?ref_type=heads#33-integration-with-keysight-rictest.
+
+### 6.1.2 OAI RAN, CN and FlexRIC
+
+## 6.2 Slicing demo
+
+- slice #1: ssT=1, sD=1
+- slice #2: ssT=1, sD=5
+ 
+* Start the CN
+  ```bash
+  git clone https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed
+  git checkout slicing-spring-of-code
+  cd <path-to/oai-cn5g-fed/docker-compose>
+  docker compose -f docker-compose-slicing-basic-nrf.yaml up -d
+  ```
+
+* Compile FlexRIC
+  ```bash
+  git clone https://gitlab.eurecom.fr/mosaic5g/flexric
+  cd flexric
+  git checkout slicing-spring-of-code
+  ```
+  If you have installed optional libraries from section [1.2.2 Mutli-language xApp requirements (optional)](#122-mutli-language-xApp-requirements-(optional)), run this command:
+  ```bash
+  mkdir build && cd build && cmake .. && make -j8 && sudo make install
+  ```
+  otherwise:
+  ```bash
+  mkdir build && cd build && cmake -DXAPP_MULTILANGUAGE=OFF .. && make -j8 && sudo make install
+  ```
+
+* Compile OAI
+  ```bash
+  git clone https://gitlab.eurecom.fr/oai/openairinterface5g
+  cd openairinterface5g
+  git checkout slicing-spring-of-code
+  cd cmake_targets
+  ./build_oai -c -C -w SIMU --gNB --nrUE --build-e2 --ninja
+  ```
+
+* Start nearRT-RIC
+  ```bash
+  cd flexric/build/examples/ric
+  ./nearRT-RIC 
+  ```
+
+* Start gNB-mono
+  ```bash
+  cd openairinterface5g/cmake_targets/ran_build/build
+  sudo ./nr-softmodem -O <path-to/oai-workshops/oam/conf/slicing_demo/gnb.conf> --sa --rfsim -E
+  ```
+
+* Start UE#1
+  ```bash
+  cd openairinterface5g/cmake_targets/ran_build/build
+  sudo <path-to/multi-ue.sh> -c1 -e  # create namespace
+  sudo LD_LIBRARY_PATH=. ./nr-uesoftmodem --rfsimulator.serveraddr 10.201.1.100 -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/slicing_demo/ue_1.conf> -E
+  ```
+
+* Start UE#2
+  ```bash
+  cd openairinterface5g/cmake_targets/ran_build/build
+  sudo <path-to/multi-ue.sh> -c2 -e  # create namespace
+  sudo LD_LIBRARY_PATH=. ./nr-uesoftmodem --rfsimulator.serveraddr 10.202.1.100 -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/slicing_demo/ue_2.conf> -E
+  ```
+
+* Start KPM xApp (optional, to check if the thp is equal to the one in iperf3 logs)
+  ```bash
+  cd flexric/build/examples/xApp/c/monitor
+  ./xapp_kpm_moni
+  ```
+
+* Start iperf for UE#1
+  - terminal #1
+  ```bash
+  sudo ip netns exec ue1 bash
+  ifconfig  # get UE IP address on interface oaitun_ue1
+  iperf3 -i1 -s
+  ```
+
+  - terminal #2
+  ```bash
+  cd <path-to/oai-cn5g-fed/docker-compose>
+  docker exec -t oai-ext-dn iperf3 -c <UE-IP-address> -t60 -B 192.168.70.145 -i1  # ip address 12.2.1.0/25
+  ```
+
+* Start iperf for UE#2
+  - terminal #3
+  ```bash
+  sudo ip netns exec ue2 bash
+  ifconfig  # get UE IP address on interface oaitun_ue1
+  iperf3 -i1 -s
+  ```
+
+  - terminal #4
+  ```bash
+  cd <path-to/oai-cn5g-fed/docker-compose>
+  docker exec -t oai-ext-dn iperf3 -c <UE-IP-address> -t60 -B 192.168.70.145 -i1  # ip address 12.1.1.128/25
+  ```
+
+At this point, you should se max thp is at 100 Mbps, split equally 50/50% between UEs.
+
+* Start RC xApp
+  ```bash
+  cd flexric/build/examples/xApp/c/ctrl
+  ./xapp_rc_slice_ctrl
+  ```
+
+RC Control message is sent to gNB-mono, and you should see in its logs:
+```bash
+[NR_MAC]   [E2-Agent]: RC CONTROL rx, RIC Style Type 2, Action ID 6
+[NR_MAC]   Add default DL slice id 99, label default, sst 0, sd 0, slice sched algo NVS_CAPACITY, pct_reserved 0.05, ue sched algo nr_proportional_fair_wbcqi_dl
+[NR_MAC]   configure slice 0, label SST1SD1, Min_PRB_Policy_Ratio 0
+[NR_MAC]   configure slice 0, label SST1SD1, Dedicated_PRB_Policy_Ratio 70
+[NR_MAC]   add DL slice id 1, label SST1SD1, slice sched algo NVS_CAPACITY, pct_reserved 0.66, ue sched algo nr_proportional_fair_wbcqi_dl
+[NR_MAC]   Matched slice, Add UE rnti 0x1013 to slice idx 0, sst 0, sd 0
+[NR_MAC]   Matched slice, Add UE rnti 0x1013 to slice idx 1, sst 1, sd 1
+[NR_MAC]   configure slice 1, label SST1SD5, Min_PRB_Policy_Ratio 0
+[NR_MAC]   configure slice 1, label SST1SD5, Dedicated_PRB_Policy_Ratio 30
+[NR_MAC]   add DL slice id 2, label SST1SD5, slice sched algo NVS_CAPACITY, pct_reserved 0.28, ue sched algo nr_proportional_fair_wbcqi_dl
+[NR_MAC]   Matched slice, Add UE rnti 0x9b7f to slice idx 0, sst 0, sd 0
+[NR_MAC]   Matched slice, Add UE rnti 0x9b7f to slice idx 2, sst 1, sd 5
+[E2-AGENT]: CONTROL ACKNOWLEDGE tx
+[NR_MAC]   Frame.Slot 896.0
+```
+and the thp of 100 Mbps is split 70/30% between UEs.
+iperf can be run again, and the thp should remain divided 70/30%.
+
+# 7. Tasks for Spring of Code
+
+## 7.1 KPM SM
+
+### 7.1.0 Pick interesting measurements
+
+Pick a measurement that seems interesting to you. A list of suggested
+measurements is in the Spring-of-Code description. You might want to consult
+[3GPP TS
+28.552](https://www.etsi.org/deliver/etsi_ts/128500_128599/128552/16.17.00_60/ts_128552v161700p.pdf)
+for more information.
+
+We recommend to start with a measurement expressed through a single number.
+Note that you ideally implement full distributions, but there is no example for
+that. It will be extra work, so start easy.
+
+Inform us so we clarify that OAI gNB is actually capable of exporting this
+data.
+
+### 7.1.1 Set up FlexRIC and implement measurement with emulator
+
+Reproduce the sample seen in the training with OAI UE, gNB, CN, and FlexRIC,
+and observe KPM statistics.
+
+Clarify how E2AP works on this example:
+* E2 Setup Request - read about RAN Function Definition
+* clarify RIC SUBSCRIPTION and RIC INDICATION messages for REPORT Service
+
+Implement the measurement with the emulator, exporting random data. Request the
+measurement from the xApp, and show it as in the existing xApp.
+
+### 7.1.2 Implement in the RAN Function
+
+Reuse the xApp code and request the measurement from the RAN. For the moment,
+keep it simple by implementing it in the RAN function by exporting random
+numbers.  Basically, you will be able to see e.g. PDCP statistics for the UE,
+as in the training, and your measurement will show still as a random number,
+next to it, but exported from the RAN.
+
+### 7.1.3 Read the correct data from the RAN
+
+Identify where in the RAN the measurement is written; ask us for help. Read the
+data and show it in the xApp. Verify.
+
+
+## 7.2 RC SM
+
+### 7.2.0 Pick interesting reports
+
+Pick an RC report that seems interesting to you. A list of suggested reports is
+in the Spring-of-Code description. You might want to consult the O-RAN RC
+specification for more information.
+
+We recommend to start with an RRC message exported from RRC, as there is an
+existing implemention for signaling data from RRC which you can read for
+orientation.
+
+Inform us so we clarify that OAI gNB is actually capable of exporting this
+data.
+
+### 7.2.1 Set up FlexRIC
+
+Reproduce the sample seen in the training with OAI UE, gNB, CN, and FlexRIC,
+and observe RRC State Changes for a UE.
+
+Clarify how E2AP works on this example:
+* E2 Setup Request - read about RAN Function Definition
+* clarify RIC SUBSCRIPTION and RIC INDICATION messages for REPORT Service
+* clarify RIC CONTROL message for CONTROL Service
+
+Clarify the format of E2SM-RC reports, so you can properly fill the data for
+the RC SM.
+
+### 7.2.2 Implement in the RAN 
+
+Read and understand the code on how to asynchronously signal an event to an
+xApp for an RRC State Change. Trigger your event from the code; observe that
+you indeed call into the RAN function. Fill the message properly, and send to
+the xApp. The xApp should of course have subscribed for the corresponding
+indication messages.
+
+### 7.2.3 Decode the message in the xApp
+
+Decode the RRC message received in the xApp. We will guide you on how to add
+the generation of ASN.1 messages to an xApp. At the end, you should be able to
+print the content of your RRC message in the xApp using
+`xer_fprint(stdout, ...);`.
