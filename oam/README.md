@@ -47,7 +47,7 @@ This tutorial describes the steps of deployment 5G OAI RAN, with integrated E2 a
   sudo apt install libsctp-dev cmake-curses-gui libpcre2-dev
   ```
 
-### 1.2.2 Mutli-language xApp requirements (optional)
+### 1.2.2 Multi-language xApp requirements (optional)
   - SWIG (at least  v.4.1). 
 
     We use SWIG as an interface generator to enable the multi-language feature (i.e., C/C++ and Python) for the xApps. Please, check your SWIG version (i.e, `swig
@@ -383,7 +383,7 @@ Please, take a look at https://gitlab.eurecom.fr/mosaic5g/flexric/-/tree/dev?ref
   cd flexric
   git checkout slicing-spring-of-code
   ```
-  If you have installed optional libraries from section [1.2.2 Mutli-language xApp requirements (optional)](#122-mutli-language-xApp-requirements-(optional)), run this command:
+  If you have installed optional libraries from section [1.2.2 Multi-language xApp requirements (optional)](#122-mutli-language-xapp-requirements-optional), run this command:
   ```bash
   mkdir build && cd build && cmake .. && make -j8 && sudo make install
   ```
