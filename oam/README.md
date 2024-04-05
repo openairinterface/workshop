@@ -151,24 +151,24 @@ We assume that user is familiar with O-RAN WG3 specifications that can be found 
   Per O-RAN specifications, 5G measurements supported by KPM are specified in 3GPP TS 28.552.
 
   From 3GPP TS 28.552, at the moment, we support the following list:
-    * "DRB.PdcpSduVolumeDL"
-    * "DRB.PdcpSduVolumeUL"
-    * "DRB.RlcSduDelayDl"
-    * "DRB.UEThpDl"
-    * "DRB.UEThpUl"
-    * "RRU.PrbTotDl"
-    * "RRU.PrbTotUl"
+  * "DRB.PdcpSduVolumeDL"
+  * "DRB.PdcpSduVolumeUL"
+  * "DRB.RlcSduDelayDl"
+  * "DRB.UEThpDl"
+  * "DRB.UEThpUl"
+  * "RRU.PrbTotDl"
+  * "RRU.PrbTotUl"
 
   From O-RAN.WG3.E2SM-KPM-version specification, we implemented:
-    * REPORT Service Style 4 ("Common condition-based, UE-level" - section 7.4.5) - fetch above measurements per each UE that matches common criteria (e.g. S-NSSAI).
+  * REPORT Service Style 4 ("Common condition-based, UE-level" - section 7.4.5) - fetch above measurements per each UE that matches common criteria (e.g. S-NSSAI).
 
 ### 3.1.2 E2SM-RC
 
   We support RC v1.03. Uses ASN.1 encoding.
 
   From ORAN.WG3.E2SM-RC-v01.03 specification, we implemented:
-    * REPORT Service Style 4 ("UE Information" - section 7.4.5) - aperiodic subscription for "UE RRC State Change"
-    * CONTROL Service Style 1 ("Radio Bearer Control" - section 7.6.2) - "QoS flow mapping configuration" (e.g creating a new DRB)
+  * REPORT Service Style 4 ("UE Information" - section 7.4.5) - aperiodic subscription for "UE RRC State Change"
+  * CONTROL Service Style 1 ("Radio Bearer Control" - section 7.6.2) - "QoS flow mapping configuration" (e.g creating a new DRB)
 
 ## 3.2 Custom Service Models
 
@@ -238,7 +238,7 @@ If you are interested in TC and SLICE SMs, please follow the instructions at htt
     sm_dir = "/usr/local/lib/flexric/"
   }
   ```
-  
+
 * start E2 Node agents
 
   As per O-RAN.WG3.E2SM-v02.00 specifications, UE ID (section 6.2.2.6) representation in OAI is following (ran_e2sm_ue_id.c):
