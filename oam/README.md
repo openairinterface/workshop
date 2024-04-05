@@ -207,17 +207,17 @@ If you are interested in TC and SLICE SMs, please follow the instructions at htt
       ```
       Note: we assume that each UE has only 1 DRB; CU-UP does not store the slices, therefore "coarse filtering" is used
 
-  * start the RC monitor xApp - aperiodic subscription for "UE RRC State Change"
-      ```bash
-      cd flexric
-      ./build/examples/xApp/c/monitor/xapp_rc_moni
-      ```
+    * start the RC monitor xApp - aperiodic subscription for "UE RRC State Change"
+        ```bash
+        cd flexric
+        ./build/examples/xApp/c/monitor/xapp_rc_moni
+        ```
 
-  * start the RC control xApp - RAN control function "QoS flow mapping configuration" (e.g. creating a new DRB)
-      ```bash
-      cd flexric
-      ./build/examples/xApp/c/kpm_rc/xapp_kpm_rc
-      ```
+    * start the RC control xApp - RAN control function "QoS flow mapping configuration" (e.g. creating a new DRB)
+        ```bash
+        cd flexric
+        ./build/examples/xApp/c/kpm_rc/xapp_kpm_rc
+        ```
 
     * start the (MAC + RLC + PDCP + GTP) monitor xApp
       ```bash
@@ -232,12 +232,13 @@ If you are interested in TC and SLICE SMs, please follow the instructions at htt
   At this point, we assume the 5G Core Network is already running in the background. Please follow CN tutorial https://gitlab.eurecom.fr/oai/trainings/oai-workshops/-/blob/main/cn/README.md?ref_type=heads for more information.
 
   In order to configure E2 agent, please, add the following block in OAI's configuration file (gnb.conf, du.conf, cu.conf,...):
-    ```bash
-    e2_agent = {
-      near_ric_ip_addr = "127.0.0.1";
-      sm_dir = "/usr/local/lib/flexric/"
-    }
-    ```
+  ```bash
+  e2_agent = {
+    near_ric_ip_addr = "127.0.0.1";
+    sm_dir = "/usr/local/lib/flexric/"
+  }
+  ```
+  
 * start E2 Node agents
 
   As per O-RAN.WG3.E2SM-v02.00 specifications, UE ID (section 6.2.2.6) representation in OAI is following (ran_e2sm_ue_id.c):
@@ -264,9 +265,9 @@ If you are interested in TC and SLICE SMs, please follow the instructions at htt
 
   * if CU-CP/CU-UP/DU split is used, start the gNB as follows
     ```bash
-    sudo ./nr-softmodem -O <path-to/du_for_cu_cp_up.conf> --rfsim --sa -E
-    sudo ./nr-softmodem -O <path-to/cucp.conf> --sa
-    sudo ./nr-cuup -O <path-to/cuup.conf> --sa
+    sudo ./nr-softmodem -O <path-to/oai-workshops/oam/conf/du_for_cu_cp_up.conf> --rfsim --sa -E
+    sudo ./nr-softmodem -O <path-to/oai-workshops/oam/conf/cucp.conf> --sa
+    sudo ./nr-cuup -O <path-to/oai-workshops/oam/conf/cuup.conf> --sa
     ```
 
 * start the nrUE
