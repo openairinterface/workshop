@@ -118,7 +118,7 @@ By default, FlexRIC will build the nearRT-RIC with E2AP v2 and KPM v2. If you wa
   ```bash
   git clone https://gitlab.eurecom.fr/mosaic5g/flexric flexric
   cd flexric/
-  git checkout 34d6810f9ab435ac3a4023d5e1917669e24341da
+  git checkout f1c08ed2b9b1eceeda7941dd7bf435db0168dd56
   ```
 
 ### 2.2.2 Build FlexRIC
@@ -143,6 +143,12 @@ By default, FlexRIC will build the nearRT-RIC with E2AP v2 and KPM v2. If you wa
 ## 3.1 O-RAN
 
 We assume that user is familiar with O-RAN WG3 specifications that can be found at https://orandownloadsweb.azurewebsites.net/specifications.
+
+For Spring-of-Code purpose, the following specifications are important:
+- O-RAN.WG3.E2GAP-v02.00 - nearRT-RIC architecture & E2 General Aspects and Principles
+- O-RAN.WG3.E2AP-v02.03 - E2AP protocol description
+- O-RAN.WG3.E2SM-KPM-v02.03 - KPM Service Model description
+- O-RAN.WG3.E2SM-RC-v01.03 - RAN Control Service Model description
 
 ### 3.1.1 E2SM-KPM
 
@@ -276,7 +282,8 @@ If you are interested in TC and SLICE SMs, please follow the instructions at htt
   sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/ue.conf> -E
   ```
 
-Run Wireshark and capture E2AP traffic.
+Run Wireshark and capture E2AP traffic. Per O-RAN.WG3.E2GAP-v02.00 specifications, no SCTP port is specified for E2AP protocol. In our implementation, we use port number 36421. Please, add the following configuration in Wireshark:
+![E2AP configuration](./resources/wireshark_e2ap.png)
 
 * start the nearRT-RIC
   ```bash
@@ -364,6 +371,122 @@ Please, take a look at https://gitlab.eurecom.fr/mosaic5g/flexric/-/tree/dev?ref
 
 ### 6.1.2 OAI RAN, CN and FlexRIC
 
+This description is a step-by-step guide to reproduce the demo
+
+> Improving QoE using O-RAN compliant nearRT-RIC, KPM and RC SMs in an online multi-player game
+
+In the O-RAN F2F meeting in Athens in February 2024, the QoE E2 demo was complemented with an O1 use case to "soft-restart" the base station; this is not described in this document. You can see the slides and demo videos here:
+
+Long demo video: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2.mp4
+Demo video with game: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2-game.mkv
+Slides: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2.pdf
+
+For more information on O1, checkout the `telnet-o1` branch in OAI, and the "O1 adapter" at https://gitlab.eurecom.fr/oai/o1-adapter
+
+#### 6.1.2.1 Set up a working RAN environment with OAI
+
+We suppose you have a working RAN with a commercial UE (Quectel module, smartphone).  The branch used for this demo is `qoe-e2`. We suggest to check out this branch, and to make sure that you can connect a UE to the RAN (and the core!) WITHOUT E2, before proceeding.
+
+Make sure that you have a stable throughput, and that you can reach maximum throughput using F1 and using 20 and 40 MHz configuration files `cu.conf`, `du_20.conf`, and `du_40.conf`. The original demo uses one host for DU (further called `duhost`) and another one for RIC, CU, and CN (further called `cuhost`), so adapt IP addresses accordingly.
+
+You might want to open `slither.io` on the phone and see that you can play it smoothly (cf. demo videos).
+
+#### 6.1.2.2 Build RIC and OAI with E2 support
+
+Assuming the repository of the above step is in `~/openairinterface5g`:
+```bash
+cd ~/openairinterface5g
+git checkout qoe-e2 # you should have already done this, here for clarity
+cd cmake_targets
+./build_oai --ninja --gNB -w USRP -c --build-e2 # build with E2 support
+```
+
+Do the above on both DU and CU host machines. Meanwhile, build flexric in the submodule, from another terminal, *on both hosts*, to install the service models:
+```bash
+cd ~/openairinterface5g
+cd openair2/E2AP/flexric
+mkdir build && cd build
+cmake .. -DXAPP_MULTILANGUAGE=OFF -GNinja -DCMAKE_BUILD_TYPE=Release
+ninja
+sudo ninja install     # important, on both machines!
+```
+
+#### 6.1.2.3 Run the system, first without xApp
+
+Start the RIC on `cuhost`:
+```bash
+cd ~/openairinterface5g/openair2/E2AP/flexric/build/
+./examples/ric/nearRT-RIC
+```
+
+Open Wireshark on `cuhost`, capture on `any` interface with capture filter `sctp`.
+
+In another terminal, start the CN (not listed here for brevity) and the CU on `cuhost`:
+```bash
+sudo ./nr-softmodem --sa -O ~/openairinterface5g/cu.conf
+```
+
+Make sure the CU correctly connected to the CN and FlexRIC with the NG Setup and E2 Setup procedures!
+
+On `duhost`, start the DU:
+```bash
+sudo ./nr-softmodem --sa -O ~/openairinterface5g/du_20.conf
+sudo ./nr-softmodem --sa -E -O ~/openairinterface5g/du_40.conf # alternative
+```
+
+Note that you need 3/4 sampling for 40MHz on B210, which was used in the demo.
+
+Again, make sure that the DU connected properly to CU and FlexRIC with the F1 Setup and E2 Setup procedures. You should see this in the one Wireshark window you opened on `cuhost`.
+
+Now, connect the phone. Again, `slither.io` should be playable. You can generate iperf traffic, and `slither.io` should start to lag. A single TCP stream should be enough. To really provoke buffer bloat, you might use multiple streams. For this, do the following:
+```bash
+iperf3 -sui1 # on the phone, receive traffic
+docker exec -it oai-ext-dn iperf3 -c 12.1.1.102 -t3600 -B 192.168.70.135 --cport 10101 -i1 -P8 # on cuhost, generate traffic
+```
+
+Set the IP address of the phone correctly. The `--cport 10101` option is important so that the traffic will be segregated into the two bearers correctly later. `-P8` creates multiple streams to trigger buffer bloat.
+
+You can also ping the phone, which should show increasing ping times:
+```bash
+docker exec -it oai-ext-dn ping 12.1.1.102
+```
+
+#### 6.1.2.4 Use the xApp to trigger bearer creation on demand automatically
+
+Simply start the xApp on `cuhost`:
+```bash
+cd ~/openairinterface5g/openair2/E2AP/flexric/build/
+./examples/xApp/c/kpm_rc/cu_du_xapp_kpm_rc
+```
+
+The xApp will subscribe at the DU to receive "RLC sojourn times", i.e., the time packets wait at RLC, and show it. The measurement is in microseconds (us). If the time is > 10000 us, it will trigger a new bearer (visible through "LCID 5" in the DU periodical output, and corresponding message in the CU, or in wireshark); if it is lower, it will release the second bearer, if any.
+
+This should have the effect of maintaining ping at a low level, while still maxing out the throughput.
+
+If you stop the xApp while iperf was running (a second bearer had been created), the second bearer will remain.
+
+If you stop the xApp while no iperf is running/only one bearer is present, no bearer will be created in the future.
+
+#### 6.1.2.5 Reproducing the demo without FlexRIC and xApp using telnet
+
+You can reproduce the demo without using FlexRIC/xApp, and by triggering the bearer addition/release manually. Simply, on the CU, build with telnet server support:
+```bash
+./build_oai --ninja --gNB -w USRP -c --build-lib telnetsrv 
+```
+
+You can build with E2 support, but it is not necessary to trigger bearers as shown below.
+
+Then start the DU as normal, and the CU by loading the telnet server including the special `bearer` module:
+```bash
+sudo ./nr-softmodem --sa -O ~/openairinterface5g/cu.conf --telnetsrv --telnetsrv.shrmod bearer
+```
+
+Now, if the UE is connected, you can trigger the bearer addition and release at will with these two commands, on `cuhost`, and assuming you have `ncat` installed:
+```bash
+echo bearer add_bearer | nc 127.0.0.1 9090
+echo bearer release_bearer | nc 127.0.0.1 9090
+```
+
 ## 6.2 Slicing demo
 
 - slice #1: ssT=1, sD=1
@@ -372,8 +495,9 @@ Please, take a look at https://gitlab.eurecom.fr/mosaic5g/flexric/-/tree/dev?ref
 * Start the CN
   ```bash
   git clone https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed
+  cd oai-cn5g-fed
   git checkout slicing-spring-of-code
-  cd <path-to/oai-cn5g-fed/docker-compose>
+  cd docker-compose
   docker compose -f docker-compose-slicing-basic-nrf.yaml up -d
   ```
 
@@ -496,7 +620,7 @@ iperf can be run again, and the thp should remain divided 70/30%.
 ### 7.1.0 Pick interesting measurements
 
 Pick a measurement that seems interesting to you. A list of suggested
-measurements is in the Spring-of-Code description. You might want to consult
+measurements is in the Spring-of-Code description at https://openairinterface.org/wp-content/uploads/2024/03/Appendix-1.pdf. You might want to consult
 [3GPP TS
 28.552](https://www.etsi.org/deliver/etsi_ts/128500_128599/128552/16.17.00_60/ts_128552v161700p.pdf)
 for more information.
@@ -539,7 +663,7 @@ data and show it in the xApp. Verify.
 ### 7.2.0 Pick interesting reports
 
 Pick an RC report that seems interesting to you. A list of suggested reports is
-in the Spring-of-Code description. You might want to consult the O-RAN RC
+in the Spring-of-Code description at https://openairinterface.org/wp-content/uploads/2024/03/Appendix-2.pdf. You might want to consult the O-RAN RC
 specification for more information.
 
 We recommend to start with an RRC message exported from RRC, as there is an
