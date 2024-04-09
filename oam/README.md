@@ -283,6 +283,7 @@ If you are interested in TC and SLICE SMs, please follow the instructions at htt
   ```
 
 Run Wireshark and capture E2AP traffic. Per O-RAN.WG3.E2GAP-v02.00 specifications, no SCTP port is specified for E2AP protocol. In our implementation, we use port number 36421. Please, add the following configuration in Wireshark:
+
 ![E2AP configuration](./resources/wireshark_e2ap.png)
 
 * start the nearRT-RIC
@@ -377,9 +378,9 @@ This description is a step-by-step guide to reproduce the demo
 
 In the O-RAN F2F meeting in Athens in February 2024, the QoE E2 demo was complemented with an O1 use case to "soft-restart" the base station; this is not described in this document. You can see the slides and demo videos here:
 
-Long demo video: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2.mp4
-Demo video with game: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2-game.mkv
-Slides: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2.pdf
+- Long demo video: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2.mp4
+- Demo video with game: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2-game.mkv
+- Slides: https://wiki.o-ran-sc.org/download/attachments/109707440/o1%2Be2.pdf
 
 For more information on O1, checkout the `telnet-o1` branch in OAI, and the "O1 adapter" at https://gitlab.eurecom.fr/oai/o1-adapter
 
