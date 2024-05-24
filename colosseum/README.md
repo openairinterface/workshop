@@ -1,9 +1,13 @@
-% RAN Hands-On
-% Robert Schmidt
-% March 29, 2024
+---
+layout: post
+title: "Deploying OpenAirInterface (OAI) 5G RAN and Core-network in Colosseum"
+date: 2024-04-24
+category: tutorials
+author: Florian Kaltenberger, Robert Schmidt, Sakthi Velumani, Rakesh Mundlamuri, Tien-Thinh Nguyen, Teodora Vladic, and many more
+short-description: How to deploy the latest version of OAI gNB, UE and 5G Core network in Colosseum and establish end-to-end connection
+---
 
-
-**What do we cover in the RAN Hands-On?**
+**What do we cover in the OAI on Colosseum Hands-On?**
 
 The aim of this tutorial is to:
 
@@ -30,14 +34,6 @@ pandoc -t slidy --template ran.slidy -s README.md -o README.html
 
 ---
 
----
-layout: post
-title: "Deploying OpenAirInterface (OAI) 5G RAN and Core-network in Colosseum"
-date: 2024-04-24
-category: tutorials
-author: Florian Kaltenberger, Robert Schmidt, Sakthi Velumani, Rakesh Mundlamuri, Tien-Thinh Nguyen, Teodora Vladic, and many more
-short-description: How to deploy the latest version of OAI gNB, UE and 5G Core network in Colosseum and establish end-to-end connection
----
 
 # Deploying OAI on Colosseum
 
@@ -135,7 +131,7 @@ On the UE side, run `iperf3 -c 192.168.70.135 -B <ip of oaitun_ue> -b 15M -u`
 
 ---
 
-## Docker images
+### Docker images
 
 Docker images of all OAI repositories are hosted on https://hub.docker.com/orgs/oaisoftwarealliance/.
 
@@ -147,7 +143,7 @@ The OAI CI/CD team has automated more frequent pushes to Docker-Hub on `oaisoftw
 
 ---
 
-##  Configuring the OAI-5G Core Network Functions
+###  Configuring the OAI-5G Core Network Functions
 
 Since `v2.0.0` release of the 5G Core Network, the deployment files have been simplified:
 
@@ -173,7 +169,7 @@ Since `v2.0.0` release of the 5G Core Network, the deployment files have been si
 
 ---	 
 
-## RAN Repository structure
+### RAN Repository structure
 
 - `openair1`: Layer 1 (3GPP LTE Rel-10/12 PHY, NR Rel-15 PHY)
 - `openair2`: Layer 2 (3GPP LTE Rel-10 MAC/RLC/PDCP/RRC/X2AP, NR Rel-15+ MAC/RLC/PDCP/SDAP/RRC/X2AP/F1AP/E1AP), E2AP!
@@ -198,7 +194,7 @@ Since `v2.0.0` release of the 5G Core Network, the deployment files have been si
 ---
 
 
-## Installation of dependencies and compilation
+### Installation of dependencies and compilation
 
 Install the RAN dependencies and compile it, as this takes some time.
 
@@ -216,7 +212,7 @@ Note: for USRP support, you have to give the switch `-w USRP`
 
 ---
 
-## How to build
+### How to build
 
 - Use of the `build_oai` script
   - Is a wrapper for `cmake`
@@ -227,18 +223,6 @@ Note: for USRP support, you have to give the switch `-w USRP`
   ninja nr-softmodem nr-uesoftmodem dfts ldpc params_libconfig coding rfsimulator
   ```
 - Also interesting: `lte-softmodem`, `lte-uesoftmodem`
-
----
-
-## How to contribute
-
-- Anyone can contribute! You are here to contribute!
-- You have to sign a [Contributor License Agreement](https://openairinterface.org/legal/oai-license-model/)
-- Contributions go through
-  - Peer review on Gitlab
-  - Continuous Integration Build and Testing
-
----
 
 
 ### A closer look at the config file
@@ -283,11 +267,11 @@ Other parameters: see `openair2/GNB_APP/MACRLC_nr_paramdef.h`
 
 ---
 
-## Scopes
+### Scopes
 
 The scopes allow to see various channels.
 
-### Xforms
+#### Xforms
 
 - Install dependencies:
   ```
@@ -316,7 +300,7 @@ The scopes allow to see various channels.
 ---
 
 
-### QtScope
+#### QtScope
 
 - Install dependencies (note: you need Qt5, not Qt6!)
   ```
@@ -357,4 +341,16 @@ The scopes allow to see various channels.
 ---
 
 ## FlexRIC
+
+---
+
+## How to contribute
+
+- Anyone can contribute! You are here to contribute!
+- You have to sign a [Contributor License Agreement](https://openairinterface.org/legal/oai-license-model/)
+- Contributions go through
+  - Peer review on Gitlab
+  - Continuous Integration Build and Testing
+
+---
 
