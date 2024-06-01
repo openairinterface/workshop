@@ -39,8 +39,8 @@ pandoc -t slidy --template ran.slidy -s README.md -o README.html
 
 There are ready-made images in Colosseum NAS which include OAI RAN and 5G Core Network. These images can be selected in the Colosseum reservation page under the `common` section. The images of interest are
 
- - RAN Image: `oai-ran-2024-w13`
- - Core-network Image: `oai-5gcore-2024`
+ - RAN Image: `sakthi-oai-flexric`
+ - Core-network Image: `sakthi-core-2024-tcpdump`
 
 Make a reservation with `n+2` SRNs out of which one Core-network image and `n+1` RAN Images where `n` is the number of UEs in the test scenario.
 
@@ -154,6 +154,18 @@ Since `v2.0.0` release of the 5G Core Network, the deployment files have been si
   * PLMN / Slices
   * DNN
   * ...
+
+### Analyzing core network traffic with wireshark or tshark
+
+We can analyze the messages between the core network components and between the RAN and the core with wireshark (graphical interface) or tshark (command line interface)
+
+After starting the core network you will see a docker bridge network named "demo-oai-public-net" and a local netowkr interface named "demo-oai". 
+
+- With Wireshark, select interface "demo-oai" with capture filter `sctp` and dispay filter `ngap`
+
+- With tshark type: tshark -i demo-oai -f sctp -w oai.pcap
+
+- You will need to copy this file to your local machine using scp and then you can analyze it with wireshark there. 
 
 ---
 
@@ -319,15 +331,15 @@ The scopes allow to see various channels.
 
 ---
 
-## CU-DU split
+### CU-DU split
 
-- Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
 - Start the gNB as follows
   ```
   sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
   sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
   ```
 - Start the UE as before
+
 - Compare the IP addresses in the config with what you have below to understand
   the interfaces
 
@@ -335,8 +347,21 @@ The scopes allow to see various channels.
 
 ---
 
+You can now also analyze the traffic on the F1 interface with wireshark/tshark. For that you need to start a wireshark/tshark session on the local interface "lo", capture filter "sctp"  and use display filter "f1ap". Here is an example  
+
 ![Screenshot of the Wireshark with NG and F1](../ran/resources/f1.png)
 
+### Troubleshooting
+
+#### The UE runs into a segmentation fault.
+The current OAI version precompiled on the image is 2024.w14, which has the known bug. Please upgrade the OAI version to 2015.w15 and recompile.
+
+#### I am getting a lot of LLLLLLs on the screen
+These Ls come from the USRP driver (called UHD) and mean that there were late packets in the communication between the USRP and the server. These real-time problems usually appear when the nr-softmodem executable runs on a different NUMA node than the network card is connected to. On the SRNs the network card is connected to NUMA node 1 and you can force the nr-softmodem to run on that core using the command numactl. You will not be able to use the python script so you need to start the nr-softmodem with all the command line paramters directly without using the python script. 
+
+```
+numactl --cpunodebind=1 --membind=1 ./nr-softmodem ...
+```
 
 ---
 
