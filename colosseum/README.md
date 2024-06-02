@@ -354,18 +354,20 @@ You can now also analyze the traffic on the F1 interface with wireshark/tshark. 
 ### Troubleshooting
 
 #### The UE runs into a segmentation fault.
-The current OAI version precompiled on the image is 2024.w14, which has the known bug. Please upgrade the OAI version to 2015.w15 and recompile.
+The current OAI version precompiled on the image is 2024.w14, which has the known bug. Please upgrade the OAI version to 2024.w15 and recompile.
 
 #### I am getting a lot of LLLLLLs on the screen
-These Ls come from the USRP driver (called UHD) and mean that there were late packets in the communication between the USRP and the server. These real-time problems usually appear when the nr-softmodem executable runs on a different NUMA node than the network card is connected to. On the SRNs the network card is connected to NUMA node 1 and you can force the nr-softmodem to run on that core using the command numactl. You will not be able to use the python script so you need to start the nr-softmodem with all the command line paramters directly without using the python script. 
+These Ls come from the USRP driver (called UHD) and mean that there were late packets in the communication between the USRP and the server. These real-time problems usually appear when the nr-softmodem executable runs on a different NUMA node than the network card is connected to. On the SRNs the network card is connected to NUMA node 1 and you can force the nr-softmodem to run on that core using the command numactl. You will not be able to use the python script so you need to start the nr-softmodem with all the command line paramters directly without using the python script. You can see the command line parameters used in the logs of a previous call.
 
 ```
-numactl --cpunodebind=1 --membind=1 ./nr-softmodem ...
+numactl --cpunodebind=1 --membind=1 ./nr-softmodem <command line options>
 ```
 
 ---
 
 ## FlexRIC
+
+![FlexRIC Tutorial](../oam/README.md)
 
 ---
 
