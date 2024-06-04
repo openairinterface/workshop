@@ -44,6 +44,8 @@ There are ready-made images in Colosseum NAS which include OAI RAN and 5G Core N
 
 Make a reservation with `n+2` SRNs out of which one Core-network image and `n+1` RAN Images where `n` is the number of UEs in the test scenario.
 
+When you make a reservation, please check the box Q1-Q2-Q3. This will guarantee that your nodes are synchronized.
+
 Once the reservation is active, you can login to the SRNs. The user for both images is 'root' and the password is `pass`.
 
 ---
@@ -221,7 +223,7 @@ git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
 cd openairinterface5g/cmake_targets
 git checkout 2024.w12                        # tested tag
 ./build_oai --ninja -I                       # install dependencies
-./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
+./build_oai --ninja --gNB --nrUE -w USRP -c  # compile gNB and nrUE
 ```
 
 Note: for USRP support, you have to give the switch `-w USRP`
