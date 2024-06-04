@@ -66,6 +66,11 @@ python3 ran.py -t donor -m sa
 ```
 This will start the gNB process. If you get an error related to FPGA compatibility number mismatch, run the above command with `-f` option. This will flash the FPGA of the USRP with the version that matches your version of the UHD driver. This option is only needed once. The subsequent runs can be started without `-f`.
 
+You can also add the --numa option to the script. In this case you first need to set the environment variable
+```
+export USRP_NUMA_NODE=1
+```
+
 ---
 
 ## Start RF Scenario
