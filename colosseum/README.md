@@ -367,7 +367,9 @@ numactl --cpunodebind=1 --membind=1 ./nr-softmodem <command line options>
 
 ## FlexRIC
 
-![FlexRIC Tutorial](../oam/README.md)
+Please follow Section 4.2 of the ![FlexRIC Tutorial](../oam/README.md).
+
+The FlexRIC E2 Agent and FlexRIC application are already installed in the image sakthi-oai-flexric. You can run FlexRIC on the same host as the gNB. If you want to run it on a different machine you have to modify the e2_agent secion in the OAI config file. 
 
 ---
 
