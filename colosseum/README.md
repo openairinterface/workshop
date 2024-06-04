@@ -44,7 +44,7 @@ There are ready-made images in Colosseum NAS which include OAI RAN and 5G Core N
 
 Make a reservation with `n+2` SRNs out of which one Core-network image and `n+1` RAN Images where `n` is the number of UEs in the test scenario.
 
-Once the reservation is active, you can login to the SRNs. The password of `root` user is `pass`.
+Once the reservation is active, you can login to the SRNs. The user for both images is 'root', the password of for the core image is `pass` and for the RAN image is `ChangeMe`.
 
 ---
 
