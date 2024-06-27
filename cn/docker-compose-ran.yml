@@ -1,7 +1,7 @@
 version: '3.8'
 services:
     oai-gnb:
-        image: oaisoftwarealliance/oai-gnb:2024.w12
+        image: oaisoftwarealliance/oai-gnb:2024.w25
         privileged: true
         container_name: oai-gnb
         environment:
@@ -17,7 +17,7 @@ services:
             timeout: 5s
             retries: 5
     oai-nr-ue:
-        image: oaisoftwarealliance/oai-nr-ue:2024.w12
+        image: oaisoftwarealliance/oai-nr-ue:2024.w25
         privileged: true
         container_name: oai-nr-ue
         environment: 
@@ -33,7 +33,7 @@ services:
             timeout: 5s
             retries: 5
     oai-nr-ue2:
-        image: oaisoftwarealliance/oai-nr-ue:2024.w12
+        image: oaisoftwarealliance/oai-nr-ue:2024.w25
         privileged: true
         container_name: oai-nr-ue2
         environment: 

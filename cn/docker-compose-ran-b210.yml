@@ -1,7 +1,7 @@
 version: '3.8'
 services:
     oai-gnb:
-        image: oaisoftwarealliance/oai-gnb:develop
+        image: oaisoftwarealliance/oai-gnb:2024.w25
         privileged: true
         container_name: oai-gnb
         environment:
