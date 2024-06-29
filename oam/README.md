@@ -33,42 +33,47 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave 
 sudo update-alternatives --config gcc # chose gcc-12
 ```
 
-### 1.1.2 CMake (at least v3.15). 
+### 1.1.2 CMake (at least v3.15).
 
-  On Ubuntu, you might want to use [this PPA](https://apt.kitware.com/) to install an up-to-date version.
+On Ubuntu, you should use [this PPA](https://apt.kitware.com/) to install an up-to-date version.
 
-### 1.1.3 Flatbuffer encoding (optional)
-  
-  We also provide a flatbuffers encoding/decoding scheme as alternative to ASN.1. In case that you want to use it  follow the
-  instructions at https://github.com/dvidelabs/flatcc and provide the path for the lib and include when selecting it at `ccmake ..` from the build directory 
+### 1.1.3 Flatbuffer encoding (optional, advanced)
+
+FlexRIC has experimental support for an alternative encoding/decoding scheme
+using Flatbuffers. Refer to the [FlexRIC
+README](https://gitlab.eurecom.fr/mosaic5g/flexric) in case you are interested
+to try it.
 
 ## 1.2 Download the required dependencies
 
 ### 1.2.1 Mandatory dependencies
-  ```bash
-  sudo apt install libsctp-dev cmake-curses-gui libpcre2-dev
-  ```
+```bash
+sudo apt install libsctp-dev cmake-curses-gui libpcre2-dev
+```
 
 ### 1.2.2 Multi-language xApp requirements (optional)
-  - SWIG (at least  v.4.1). 
 
-    We use SWIG as an interface generator to enable the multi-language feature (i.e., C/C++ and Python) for the xApps. Please, check your SWIG version (i.e, `swig
-    -version`) and install it from scratch if necessary as described here: https://swig.org/svn.html or via the code below: 
+- SWIG (at least  v.4.1).
 
-    ```bash
-    git clone https://github.com/swig/swig.git
-    cd swig
-    git checkout release-4.1 
-    ./autogen.sh
-    ./configure --prefix=/usr/
-    make -j8
-    make install
-    ```
+  We use SWIG as an interface generator to enable the multi-language feature
+  (i.e., C/C++ and Python) for the xApps. Please, check your SWIG version (i.e,
+  `swig -version`) and install it from scratch if necessary as described here:
+  https://swig.org/svn.html or via the code below:
 
-  - Python dependencies
-    ```bash
-    sudo apt install python3.8 python-dev
-    ```
+  ```bash
+  git clone https://github.com/swig/swig.git
+  cd swig
+  git checkout release-4.1
+  ./autogen.sh
+  ./configure --prefix=/usr/
+  make -j8
+  make install
+  ```
+
+- Python dependencies
+  ```bash
+  sudo apt install python3.8 python-dev
+  ```
 
 # 2. Deployment
 
