@@ -368,14 +368,14 @@ cases with ultra low-latency requirements.
 
 ## 4.3 Mapping between emulator and RAN E2 agent code
 
-  |                                                     | Emulator           | OAI E2 agent         |
-  |:----------------------------------------------------|:-------------------|:---------------------|
-  | E2 Setup Request (E2 node Component Configuration)  | read_setup_ran.c   | read_setup_ran.c     |
-  | E2 Setup Request (RAN Functions added)              | test_agent.c       | init_ran_func.c      |
-  | general KPM SM source file                          | sm_kpm.c           | ran_func_kpm.c       |
-  | KPM SM REPORT Service                               |                    | ran_func_kpm_subs.c  |
-  | general RC SM source file                           | sm_rc.c            | ran_func_rc.c        |
-  | RC SM REPORT Service                                |                    | ran_func_rc_subs.c   |
+|                                                     | Emulator           | OAI E2 agent          |
+|:----------------------------------------------------|:-------------------|:----------------------|
+| E2 Setup Request (E2 node Component Configuration)  | `read_setup_ran.c` | `read_setup_ran.c`    |
+| E2 Setup Request (RAN Functions added)              | `test_agent.c`     | `init_ran_func.c`     |
+| general KPM SM source file                          | `sm_kpm.c`         | `ran_func_kpm.c`      |
+| KPM SM REPORT Service                               |                    | `ran_func_kpm_subs.c` |
+| general RC SM source file                           | `sm_rc.c`          | `ran_func_rc.c`       |
+| RC SM REPORT Service                                |                    | `ran_func_rc_subs.c`  |
 
 # 5. Optional - Multiple UEs
 
