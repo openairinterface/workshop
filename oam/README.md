@@ -81,10 +81,16 @@ sudo apt install libsctp-dev cmake-curses-gui libpcre2-dev
 
 ### 2.1.1 Clone the OAI repository
 
+We use the same version of OAI as the [RAN tutorial](../ran/README.md), i.e.,
+tag `2024.w26`.
+
 ```bash
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g oai
 cd oai/
+git checkout 2024.w26
 ```
+
+Note: you can of course do that in an existing repository.
 
 ### 2.1.2 Build OAI with E2 Agent
 
@@ -133,6 +139,10 @@ git clone https://gitlab.eurecom.fr/mosaic5g/flexric flexric
 cd flexric/
 git checkout beabdd072ca9e381d4d27c9fbc6bb19382817489
 ```
+
+Note! Instead of manually cloning this in a separate directory, you can of
+course simply use the git submodule directory in the RAN, skip the clone, and
+proceed with the next section.
 
 ### 2.2.2 Build FlexRIC
 
