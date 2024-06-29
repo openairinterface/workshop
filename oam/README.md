@@ -379,8 +379,8 @@ cases with ultra low-latency requirements.
 
 # 5. Optional - Multiple UEs
 
-  If you are interested in having multiple UEs in rfsim mode, please, follow the instructions at https://gitlab.eurecom.fr/oai/trainings/oai-workshops/-/blob/main/ran/README.md#multiple-ues.
-
+Multi-UE operation is also supported through FlexRIC as described in the [RAN
+tutorial](../ran/README.md).
 
 # 6. Showcased demos
 
@@ -388,7 +388,7 @@ cases with ultra low-latency requirements.
 
 ### 6.1.1 Keysight RAN Simulator && OAI FlexRIC
 
-Please, take a look at https://gitlab.eurecom.fr/mosaic5g/flexric/-/tree/dev?ref_type=heads#33-integration-with-keysight-rictest.
+Please, take a look at [the FlexRIC README](https://gitlab.eurecom.fr/mosaic5g/flexric/-/tree/dev?ref_type=heads#33-integration-with-keysight-rictest).
 
 ### 6.1.2 OAI RAN, CN and FlexRIC
 
@@ -492,7 +492,7 @@ If you stop the xApp while no iperf is running/only one bearer is present, no be
 
 You can reproduce the demo without using FlexRIC/xApp, and by triggering the bearer addition/release manually. Simply, on the CU, build with telnet server support:
 ```bash
-./build_oai --ninja --gNB -w USRP -c --build-lib telnetsrv 
+./build_oai --ninja --gNB -w USRP -c --build-lib telnetsrv
 ```
 
 You can build with E2 support, but it is not necessary to trigger bearers as shown below.
@@ -510,31 +510,28 @@ echo bearer release_bearer | nc 127.0.0.1 9090
 
 ## 6.2 Slicing demo
 
-- slice #1: ssT=1, sD=1
-- slice #2: ssT=1, sD=5
- 
-* Start the CN
-  ```bash
-  git clone https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed
-  cd oai-cn5g-fed
-  git checkout slicing-spring-of-code
-  cd docker-compose
-  docker compose -f docker-compose-slicing-basic-nrf.yaml up -d
-  ```
+This demo is based on branch `slicing-spring-of-code`. It is experimental work
+that is subject to changes, but usable as of writing of this training material.
+Note that OAI then also uses a specific version of FlexRIC in the submodule,
+which you need to use if you clone flexric in a separate directory elsewhere!
+
+We will consider two slices as follows.
+
+- Slice No. 1: SST=1, SD=1
+- Slice No. 2: SST=1, SD=5
+
+Two UEs will connect and request traffic. Their traffic will be prioritised,
+based on the configuration of the slices.
+
+* Start the CN as given in the CN tutorial
 
 * Compile FlexRIC
   ```bash
   git clone https://gitlab.eurecom.fr/mosaic5g/flexric
   cd flexric
   git checkout slicing-spring-of-code
-  ```
-  If you have installed optional libraries from section [1.2.2 Multi-language xApp requirements (optional)](#122-multi-language-xapp-requirements-optional), run this command:
-  ```bash
   mkdir build && cd build && cmake .. && make -j8 && sudo make install
-  ```
-  otherwise:
-  ```bash
-  mkdir build && cd build && cmake -DXAPP_MULTILANGUAGE=OFF .. && make -j8 && sudo make install
+  mkdir build && cd build && cmake -DXAPP_MULTILANGUAGE=OFF .. && make -j8 && sudo make install # if SWIG not installed
   ```
 
 * Compile OAI
@@ -549,7 +546,7 @@ echo bearer release_bearer | nc 127.0.0.1 9090
 * Start nearRT-RIC
   ```bash
   cd flexric/build/examples/ric
-  ./nearRT-RIC 
+  ./nearRT-RIC
   ```
 
 * Start gNB-mono
