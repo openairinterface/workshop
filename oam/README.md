@@ -263,15 +263,16 @@ cases with ultra low-latency requirements.
 
 ## 4.2 Test with OAI RAN
 
-  At this point, we assume the 5G Core Network is already running in the background. Please follow CN tutorial https://gitlab.eurecom.fr/oai/trainings/oai-workshops/-/blob/main/cn/README.md?ref_type=heads for more information.
+At this point, we assume the 5G Core Network is already running in the
+background. Please follow [CN tutorial](../cn/README.md) for more information.
 
-  In order to configure E2 agent, please, add the following block in OAI's configuration file (gnb.conf, du.conf, cu.conf,...):
-  ```bash
-  e2_agent = {
-    near_ric_ip_addr = "127.0.0.1";
-    sm_dir = "/usr/local/lib/flexric/"
-  }
-  ```
+In order to configure E2 agent, please, add the following block in OAI's configuration file:
+```bash
+e2_agent = {
+  near_ric_ip_addr = "127.0.0.1";
+  sm_dir = "/usr/local/lib/flexric/"
+}
+```
 
 * start E2 Node agents
 
@@ -300,7 +301,10 @@ cases with ultra low-latency requirements.
   sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/ue.conf> -E
   ```
 
-Run Wireshark and capture E2AP traffic. Per O-RAN.WG3.E2GAP-v02.00 specifications, no SCTP port is specified for E2AP protocol. In our implementation, we use port number 36421. Please, add the following configuration in Wireshark:
+Run Wireshark and capture E2AP traffic by selecting `any` and set the capture
+filter to `sctp`. Per O-RAN.WG3.E2GAP-v02.00 specifications, no SCTP port is
+specified for E2AP protocol. In our implementation, we use port number 36421.
+Please, add the following configuration in Wireshark:
 
 ![E2AP configuration](./resources/wireshark_e2ap.png)
 
@@ -310,7 +314,7 @@ Run Wireshark and capture E2AP traffic. Per O-RAN.WG3.E2GAP-v02.00 specification
   ./build/examples/ric/nearRT-RIC
   ```
 
-Check that you see the E2 Setup Request and Response messages in Wireshark. 
+Check that you see the E2 Setup Request and Response messages in Wireshark.
 Within E2 Setup Request message, E2 node sends his own capabilities, such are KPM and RC supported RAN Functions:
 
 ![KPM SM capabilities](./resources/wireshark_kpm.png)
@@ -322,7 +326,7 @@ Within E2 Setup Request message, E2 node sends his own capabilities, such are KP
   * get UE IP address and open server port
     ```bash
     ifconfig  # get UE IP address on interface oaitun_ue1
-    iperf3 -i1 -s
+    iperf3 -i1 -s --bind <UE-IP-address>
     ```
 
   * start DL traffic from traffic container `oai-ext-dn` within CN
@@ -357,12 +361,10 @@ Within E2 Setup Request message, E2 node sends his own capabilities, such are KP
     cd flexric
     ./build/examples/xApp/c/monitor/xapp_gtp_mac_rlc_pdcp_moni
     ```
-The latency that you observe in your monitor xApp is the latency from the E2 Agent to the nearRT-RIC and xApp. 
-Therefore, FlexRIC is well suited for use cases with ultra low-latency requirements.
-Additionally, all the data received in the `xapp_gtp_mac_rlc_pdcp_moni` xApp is also written to /tmp/xapp_db in case that offline data processing is wanted (e.g., Machine Learning/Artificial Intelligence applications). You can browse the data using e.g., sqlitebrowser.
-Please note:
-* KPM SM database is not been updated, therefore commented in `flexric/src/xApp/db/sqlite3/sqlite3_wrapper.c:1152`
-* RC SM database is not yet implemented.
+
+The latency that you observe in your monitor xApp is the latency from the E2
+Agent to the nearRT-RIC and xApp.  This shows that FlexRIC can be used for use
+cases with ultra low-latency requirements.
 
 ## 4.3 Mapping between emulator and RAN E2 agent code
 
