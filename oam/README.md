@@ -275,16 +275,6 @@ cases with ultra low-latency requirements.
 
 * start E2 Node agents
 
-  As per O-RAN.WG3.E2SM-v02.00 specifications, UE ID (section 6.2.2.6) representation in OAI is following (ran_e2sm_ue_id.c):
-  |                       | gNB-mono        | CU              | CU-CP           | CU-UP                 | DU                 |
-  |:----------------------|:----------------|:----------------|:----------------|:----------------------|:-------------------|
-  | CHOICE UE ID case     | GNB_UE_ID_E2SM  | GNB_UE_ID_E2SM  | GNB_UE_ID_E2SM  | GNB_CU_UP_UE_ID_E2SM  | GNB_DU_UE_ID_E2SM  |
-  | AMF UE NGAP ID        | amf_ue_ngap_id  | amf_ue_ngap_id  | amf_ue_ngap_id  |                       |                    |
-  | GUAMI                 | guami           | guami           | guami           |                       |                    |
-  | gNB-CU UE F1AP ID     |                 | rrc_ue_id       |                 |                       | rrc_ue_id          |
-  | gNB-CU-CP UE E1AP ID  |                 |                 | rrc_ue_id       | rrc_ue_id             |                    |
-  | RAN UE ID             | rrc_ue_id       | rrc_ue_id       | rrc_ue_id       | rrc_ue_id             | rrc_ue_id          |
-
   * start the gNB-mono
     ```bash
     cd oai/cmake_targets/ran_build/build
