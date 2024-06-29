@@ -20,16 +20,18 @@ This tutorial describes the steps of deployment 5G OAI RAN, with integrated E2 a
 ## 1.1 Install prerequisites
 
 ### 1.1.1 GCC compiler
-  - Please make sure you have gcc-10 installed (gcc-12 and 13 should also work but we recommend gcc-10). Follow the next steps:
-    ```bash
-    sudo apt update -y
-    sudo apt upgrade -y
-    sudo apt install -y build-essential
-    sudo apt install -y gcc-10 g++-10 cpp-10
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
-    sudo update-alternatives --config gcc # chose gcc-10
-    ```
-    Note: gcc-11 is not supported in FlexRIC
+
+FlexRIC triggers a compiler bug in gcc-11 and is therefore not supported.
+Please make sure you have gcc-12 installed (gcc-10 and 13 should also work but
+we recommend gcc-12). Follow the next steps:
+```bash
+sudo apt update -y
+sudo apt upgrade -y
+sudo apt install -y build-essential
+sudo apt install -y gcc-12 g++-12 cpp-12
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 --slave /usr/bin/gcov gcov /usr/bin/gcov-12
+sudo update-alternatives --config gcc # chose gcc-12
+```
 
 ### 1.1.2 CMake (at least v3.15). 
 
