@@ -80,41 +80,43 @@ sudo apt install libsctp-dev cmake-curses-gui libpcre2-dev
 ## 2.1 OAI RAN
 
 ### 2.1.1 Clone the OAI repository
-  ```bash
-  git clone https://gitlab.eurecom.fr/oai/openairinterface5g oai
-  cd oai/
-  ```
+
+```bash
+git clone https://gitlab.eurecom.fr/oai/openairinterface5g oai
+cd oai/
+```
 
 ### 2.1.2 Build OAI with E2 Agent
 
-  - By default, OAI will build the E2 Agent with E2AP v2 and KPM v2. If you want a different version, edit the variable E2AP\_VERSION and KPM\_VERSION at OAI's CMakeLists.txt file.
+Currently available versions:
+|            |KPM v2.03|KPM v3.00|
+|:-----------|:--------|:--------|
+| E2AP v1.01 | Y       | Y       |
+| E2AP v2.03 | Y       | Y       |
+| E2AP v3.01 | Y       | Y       |
 
-  Currently available versions:
-  |            |KPM v2.03|KPM v3.00|
-  |:-----------|:--------|:--------|
-  | E2AP v1.01 | Y       | Y       |
-  | E2AP v2.03 | Y       | Y       |
-  | E2AP v3.01 | Y       | Y       |
+Please note that KPM SM v2.01 is supported only in FlexRIC, but not in OAI.
+By default, OAI will build the E2 Agent with E2AP v2 and KPM v2. If you want a
+different version, by passing `--cmake-opt -DE2AP_VERSION=E2AP_VX` with
+`X`=`1`,`2`,`3`, and `--cmake-opt -DKPM_VERSION=KPM_VX` with `X`=`2_03`,`3_00`
 
-  Please note that KPM SM v2.01 is supported only in FlexRIC, but not in OAI.
+```bash
+cd cmake_targets/
+./build_oai -I # only first time install for OAI
+./build_oai -c --gNB --nrUE --build-e2 --ninja
+```
 
-  ```bash
-  cd cmake_targets/
-  ./build_oai -I -w SIMU --gNB --nrUE --build-e2 --ninja
-  ```
+* `-I` option is to install pre-requisites, you only need it the first time you build the softmodem or when some oai dependencies have changed.
+* `--gNB` is to build the `nr-softmodem` and `nr-cuup` executables and all required shared libraries
+* `--nrUE` is to build the `nr-uesoftmodem` executable and all required shared libraries
+* `--ninja` is to use the ninja build tool, which speeds up compilation
+* `--build-e2` option is to use the E2 agent, integrated within RAN.
 
-  * `-I` option is to install pre-requisites, you only need it the first time you build the softmodem or when some oai dependencies have changed.
-  * `-w` option is to select the radio head support you want to include in your build. Radio head support is provided via a shared library, which is called the "oai device" The build script creates a soft link from `liboai_device.so` to the true device which will be used at run-time (here the USRP one, liboai_usrpdevif.so). The RF simulatorRF simulator is implemented as a specific device replacing RF hardware, it can be specifically built using `-w SIMU` option, but is also built during any softmodem build.
-  * `--gNB` is to build the `nr-softmodem` and `nr-cuup` executables and all required shared libraries
-  * `--nrUE` is to build the `nr-uesoftmodem` executable and all required shared libraries
-  * `--ninja` is to use the ninja build tool, which speeds up compilation
-  * `--build-e2` option is to use the E2 agent, integrated within RAN.
-
-  If the openair2/E2AP/flexric folder is empty, try manually the following commands:
-  ```bash
-  git submodule init
-  git submodule update
-  ```
+If the `openair2/E2AP/flexric` folder is empty, try manually the following commands:
+```bash
+git submodule init
+git submodule update
+```
 
 ## 2.2 FlexRIC
 
