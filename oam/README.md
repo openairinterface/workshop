@@ -120,32 +120,44 @@ git submodule update
 
 ## 2.2 FlexRIC
 
-By default, FlexRIC will build the nearRT-RIC with E2AP v2 and KPM v2. If you want a different version, edit the variable E2AP\_VERSION and KPM\_VERSION at FlexRIC's CMakeLists.txt file. Note that OAI's and FlexRIC's E2AP\_VERSION and KPM\_VERSION need to match due to O-RAN incompatibilities among versions.
-
+By default, FlexRIC will build the nearRT-RIC with E2AP v2 and KPM v2. If you
+want a different version, edit the cmake variable `E2AP_VERSION` and
+`KPM_VERSION` during cmake invocation as shown below. Note that OAI's and
+FlexRIC's `E2AP_VERSION` and `KPM_VERSION` need to match to avoid
+incompatibilities among versions.
 
 ### 2.2.1 Clone the FlexRIC repository
-  ```bash
-  git clone https://gitlab.eurecom.fr/mosaic5g/flexric flexric
-  cd flexric/
-  git checkout f1c08ed2b9b1eceeda7941dd7bf435db0168dd56
-  ```
+
+```bash
+git clone https://gitlab.eurecom.fr/mosaic5g/flexric flexric
+cd flexric/
+git checkout beabdd072ca9e381d4d27c9fbc6bb19382817489
+```
 
 ### 2.2.2 Build FlexRIC
-  If you have installed optional libraries from section [1.2.2 Multi-language xApp requirements (optional)](#122-multi-language-xapp-requirements-optional), run this command:
-  ```bash
-  mkdir build && cd build && cmake .. && make -j8
-  ```
-  otherwise:
-  ```bash
-  mkdir build && cd build && cmake -DXAPP_MULTILANGUAGE=OFF .. && make -j8
-  ```
+
+If you have installed optional libraries from section [1.2.2 Multi-language xApp requirements (optional)](#122-multi-language-xapp-requirements-optional), run this command:
+```bash
+mkdir build && cd build && cmake .. && make -j8
+```
+
+You can pass a number of variables to cmake:
+- `-DXAPP_MULTILANGUAGE=OFF` to disable the usage of SWIG (meaning, that only
+xApps written in C will be supported.
+- `-DE2AP_VERSION=E2AP_VX` with `X`=`1`,`2`,`3` to select the E2AP version.
+- `-DKPM_VERSION=KPM_VX` with `X`=`2_01`,`2_03`,`3_00` to select the KPM
+version.
 
 ### 2.2.3 Installation of Service Models (SMs)
-  ```bash
-  sudo make install
-  ```
 
-  By default the service model libraries will be installed in the path `/usr/local/lib/flexric` while the configuration file in `/usr/local/etc/flexric`.
+You need to install the SMs to use them in FlexRIC (important!):
+```bash
+sudo make install
+```
+
+By default the service model libraries will be installed in the path
+`/usr/local/lib/flexric` while the configuration file is in
+`/usr/local/etc/flexric`.
 
 # 3. Service Models available in OAI RAN
 
