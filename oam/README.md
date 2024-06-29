@@ -163,9 +163,11 @@ By default the service model libraries will be installed in the path
 
 ## 3.1 O-RAN
 
-We assume that user is familiar with O-RAN WG3 specifications that can be found at https://orandownloadsweb.azurewebsites.net/specifications.
+For a deeper understanding, we recommend that users of FlexRIC familiarize
+themselves with O-RAN WG3 specifications available at the [O-RAN specifications
+page](https://orandownloadsweb.azurewebsites.net/specifications).
 
-For Spring-of-Code purpose, the following specifications are important:
+The following specifications are recommended:
 - O-RAN.WG3.E2GAP-v02.00 - nearRT-RIC architecture & E2 General Aspects and Principles
 - O-RAN.WG3.E2AP-v02.03 - E2AP protocol description
 - O-RAN.WG3.E2SM-KPM-v02.03 - KPM Service Model description
@@ -173,86 +175,91 @@ For Spring-of-Code purpose, the following specifications are important:
 
 ### 3.1.1 E2SM-KPM
 
-  As mentioned in section [2.1.2 Build OAI with E2 Agent](#212-build-oai-with-e2-agent), we support KPM v2.03/v3.00. Uses ASN.1 encoding.
+As mentioned in section [2.1.2 Build OAI with E2
+Agent](#212-build-oai-with-e2-agent), we support KPM v2.03/v3.00. Both use
+ASN.1 encoding.
 
-  Per O-RAN specifications, 5G measurements supported by KPM are specified in 3GPP TS 28.552.
+Per O-RAN specifications, 5G measurements supported by KPM are specified in
+3GPP TS 28.552.
 
-  From 3GPP TS 28.552, at the moment, we support the following list:
-  * "DRB.PdcpSduVolumeDL"
-  * "DRB.PdcpSduVolumeUL"
-  * "DRB.RlcSduDelayDl"
-  * "DRB.UEThpDl"
-  * "DRB.UEThpUl"
-  * "RRU.PrbTotDl"
-  * "RRU.PrbTotUl"
+From 3GPP TS 28.552, at the moment, we support the following list:
+* `DRB.PdcpSduVolumeDL`
+* `DRB.PdcpSduVolumeUL`
+* `DRB.RlcSduDelayDl`
+* `DRB.UEThpDl`
+* `DRB.UEThpUl`
+* `RRU.PrbTotDl`
+* `RRU.PrbTotUl`
 
-  From O-RAN.WG3.E2SM-KPM-version specification, we implemented:
-  * REPORT Service Style 4 ("Common condition-based, UE-level" - section 7.4.5) - fetch above measurements per each UE that matches common criteria (e.g. S-NSSAI).
+From O-RAN.WG3.E2SM-KPM-version specification, we implemented:
+* REPORT Service Style 4 ("Common condition-based, UE-level" - section 7.4.5) - fetch above measurements per each UE that matches common criteria (e.g. S-NSSAI).
 
 ### 3.1.2 E2SM-RC
 
-  We support RC v1.03. Uses ASN.1 encoding.
+We support RC v1.03. It uses ASN.1 encoding.
 
-  From ORAN.WG3.E2SM-RC-v01.03 specification, we implemented:
-  * REPORT Service Style 4 ("UE Information" - section 7.4.5) - aperiodic subscription for "UE RRC State Change"
-  * CONTROL Service Style 1 ("Radio Bearer Control" - section 7.6.2) - "QoS flow mapping configuration" (e.g creating a new DRB)
+From ORAN.WG3.E2SM-RC-v01.03 specification, we implemented:
+* REPORT Service Style 4 ("UE Information" - section 7.4.5) - aperiodic subscription for "UE RRC State Change"
+* CONTROL Service Style 1 ("Radio Bearer Control" - section 7.6.2) - "QoS flow mapping configuration" (e.g creating a new DRB)
 
 ## 3.2 Custom Service Models
 
-In addition, we support custom Service Models, such are MAC, RLC, PDCP, and GTP. Use plain encoding.
-
-If you are interested in TC and SLICE SMs, please follow the instructions at https://gitlab.eurecom.fr/mosaic5g/flexric.
+In addition, we support custom Service Models, such as MAC, RLC, PDCP, and GTP.
+All use plain encoding, i.e., no ASN.1, but write the binary data into network
+messages.  If you are interested in those, please follow the instructions in
+the [FlexRIC README](https://gitlab.eurecom.fr/mosaic5g/flexric).
 
 # 4. Start the process
 
 ## 4.1 Test with emulators
 
-  * Start the nearRT-RIC
+* Start the nearRT-RIC
 
+  ```bash
+  $ ./build/examples/ric/nearRT-RIC
+  ```
+
+* Start E2 Node agents
+
+  * gNB-mono
     ```bash
-    $ ./build/examples/ric/nearRT-RIC
+    $ ./build/examples/emulator/agent/emu_agent_gnb
+    ```
+  * if CU/DU split is used, start the gNB as follows
+    ```bash
+    $ ./build/examples/emulator/agent/emu_agent_gnb_cu
+    $ ./build/examples/emulator/agent/emu_agent_gnb_du
     ```
 
-  * Start E2 Node agents
+* Start different xApps
 
-    * gNB-mono
-      ```bash
-      $ ./build/examples/emulator/agent/emu_agent_gnb
-      ```
-    * if CU/DU split is used, start the gNB as follows
-      ```bash
-      $ ./build/examples/emulator/agent/emu_agent_gnb_cu
-      $ ./build/examples/emulator/agent/emu_agent_gnb_du
-      ```
+  * start the KPM monitor xApp - measurements stated in [3.1.1 E2SM-KPM](#311-e2sm-kpm) for each UE that matches S-NSSAI common criteria
+    ```bash
+    cd flexric
+    ./build/examples/xApp/c/monitor/xapp_kpm_moni
+    ```
+    Note: we assume that each UE has only 1 DRB; CU-UP does not store the slices, therefore "coarse filtering" is used
 
-  * Start different xApps
-
-    * start the KPM monitor xApp - measurements stated in [3.1.1 E2SM-KPM](#311-e2sm-kpm) for each UE that matches S-NSSAI common criteria
+  * start the RC monitor xApp - aperiodic subscription for "UE RRC State Change"
       ```bash
       cd flexric
-      ./build/examples/xApp/c/monitor/xapp_kpm_moni
+      ./build/examples/xApp/c/monitor/xapp_rc_moni
       ```
-      Note: we assume that each UE has only 1 DRB; CU-UP does not store the slices, therefore "coarse filtering" is used
 
-    * start the RC monitor xApp - aperiodic subscription for "UE RRC State Change"
-        ```bash
-        cd flexric
-        ./build/examples/xApp/c/monitor/xapp_rc_moni
-        ```
-
-    * start the RC control xApp - RAN control function "QoS flow mapping configuration" (e.g. creating a new DRB)
-        ```bash
-        cd flexric
-        ./build/examples/xApp/c/kpm_rc/xapp_kpm_rc
-        ```
-
-    * start the (MAC + RLC + PDCP + GTP) monitor xApp
+  * start the RC control xApp - RAN control function "QoS flow mapping configuration" (e.g. creating a new DRB)
       ```bash
       cd flexric
-      ./build/examples/xApp/c/monitor/xapp_gtp_mac_rlc_pdcp_moni
+      ./build/examples/xApp/c/kpm_rc/xapp_kpm_rc
       ```
-  The latency that you observe in your monitor xApp is the latency from the E2 Agent to the nearRT-RIC and xApp. 
-  Therefore, FlexRIC is well suited for use cases with ultra low-latency requirements.
+
+  * start the (MAC + RLC + PDCP + GTP) monitor xApp
+    ```bash
+    cd flexric
+    ./build/examples/xApp/c/monitor/xapp_gtp_mac_rlc_pdcp_moni
+    ```
+The latency that you observe in your monitor xApp is the latency from the E2
+Agent to the nearRT-RIC and xApp.  This shows that FlexRIC can be used for use
+cases with ultra low-latency requirements.
 
 ## 4.2 Test with OAI RAN
 
