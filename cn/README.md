@@ -7,7 +7,7 @@
       </a>
     </td>
     <td style="border-collapse: collapse; border: none; vertical-align: center;">
-      <b><font size = "5">OpenAirInterface 5G Core Network Summer Workshop 2023</font></b>
+      <b><font size = "5">OpenAirInterface 5G Core Network Workshop 2024</font></b>
     </td>
   </tr>
 </table>
@@ -138,7 +138,9 @@ cd /tmp/oai-spring-of-code/cn
 docker-compose up -f docker-compose.yml -d mysql
 ```
 
-2. Run wireshark with `root` privileges select `oaiworkshop` interface or you can capture packets using `tshark` command. 
+2. Run wireshark with `root` privileges select `oaiworkshop` interface.
+
+(Optional) You can also capture packets using `tshark` command. 
 
 ```bash
 sudo tshark -i oaiworkshop -f "sctp or port 80 or port 8080 or port 8805 or icmp or port 3306" -w /tmp/oaiworkshop.pcap
@@ -182,9 +184,17 @@ We can check all these requests from the PCAPs or logs.
 
 6. PFCP heartbeat exchange between SMF and UPF
 
-## 4. Deploying OAI-GNB RFSIM
+ - SMF and UPF exchange PFCP heartbeat messages
 
-In the RAN workshop you much have learned how to use oai-gnb. Here we are using oai-gnb rfsimulator in docker container. In case you want to run it without docker then you can do that. 
+We can check these requests from the PCAPs or logs. 
+
+## 4. Deploying OAI-GNB, RFSIM and UEs
+
+In the [RAN workshop](../ran/README.md) you have learned how to use oai-gnb. Here we are using oai-gnb rfsimulator in a docker container. 
+
+In case you want to use the bare-metal deployment without docker, please refer to the [RAN workshop](../ran/README.md).
+
+### 4.1 Deploy OAI-GNB
 
 Open three terminals and in one terminal type
 
@@ -206,15 +216,18 @@ docker-compose -f docker-compose-ran.yml up -d oai-gnb
 
 Wait for the gNB to be healthy and meanwhile you can check the logs of `oai-amf`.
 
+### 4.2 Deploy OAI-NR-UE
+
 Open a fourth terminal and start the UE.
 
 ```bash
 docker-compose -f docker-compose-ran.yml up -d oai-nr-ue
 ```
 
-Check the logs of `oai-amf` and `oai-smf`. You might have received an ip-address.
+Check the logs of `oai-amf` and `oai-smf`. If the PDU session establishment is successful, the UE receives an IP address. 
+This IP address (together with other PDU session information) is also logged to the console on SMF. 
 
-But the best way to see if the UE got connected:
+However, this the best way to see if the UE got connected:
 
 ```bash
 docker exec oai-nr-ue ifconfig
@@ -228,7 +241,11 @@ oaitun_ue1: flags=4305<UP,POINTOPOINT,RUNNING,NOARP,MULTICAST>  mtu 1500
         inet 10.0.0.2  netmask 255.255.255.0  destination 10.0.0.2
 ```
 
-==> `10.0.0.2` has been allocated to the UE tunnell.
+==> `10.0.0.2` has been allocated to the UE tunnel.
+
+## 5. Traffic test
+
+Now that we have an IP address and a successful PDU session, we perform traffic tests. 
 
 Get inside the UE and try to ping `8.8.8.8` or `10.0.0.1` or `192.168.70.135`
 
@@ -240,8 +257,6 @@ ping -I oaitun_ue1 8.8.8.8 -c4
 ping -I oaitun_ue1 10.0.0.1 -c4
 ## ping towards oai-traffic-generator
 ping -I oaitun_ue1 192.168.70.135 -c4
-## Iperf testing
-iperf3 -B <UE_IP_ADDRESS> -c 192.168.70.135 -u -R -b20M
 ```
 
 (optional) Connect the second UE and check `oai-amf` and `oai-smf` logs
@@ -271,15 +286,8 @@ ping -I oaitun_ue1 10.0.0.1 -c4
 ## ping towards oai-traffic-generator
 ping -I oaitun_ue1 192.168.70.135 -c4
 ```
-Once you are done with your experiment, please stop the two UEs and gNB in an order using below command, 
 
-```bash
-docker-compose -f docker-compose-ran.yml down -t 0 -v
-```
-
-Do not stop the core network. 
-
-## 5. Anaylse logs and PCAPs
+## 6. Analyse logs and PCAPs
 
 Normally you will see below messages twice because we connected the 2 UEs and pinged 4 times for each UE.
 
@@ -306,6 +314,36 @@ Below messages are from AMF pcap
 19. SHUTDOWN ACK
 20. SHUTDOWN_COMPLETE
 
+## 7. Advanced Traffic Tests
+Now that we have verified that the UE, gNB and CN behave as expected, we can do some advanced traffic tests.
+
+We are using iperf3 to measure the bandwidth between the UE and the traffic-generator in the Core Network.
+
+### 7.1 Install iperf3 in OAI NR UE
+iperf3 is not installed per default in the OAI NR UE, so we need to install it:
+
+```bash
+docker exec -it oai-nr-ue bash
+apt update
+apt install iperf3
+```
+
+Then we star the iperf3 server on oai-ex-dn (in the core network) to test UPLINK direction.
+```bash
+docker exec -it oai-ext-dn iperf3 -s
+```
+
+Then, we connect to the iperf3 server from the UE
+```bash
+docker exec -it oai-nr-ue iperf3 -B 10.0.0.2 -c 192.168.70.135 
+```
+
+If we also want to test DOWNLINK direction, we can instruct iperf3 to do so using `-R`:
+
+```bash
+docker exec -it oai-nr-ue iperf3 -B 10.0.0.2 -c 192.168.70.135 -R
+```
+
 ## 8. Remove all the docker containers
 
 Make sure you are always in `summerworkshop2023/cn` folder
@@ -318,4 +356,4 @@ docker-compose -f docker-compose.yml down -t2 -v
 ## 9. Extra
 
 1. If you want to see the resource consumption of `docker containers` you can use `docker stats`
-2. If you want to see the processes running inside a contianer you can do `docker top`
+2. If you want to see the processes running inside a container you can do `docker top`
