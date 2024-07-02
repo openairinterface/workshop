@@ -56,8 +56,7 @@ The aim of this tutorial is to explain:
 1. Create a folder where you can store all the result files of the tutorial and this repository
 
 ``` shell
-mkdir -p /tmp/oai-spring-of-code
-cd /tmp/oai-spring-of-code
+cd
 git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git .
 git checkout main
 git rebase origin/main
@@ -77,7 +76,7 @@ sudo chmox +x /usr/local/bin/docker-compose
 ```bash
 ##Recommended to login to your docker hub account
 docker login
-## Pull images v2.0.1 Core Network images
+## Pull images 2024-june Core Network images
 docker-compose pull
   Pulling mysql              ... done
   Pulling oai-nrf            ... done
@@ -89,8 +88,8 @@ docker-compose pull
   Pulling oai-upf            ... done
   Pulling oai-traffic-server ... done
 ## Your choice if you want to pull develop images for RAN then you can use develop
-docker pull oaisoftwarealliance/oai-nr-ue:2024.w12
-docker pull oaisoftwarealliance/oai-gnb:2024.w12
+docker pull oaisoftwarealliance/oai-nr-ue:2024.w26
+docker pull oaisoftwarealliance/oai-gnb:2024.w26
 ```
 
 4. (Optional) In case you do not have wireshark you can install 
@@ -127,14 +126,14 @@ Since `v2.0.0` release of the 5G Core Network, the deployment files have been si
 1. Create docker network interface so that we can capture initial packets to understand what happens when core network starts
 
 ```bash
-cd /tmp/oai-spring-of-code/cn
+cd ~/oai-workshops/cn
 docker network create --driver=bridge --subnet=192.168.70.128/26 -o "com.docker.network.bridge.name"="oaiworkshop" oaiworkshop
 ```
 
 or an easier way, just deploy the mysql database:
 
 ```bash
-cd /tmp/oai-spring-of-code/cn
+cd ~/oai-workshops/cn
 docker-compose up -f docker-compose.yml -d mysql
 ```
 
@@ -146,10 +145,10 @@ docker-compose up -f docker-compose.yml -d mysql
 sudo tshark -i oaiworkshop -f "sctp or port 80 or port 8080 or port 8805 or icmp or port 3306" -w /tmp/oaiworkshop.pcap
 ```
 
-3. Start the core network (make sure you are in `oai-spring-of-code/cn` folder)
+3. Start the core network (make sure you are in `~/oai-workshops/cn` folder)
 
 ```bash
-cd /tmp/oai-spring-of-code/cn
+cd ~/oai-workshops/cn
 docker-compose -f docker-compose.yml up -d
 ```
 
