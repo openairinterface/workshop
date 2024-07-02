@@ -74,7 +74,7 @@ Install the RAN dependencies and compile it, as this takes some time.
 cd
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
 cd openairinterface5g/cmake_targets
-git checkout develop                         # tested tag
+git checkout 2024.w26                        # tested tag
 ./build_oai --ninja -I                       # install dependencies
 ./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
 ```
@@ -87,9 +87,9 @@ Note: for USRP support, you have to give the switch `-w USRP`
 
 - `https://gitlab.eurecom.fr/oai/openairinterface5g`
 - Work happens in the `develop` branch
-- Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2024.w12`
-- `master` for a known stable version - release v2.0.0
-- latest release: `v2.1.0` (February 2024)
+- Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2024.w26`
+- `master` for a known stable version - release v2.0.1
+- latest release: `v2.1.0` (February 2024), check [Release Notes](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/CHANGELOG.md)
 
 ---
 
@@ -163,13 +163,13 @@ Start the core network:
 ```
 cd ~/oai-workshops/cn/
 docker-compose -f docker-compose.yml up -d
-watch -n 1 docker-compose ps -a
+watch -n 1 docker-compose -f docker-compose.yml ps -a
 ```
 
-Once all containers are healthy, run Wireshark and capture NGAP traffic.
+Once all containers are healthy, run Wireshark and capture NGAP traffic (set display filter to "ngap").
 
 ```
-sudo wireshark -i oaiworkshop -k
+wireshark -i any -k
 ```
 
 Then, start the gNB:
@@ -337,6 +337,8 @@ The scopes allow to see various channels.
   ```
 - Run the `nr-softmodem` and `nr-uesoftmodem` with `--dqt` switch
 
+- For more information about scopes and troubleshooting, refer to: [xForms-based Scope documentation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/PHY/TOOLS/readme.md)
+
 ![Screenshot of the nrqtscope](./resources/nrqtscope-screenshot.png)
 
 ---
@@ -450,8 +452,11 @@ telnet 127.0.0.1 9090
 
 ![Screenshot of the Wireshark with NG and F1](./resources/f1.png)
 
+---
+
 ## CU-DU F1 + E1 split
 
+- Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap or e1ap`
 - Start the gNB as follows
 ```
 sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
@@ -461,3 +466,7 @@ sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.
 - Start the UE as before
 - Compare the IP addresses in the config with what you have below to understand
   the interfaces
+
+---
+
+![Screenshot of the Wireshark with NG, F1 and E1](./resources/e1+f1.png)
