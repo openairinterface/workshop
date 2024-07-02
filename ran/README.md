@@ -26,6 +26,7 @@ The aim of this tutorial is to:
 5. Connect multiple UEs
 6. Build docker containers of the RAN
 7. Start with the DU-CU/F1 split
+8. Start with the DU-CU/F1+E1 split
 
 Note: this file can be converted to a presentation using
 
@@ -441,3 +442,15 @@ telnet 127.0.0.1 9090
 ---
 
 ![Screenshot of the Wireshark with NG and F1](./resources/f1.png)
+
+## CU-DU F1 + E1 split
+
+- Start the gNB as follows
+```
+sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
+sudo -E ./nr-cuup --sa -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
+sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
+```
+- Start the UE as before
+- Compare the IP addresses in the config with what you have below to understand
+  the interfaces
