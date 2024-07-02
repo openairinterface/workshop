@@ -1,6 +1,6 @@
 % RAN Hands-On
-% Robert Schmidt
-% March 29, 2024
+% Robert Schmidt, Jaroslava Fiedlerova
+% July 04, 2024
 
 <table style="border-collapse: collapse; border: none;">
   <tr style="border-collapse: collapse; border: none;">
@@ -74,7 +74,7 @@ Install the RAN dependencies and compile it, as this takes some time.
 cd
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
 cd openairinterface5g/cmake_targets
-git checkout 2024.w12                        # tested tag
+git checkout develop                         # tested tag
 ./build_oai --ninja -I                       # install dependencies
 ./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
 ```
@@ -100,12 +100,13 @@ Note: for USRP support, you have to give the switch `-w USRP`
 - Contributions go through
   - Peer review on Gitlab
   - Continuous Integration Build and Testing
+- Useful information on how to contribute to OAI --> [Contributing policies](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/code-style-contrib.md)
 
 ---
 
 ## Repository structure
 
-- `openair1`: Layer 1 (3GPP LTE Rel-10/12 PHY, NR Rel-15 PHY)
+- `openair1`: Layer 1 (3GPP LTE Rel-10/12 PHY, NR Rel-15+ PHY)
 - `openair2`: Layer 2 (3GPP LTE Rel-10 MAC/RLC/PDCP/RRC/X2AP, NR Rel-15+ MAC/RLC/PDCP/SDAP/RRC/X2AP/F1AP/E1AP), E2AP!
 - `openair3`: Layer 3 (3GPP LTE Rel-10 S1AP/GTP)
 - `charts`/`docker`/`openshift`: for building images
@@ -162,10 +163,16 @@ Start the core network:
 ```
 cd ~/oai-workshops/cn/
 docker-compose -f docker-compose.yml up -d
-docker-compose -f docker-compose.yml ps -a
+watch -n 1 docker-compose ps -a
 ```
 
-Once it is healthy, run Wireshark and capture NGAP traffic. Then, start the gNB:
+Once all containers are healthy, run Wireshark and capture NGAP traffic.
+
+```
+sudo wireshark -i oaiworkshop -k
+```
+
+Then, start the gNB:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
@@ -227,7 +234,7 @@ docker exec -it oai-ext-dn bash
 ping -I oaitun_ue1 192.168.70.135 # from host, "UL", to oai-ext-dn
 ping <UE IP address>              # from container, "DL"
 ```
-- Iperf:
+- Iperf3 testing:
 - on `oai-ext-dn` container run iperf3 server:
 ```
 iperf3 -s
@@ -235,16 +242,12 @@ iperf3 -s
 - on host run iperf3 client, bind UE IP address:
 ```
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R # DL
-iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 10M    # UL
+iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M    # UL
 ```
 
 ---
 
 ### A closer look at the config file
-
-- Note: if an option is not given, a default is used (which might or might not
-prevent the gNB from starting)
-- You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
 
 #### `gNBs` section
 - `plmn_list`: list of PLMNs, with MCC, MNC, and NSSAIs; needs to match CN config
@@ -279,6 +282,10 @@ Other parameters: see `openair2/GNB_APP/MACRLC_nr_paramdef.h`
   order: `6`, `12`, `18`)
 - `sdr_addrs`: arguments to be passed to search for SDR, e.g., IP address for
   N310
+
+- Note: if an option is not given, a default is used (which might or might not
+prevent the gNB from starting)
+- You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
 
 ---
 
@@ -425,7 +432,7 @@ telnet 127.0.0.1 9090
 
 ---
 
-## CU-DU split
+## CU-DU F1 split
 
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
 - Start the gNB as follows
