@@ -162,8 +162,8 @@ Note: for USRP support, you have to give the switch `-w USRP`
 Start the core network:
 ```
 cd ~/oai-workshops/cn/
-docker-compose -f docker-compose.yml up -d
-watch -n 1 docker-compose -f docker-compose.yml ps -a
+docker compose -f docker-compose.yml up -d
+watch -n 1 docker compose -f docker-compose.yml ps -a
 ```
 
 Once all containers are healthy, run Wireshark and capture NGAP traffic (set display filter to "ngap").

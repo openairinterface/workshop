@@ -34,7 +34,6 @@ The aim of this tutorial is to explain:
 |Software      |Version                                       |
 |:-------------|:---------------------------------------------|
 |docker engine |Minimum 19.03.6                               |
-|docker-compose|Minimum 1.27.4                                |
 |tshark        |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
 |wireshark     |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
 
@@ -63,7 +62,7 @@ git rebase origin/main
 cd cn
 ```
 
-2. Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/)
+2. Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/); if you installed `docker` using above steps, there is no need for `docker-compose`. You can then safely skip this step.
 
 ```bash
 curl -SL https://github.com/docker/compose/releases/download/v2.26.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
@@ -71,13 +70,13 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 sudo chmox +x /usr/local/bin/docker-compose
 ```
 
-3. (Optional): Pull all the container images which are required in this tutorial. In case you do not want to pull the images now `docker-compose` will pull the images for you. 
+3. Pull all the container images which are required in this tutorial. In case you do not want to pull the images now `docker-compose` will pull the images for you.
 
 ```bash
 ##Recommended to login to your docker hub account
 docker login
 ## Pull images 2024-june Core Network images
-docker-compose pull
+docker compose pull
   Pulling mysql              ... done
   Pulling oai-nrf            ... done
   Pulling oai-udr            ... done
@@ -113,7 +112,7 @@ sudo ip route add route CORE_NETWORK_DOCKER_SUBNET via IP_ADDRESS_OF_CORE_NETWOR
 
 Since `v2.0.0` release of the 5G Core Network, the deployment files have been simplified:
 
-1. The [docker-compose](./docker-compose.yml) file has containers/images related parameters:
+1. The [docker compose](./docker-compose.yml) file has containers/images related parameters:
   * Which version of the images to use
   * Name and IP addresses of the containers
 2. The [config.yaml](./conf/config.yaml) file has the real network configuration parameters such as:
@@ -134,7 +133,7 @@ or an easier way, just deploy the mysql database:
 
 ```bash
 cd ~/oai-workshops/cn
-docker-compose up -f docker-compose.yml -d mysql
+docker compose up -f docker-compose.yml -d mysql
 ```
 
 2. Run wireshark with `root` privileges select `oaiworkshop` interface.
@@ -149,15 +148,15 @@ sudo tshark -i oaiworkshop -f "sctp or port 80 or port 8080 or port 8805 or icmp
 
 ```bash
 cd ~/oai-workshops/cn
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 4. Wait for the core network to be healthy. You can check the core network state using
 
 ```bash
-watch docker-compose -f docker-compose.yml ps -a
+watch docker compose -f docker-compose.yml ps -a
 
-Every 2,0s: docker-compose -f docker-compose.yml ps -a
+Every 2,0s: docker compose -f docker-compose.yml ps -a
 
    Name                 Command                  State                       Ports
 ---------------------------------------------------------------------------------------------------
@@ -210,7 +209,7 @@ docker logs oai-smf -f
 Third terminal
 
 ```bash
-docker-compose -f docker-compose-ran.yml up -d oai-gnb
+docker compose -f docker-compose-ran.yml up -d oai-gnb
 ```
 
 Wait for the gNB to be healthy and meanwhile you can check the logs of `oai-amf`.
@@ -220,7 +219,7 @@ Wait for the gNB to be healthy and meanwhile you can check the logs of `oai-amf`
 Open a fourth terminal and start the UE.
 
 ```bash
-docker-compose -f docker-compose-ran.yml up -d oai-nr-ue
+docker compose -f docker-compose-ran.yml up -d oai-nr-ue
 ```
 
 Check the logs of `oai-amf` and `oai-smf`. If the PDU session establishment is successful, the UE receives an IP address. 
@@ -261,7 +260,7 @@ ping -I oaitun_ue1 192.168.70.135 -c4
 (optional) Connect the second UE and check `oai-amf` and `oai-smf` logs
 
 ```bash
-docker-compose -f docker-compose-ran.yml up -d oai-nr-ue2
+docker compose -f docker-compose-ran.yml up -d oai-nr-ue2
 ```
 
 ```
@@ -348,8 +347,8 @@ docker exec -it oai-nr-ue iperf3 -B 10.0.0.2 -c 192.168.70.135 -R
 Make sure you are always in `summerworkshop2023/cn` folder
 
 ```bash
-docker-compose -f docker-compose-ran.yml down -t2 -v
-docker-compose -f docker-compose.yml down -t2 -v
+docker compose -f docker-compose-ran.yml down -t2 -v
+docker compose -f docker-compose.yml down -t2 -v
 ```
 
 ## 9. Extra

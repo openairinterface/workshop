@@ -33,7 +33,6 @@ git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git
 |Software      |Version                                       |
 |:-------------|:---------------------------------------------|
 |docker engine |Minimum 19.03.6                               |
-|docker-compose|Minimum 1.27.4 (included in docker)           |
 |tshark        |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
 |wireshark     |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
 
