@@ -133,7 +133,7 @@ or an easier way, just deploy the mysql database:
 
 ```bash
 cd ~/oai-workshops/cn
-docker compose up -f docker-compose.yml -d mysql
+docker compose -f docker-compose.yml up -d mysql
 ```
 
 2. Run wireshark with `root` privileges select `oaiworkshop` interface.
