@@ -67,7 +67,7 @@ cd cn
 ```bash
 curl -SL https://github.com/docker/compose/releases/download/v2.26.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-sudo chmox +x /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 3. Pull all the container images which are required in this tutorial. In case you do not want to pull the images now `docker-compose` will pull the images for you.
