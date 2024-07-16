@@ -38,6 +38,9 @@ git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git
 
 In case you do not have docker and wireshark you can download, 
 
+:red-exclamation-mark: Make sure to select `yes` when the Wireshark installation asks you whether non-superusers should be able to capture packets.
+Otherwise, you will have to run in sudo mode.
+
 ```bash
 sudo add-apt-repository ppa:wireshark-dev/stable
 sudo apt update
@@ -48,15 +51,16 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
 sudo apt update
 sudo apt install -y docker docker-ce
-
-# Add your username to the docker group, otherwise you will have to run in sudo mode.
-sudo usermod -a -G docker $(whoami)
-
-# login / logout
-
 ```
 
-To follow the hands-on tutorial:
+Add your username to the docker group, otherwise you will have to run in sudo mode. 
+```bash
+sudo usermod -a -G docker $(whoami)
+```
+
+Now, logout and login again. 
+
+**To follow the hands-on tutorials:**
 
 1. [Core Network Hands-on Tutorial](./cn/README.md)
 2. [RAN Hands-on Tutorial](./ran/README.md)
