@@ -225,10 +225,11 @@ Some other things to check:
 
 
 - Check the UE's IP address: interface `oaitun_ue1` using `ip address`
+- The IP address `192.168.70.135` is the IP address of the `oai-ext-dn` container.
 - Ping:
 ```
 ping -I oaitun_ue1 192.168.70.135 # from host, "UL", to oai-ext-dn
-ping <UE IP address>              # from container, "DL"
+docker exec -it oai-ext-dn ping <UE IP address>              # from container, "DL"
 ```
 - Iperf3 testing between `oai-ext-dn` (in Docker) and the UE (running locally)
 ```
@@ -240,8 +241,6 @@ iperf3 -s
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R # DL
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M    # UL
 ```
-
-The IP address `192.168.70.135` is the IP address of the `oai-ext-dn` container.
 
 ---
 
