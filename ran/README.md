@@ -108,7 +108,7 @@ Note: for USRP support, you have to give the switch `-w USRP`
 
 - `openair1`: Layer 1 (3GPP LTE Rel-10/12 PHY, NR Rel-15+ PHY)
 - `openair2`: Layer 2 (3GPP LTE Rel-10 MAC/RLC/PDCP/RRC/X2AP, NR Rel-15+ MAC/RLC/PDCP/SDAP/RRC/X2AP/F1AP/E1AP), E2AP!
-- `openair3`: Layer 3 (3GPP LTE Rel-10 S1AP/GTP)
+- `openair3`: Layer 3 (3GPP LTE Rel-10 S1AP/GTP, NR Rel-15+ NGAP)
 - `charts`/`docker`/`openshift`: for building images
 - `ci-scripts`: everything related to continuous integration/testing, configuration files
 - `cmake_targets`: everything related to compilation, build artifacts in `ran_build/build`
@@ -223,23 +223,20 @@ Some other things to check:
 
 ### Inject traffic
 
-- One terminal in the host, the other in the docker container `oai-ext-dn`
-```
-docker exec -it oai-ext-dn bash
-```
 
 - Check the UE's IP address: interface `oaitun_ue1` using `ip address`
+- The IP address `192.168.70.135` is the IP address of the `oai-ext-dn` container.
 - Ping:
 ```
 ping -I oaitun_ue1 192.168.70.135 # from host, "UL", to oai-ext-dn
-ping <UE IP address>              # from container, "DL"
+docker exec -it oai-ext-dn ping <UE IP address>              # from container, "DL"
 ```
-- Iperf3 testing:
-- on `oai-ext-dn` container run iperf3 server:
+- Iperf3 testing between `oai-ext-dn` (in Docker) and the UE (running locally)
 ```
+docker exec -it oai-ext-dn bash
 iperf3 -s
 ```
-- on host run iperf3 client, bind UE IP address:
+- on the host in new terminal, run iperf3 client and bind the UE IP address:
 ```
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R # DL
 iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M    # UL

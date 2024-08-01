@@ -19,8 +19,7 @@ The aim of this tutorial is to explain:
 
 1. How to configure OAI5G Core network
 2. How it works end to end with a RF Simulated `oai-gnb` and `oai-nr-ue`
-3. (Optional): Connect two UEs to the gNB in two different slices
-4. (Optional): Configure a static ip-address for a UE in the UDR database
+3. How to perform traffic tests
 
 **Hardware Requirements**
 
@@ -37,10 +36,13 @@ The aim of this tutorial is to explain:
 |tshark        |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
 |wireshark     |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
 
+:red-exclamation-mark: Please make sure to [follow the steps in the training material](../README.md) 
+
 **NOTE**: 
 
-1. If you are using docker engine version > 21 then `compose` command is included in `docker`. If you do not have docker installed [then follow the official link](https://docs.docker.com/engine/install/).
-2. It is recommended to use a docker account when you are pulling images. On dockerhub there is a limit for `anonymous` pull request. Probably at the day of the workshop not everyone will be able to pull the images. So it is good if you pull images in advance.
+1. If you are using docker engine version > 21 then `compose` command is included in `docker`. If you do not have docker installed [follow the training material](../README.md).
+2. We are using `docker compose` without `-` in this tutorial, so if you installed `docker-compose` please adjust the commands accordingly.
+3. It is recommended to use a docker account when you are pulling images. On dockerhub there is a limit for `anonymous` pull request. Probably at the day of the workshop not everyone will be able to pull the images. So it is good if you pull images in advance.
 
 **Reading time**: ~ 20mins
 
@@ -57,12 +59,10 @@ The aim of this tutorial is to explain:
 ``` shell
 cd
 git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git .
-git checkout main
-git rebase origin/main
 cd cn
 ```
 
-2. Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/); if you installed `docker` using above steps, there is no need for `docker-compose`. You can then safely skip this step.
+2. (Optional) Make sure you have either `docker compose` command or standalone `docker-compose` command. In case you want to install `docker-compose` standalone command then follow the below steps or this [link](https://docs.docker.com/compose/install/standalone/); if you installed `docker` using above steps, there is no need for `docker-compose`. You can then safely skip this step.
 
 ```bash
 curl -SL https://github.com/docker/compose/releases/download/v2.26.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
@@ -86,20 +86,11 @@ docker compose pull
   Pulling oai-smf            ... done
   Pulling oai-upf            ... done
   Pulling oai-traffic-server ... done
-## Your choice if you want to pull develop images for RAN then you can use develop
 docker pull oaisoftwarealliance/oai-nr-ue:2024.w26
 docker pull oaisoftwarealliance/oai-gnb:2024.w26
 ```
 
-4. (Optional) In case you do not have wireshark you can install 
-
-```bash
-sudo add-apt-repository ppa:wireshark-dev/stable
-sudo apt update
-sudo apt install wireshark
-```
-
-5. (Optional) if you want to run the gNB and core in different machines then you need some forwarding rules. 
+4. (Optional) If you want to run the gNB and core in different machines then you need some forwarding rules. 
 
 ```bash
 sudo sysctl net.ipv4.conf.all.forwarding=1
@@ -137,6 +128,11 @@ docker compose -f docker-compose.yml up -d mysql
 ```
 
 2. Run wireshark with `root` privileges select `oaiworkshop` interface.
+
+Use the following capture filter:
+```
+sctp or port 80 or port 8080 or port 8805 or icmp or port 3306
+```
 
 (Optional) You can also capture packets using `tshark` command. 
 
