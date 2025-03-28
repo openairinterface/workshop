@@ -18,6 +18,7 @@ create_namespace() {
   ip netns exec $name ip link set dev lo up
   ip netns exec $name ip addr add 10.$BASE_IP.1.$ue_id/24 dev v-ue$ue_id
   ip netns exec $name ip link set v-ue$ue_id up
+  ip netns exec $name ip route add default via 10.$BASE_IP.1.100 dev v-ue$ue_id
 }
 
 delete_namespace() {
