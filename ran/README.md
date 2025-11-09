@@ -244,6 +244,45 @@ iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M    # UL
 
 ---
 
+### A closer look at the gNB periodic output
+The scheduler periodically outputs statistics that can help assess the radio channel quality and explain why a UE may not perform as expected.
+
+Example:
+```
+[NR_MAC]  Frame.Slot 128.0
+UE RNTI cb4d CU-UE-ID 1 in-sync PH 48 dB PCMAX 20 dBm, average RSRP -44 (16 meas)
+UE cb4d: dlsch_rounds 92/0/0/0, dlsch_errors 0, pucch0_DTX 0, BLER 0.00003 MCS (0) 0 CCE fail 3
+UE cb4d: ulsch_rounds 750/0/0/0, ulsch_errors 0, ulsch_DTX 0, BLER 0.00000 MCS (0) 0 (Qm 2 deltaMCS 0 dB) NPRB 5  SNR 51.0 dB CCE fail 0
+UE cb4d: MAC:    TX           2308 RX          19918 bytes
+UE cb4d: LCID 1: TX            528 RX            281 bytes
+UE cb4d: LCID 2: TX              0 RX              0 bytes
+UE cb4d: LCID 4: TX             30 RX           1557 bytes
+```
+
+In the first line,
+- `UE RNTI` (here `2460`): this is also used as the DU UE ID over F1; each line
+  is prepended with the RNTI
+- `CU UE ID` (`2`): separate identifier from the RNTI to handle multiple
+  UEs across DUs (in which case RNTI conflicts are possible)
+- `PH`: Power Headroom, the amount of power the UE has left. If it is > 40 you
+  can achieve full UL throughput. `PCMAX` (`24 dBm`) is what the UE reported as
+  maximum UL transmit power it can output in the channel.
+- `RSRP`: measured power of the DL reference signals at the UE. >-80dBm
+  you should have full DL throughput. <-95 dBm, you are very limited in terms
+  of connectivity.
+- `SINR`: measured signal to interference and noise ratio of the SSB
+  received at the UE. Maximum value that can be reported by the UE is 40.0 dB.
+The fourth and fifth line show HARQ-related information
+In the last lines:
+- `MAC` shows the amount of MAC PDU bytes scheduled in transmit (`TX`,
+  `1530943191`) and receive (`RX`, `194148`) directions
+- `LCID X` shows the amount of MAC SDU/RLC PDU data for Logical Channel ID with
+  ID `X` in transmit and receive directions. LCIDs 1 and 2 are mapped to SRBs 1
+  and 2. LCIDs 4 and onward are mapped to DRBs 1 onward. If you have an LCID 4,
+  it means you have a PDU session.
+
+Other parameters see in `doc/MAC/mac-usage.md`.
+
 ### A closer look at the config file
 
 #### `gNBs` section
