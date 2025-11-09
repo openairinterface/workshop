@@ -446,12 +446,12 @@ telnet 127.0.0.1 9090
   - Per-target (eNB, gNB, nrUE, lteUE, \dots) images
 - First, build the shared images:
   ```
-  docker build --target ran-base --tag ran-base:latest --file docker/Dockerfile.base.ubuntu20 .
-  docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.build.ubuntu20 .
+  docker build --target ran-base --tag ran-base:latest --file docker/Dockerfile.base.ubuntu .
+  docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.build.ubuntu .
   ```
 - Then, build the target images, e.g., gNB and nrUE (as used in the CN session):
   ```
-  docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu20 .
+  docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu .
   ```
 - see also `docker/README.md`
 
