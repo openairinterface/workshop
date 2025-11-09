@@ -1,6 +1,6 @@
 % RAN Hands-On
 % Robert Schmidt, Jaroslava Fiedlerova
-% July 04, 2024
+% November 18, 2025
 
 <table style="border-collapse: collapse; border: none;">
   <tr style="border-collapse: collapse; border: none;">
@@ -11,7 +11,7 @@
       </a>
     </td>
     <td style="border-collapse: collapse; border: none; vertical-align: center;">
-      <b><font size = "5">OpenAirInterface 5G Core Network Summer Workshop 2023</font></b>
+      <b><font size = "5">OpenAirInterface 5G RAN Workshop 2025</font></b>
     </td>
   </tr>
 </table>
@@ -21,12 +21,13 @@
 The aim of this tutorial is to:
 
 1. Understand the code repository organization
-2. Set-up of end-to-end 5G/NR SA setup with RFsimulator from source
-4. Use of the scope(s) + basic channel modelling
-5. Connect multiple UEs
-6. Build docker containers of the RAN
-7. Start with the DU-CU/F1 split
-8. Start with the DU-CU/F1+E1 split
+2. Set up an end-to-end 5G/NR SA setup with RFsimulator from source
+3. Use the scope(s) + basic channel modeling
+4. Connect multiple UEs
+5. Build Docker containers of the RAN
+6. Start with the DU-CU/F1 split
+7. Start with the DU-CU/F1+E1 split
+8. Start with the nFAPI+F1+E1 split
 
 Note: this file can be converted to a presentation using
 
@@ -38,14 +39,18 @@ pandoc -t slidy --template ran.slidy -s README.md -o README.html
 
 **Hardware Requirements**
 
-1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 16GB of storage.  To avoid any problems, we expressly recommend the use of a physical machine, i.e., NO virtual machine.
-2. Make sure your laptop/remote server cpu supports `avx2`. You can check via `lscpu | grep avx2`
-3. Operating System: Ubuntu 22.04.04. Other operating systems might work (e.g., RHEL, Fedora); others (Arch, ...) are not tested and have no support in `build_oai`
-4. Note: macOS and new M1/M2 laptops as well as the Windows Subsystem for Linux are not tested and most likely won't work
+1. Your laptop/remote server must have at least an 8-core CPU (or equivalent), and a minimum of 16 GB of RAM.
+2. Make sure your laptop/remote server CPU supports `avx2`.
+    - How to check for AVX2 support: Check /proc/cpuinfo for the AVX2 flag (`lscpu | grep avx2`)
+3. Disk space:
+    - If Ubuntu 24.04 is already installed, ensure at least 20 GB of free space.
+    - If not, prepare a free partition with at least 100 GB to install Ubuntu 24.04.
 
 **Software Prerequisites**
 
-none: we will install all the necessary software
+1. Operating system: Linux is required — no Windows or macOS (Intel/M1/M2/M3). We recommend Ubuntu 24.04. While other distributions may work, we cannot guarantee support for them.
+2. Docker: version 25.04 or higher must be pre-installed.
+Note: Other necessary software will be installed.
 
 **Reading time**: ~30mins
 
@@ -53,22 +58,30 @@ none: we will install all the necessary software
 
 ---
 
-
 **TABLE OF CONTENTS**
 
 [[_TOC_]]
 
+---
 
 # Preparation for RAN training session
 
-- We will have a general overview of the RAN repository
-- Please don't hesitate to ask questions!
+In this session we will:
+
+- setup an environment, install dependencies and start compilation
+- have a general overview of the RAN repository
+
+Please don't hesitate to ask questions!
 
 ---
 
-## Before: Installation of dependencies and compilation
+## Installation of dependencies and compilation
 
 Install the RAN dependencies and compile it, as this takes some time.
+
+The repositories should be cloned in your home directory.
+
+In this tutorial, we assume that the main repository is located at `~/openairinterface5g` and the workshop repository at `~/oai-workshops`.
 
 ```
 cd
@@ -145,7 +158,7 @@ Note: for USRP support, you have to give the switch `-w USRP`
 
 - Use of the `build_oai` script
   - Is a wrapper for `cmake`
-  - Some useful options: `-h`, `--eNB`, `--gNB`, `--UE`, `--nrUE`, `-c`, `--ninja`, `--sanitize-address`, `-g`, `-w`, `-P`/`--physical_simulators`, ...
+  - Some useful options: `-h`, `--eNB`, `--gNB`, `--UE`, `--nrUE`, `-c`, `--ninja`, `--sanitize-address`, `-g`, `-w`, `-P/--physical_simulators`, ...
 - By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
 - To rebuild more quickly, issue
   ```
@@ -166,10 +179,10 @@ docker compose -f docker-compose.yml up -d
 watch -n 1 docker compose -f docker-compose.yml ps -a
 ```
 
-Once all containers are healthy, run Wireshark and capture NGAP traffic (set display filter to "ngap").
+Once all containers are healthy, run Wireshark and capture NGAP traffic:
 
 ```
-wireshark -i any -k
+sudo wireshark -k -i any -Y "ngap"
 ```
 
 Then, start the gNB:
@@ -181,8 +194,6 @@ cd ~/openairinterface5g/cmake_targets/ran_build/build
 
 Check that you see the NGAP Setup Request and Response messages in Wireshark.
 
----
-
 Run the nrUE from a second terminal:
 
 ```
@@ -190,57 +201,75 @@ cd ~/openairinterface5g/cmake_targets/ran_build/build
 sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
 ```
 
+---
+
 Verify that it is connected: you should see the following output at gNB:
 
 ```
-[NR_RRC]   UE 1: Receive RRC Reconfiguration Complete message (xid 3)
-[NR_RRC]   msg index 0, pdu_sessions index 0, status 2, xid 3): nb_of_pdusessions 1,  pdusession_id 10, teid: 2466254620
- [NR_RRC]   NGAP_PDUSESSION_SETUP_RESP: sending the message
+[NR_RRC]  [UL] (cellID bc614e, UE ID 1 RNTI 6be9) Received RRCReconfigurationComplete
+[NR_RRC]  PDU Session Setup: ID=10, outgoing TEID=0xd2a789b8, Addr=192.168.70.129
+[NR_RRC]  NGAP_PDUSESSION_SETUP_RESP: sending the message
+[NR_MAC]  DU received confirmation of successful RRC Reconfiguration
 ```
 
 and nrUE:
 
 ```
-[NAS]   [UE 0] Received NAS_CONN_ESTABLI_CNF: errCode 1, length 99
-[LIBCONFIG] nas.noS1: 3/3 parameters successfully set, (3 to default value)
-[OIP]   Interface oaitun_ue1 successfully configured, ip address 10.0.0.2, mask 255.255.255.0 broadcast address 10.0.0.255
+[NR_RRC]  rrcReconfigurationComplete Encoded 10 bits (2 bytes)
+[NR_RRC]   Logical Channel UL-DCCH (SRB1), Generating RRCReconfigurationComplete (bytes 2)
+[NAS   ]  Received PDU Session Establishment Accept, UE IPv4: 10.0.0.3
+Unknown IEI 129
+[OIP   ]  Interface oaitun_ue1 successfully configured, IPv4 10.0.0.3, IPv6 (null)
 ```
 
 Correspondingly, an interface should have been brought up:
 ```
-113: oaitun_ue1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
+24: oaitun_ue1: <POINTOPOINT,NOARP,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none
-    inet 10.0.0.2/24 brd 10.0.0.255 scope global oaitun_ue1
+    inet 10.0.0.3/24 scope global oaitun_ue1
        valid_lft forever preferred_lft forever
-    inet6 fe80::b732:d985:ef8b:4f9f/64 scope link stable-privacy
+    inet6 fe80::d166:f94e:7413:3f79/64 scope link stable-privacy
        valid_lft forever preferred_lft forever
 ```
 
 Some other things to check:
+
 - You see the RA procedure of the UE in the gNB logs
 
 ---
 
 ### Inject traffic
+- Check the UE's IP address on interface `oaitun_ue1` using:
+  ```
+  ip address show oaitun_ue1
+  ```
+- The IP address `192.168.70.135` is the address of the `oai-ext-dn` container.
+- Ping test:
+  - From the UE ("UL") — ping from the UE (host) to the `oai-ext-dn` container:
+    ```
+    ping -I oaitun_ue1 192.168.70.135
+    ```
+  - From the `oai-ext-dn` ("DL") — ping from the `oai-ext-dn` container to the UE:
+    ```
+    docker exec -it oai-ext-dn ping <UE IP address>  # from container, "DL"
+    ```
 
-
-- Check the UE's IP address: interface `oaitun_ue1` using `ip address`
-- The IP address `192.168.70.135` is the IP address of the `oai-ext-dn` container.
-- Ping:
-```
-ping -I oaitun_ue1 192.168.70.135 # from host, "UL", to oai-ext-dn
-docker exec -it oai-ext-dn ping <UE IP address>              # from container, "DL"
-```
-- Iperf3 testing between `oai-ext-dn` (in Docker) and the UE (running locally)
-```
-docker exec -it oai-ext-dn bash
-iperf3 -s
-```
-- on the host in new terminal, run iperf3 client and bind the UE IP address:
-```
-iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R # DL
-iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M    # UL
-```
+- Iperf3 test:
+Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Docker) and the UE (running locally):
+  - start the iperf3 server inside the container:
+    ```
+    docker exec -it oai-ext-dn bash -c "iperf3 -s"
+    ```
+  - On the host, in a new terminal, run the iperf3 client and bind the UE IP address:
+    ```
+    iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 50M -R # DL
+    iperf3 -B <UE IP ADDRESS> -c 192.168.70.135 -u -b 20M    # UL
+    ```
+  - if your iperf3 version is > 3.10, you can use `--bind-dev` option instead of `-B`
+    ```
+    iperf3 --bind-dev oaitun_ue1 -c 192.168.70.135 -u -b 50M -R # DL
+    iperf3 --bind-dev oaitun_ue1 -c 192.168.70.135 -u -b 20M    # UL
+    ```
 
 ---
 
@@ -260,9 +289,10 @@ UE cb4d: LCID 4: TX             30 RX           1557 bytes
 ```
 
 In the first line,
-- `UE RNTI` (here `2460`): this is also used as the DU UE ID over F1; each line
+
+- `UE RNTI`: this is also used as the DU UE ID over F1; each line
   is prepended with the RNTI
-- `CU UE ID` (`2`): separate identifier from the RNTI to handle multiple
+- `CU UE ID`: separate identifier from the RNTI to handle multiple
   UEs across DUs (in which case RNTI conflicts are possible)
 - `PH`: Power Headroom, the amount of power the UE has left. If it is > 40 you
   can achieve full UL throughput. `PCMAX` (`24 dBm`) is what the UE reported as
@@ -272,8 +302,11 @@ In the first line,
   of connectivity.
 - `SINR`: measured signal to interference and noise ratio of the SSB
   received at the UE. Maximum value that can be reported by the UE is 40.0 dB.
-The fourth and fifth line show HARQ-related information
-In the last lines:
+
+The fourth and fifth lines show HARQ-related information.
+
+In the last lines,
+
 - `MAC` shows the amount of MAC PDU bytes scheduled in transmit (`TX`,
   `1530943191`) and receive (`RX`, `194148`) directions
 - `LCID X` shows the amount of MAC SDU/RLC PDU data for Logical Channel ID with
@@ -281,15 +314,17 @@ In the last lines:
   and 2. LCIDs 4 and onward are mapped to DRBs 1 onward. If you have an LCID 4,
   it means you have a PDU session.
 
-Other parameters see in `doc/MAC/mac-usage.md`.
+For other parameters, see [`doc/MAC/mac-usage.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/MAC/mac-usage.md) in the main repository.
+
+---
 
 ### A closer look at the config file
 
 #### `gNBs` section
-- `plmn_list`: list of PLMNs, with MCC, MNC, and NSSAIs; needs to match CN config
-- `tracking_area_code`: Tracking Area Code; needs to match CN
+- `plmn_list`: list of PLMNs, with MCC, MNC, and NSSAIs; needs to match the CN config
+- `tracking_area_code`: Tracking Area Code; needs to match the CN config
 - `amf_ip_address.[0].ipv4`: IP address of AMF
-- `NETWORK_INTERFACES.GNB_IPV4_ADDRESS_FOR_NG_AMF` and `NETWORK_INTERFACES.GNB_IPV4_ADDRESS_FOR_NGU`: IP address on which is the gNB
+- `NETWORK_INTERFACES.GNB_IPV4_ADDRESS_FOR_NG_AMF` and `NETWORK_INTERFACES.GNB_IPV4_ADDRESS_FOR_NGU`: IP address on which the gNB is running
 - `min_rxtxtime`: minimum feedback time (e.g., PDSCH to PUCCH), is 5 for OAI UE
   and 2 for commercial UE
 - `absoluteFrequencySSB` and `dl_absoluteFrequencyPointA`: frequencies for synchronization signal block and "PointA", in ARFCN; [use a calculator instead of getting mad](http://sqimway.com/nr_refA.php)
@@ -299,28 +334,28 @@ Other parameters see in `doc/MAC/mac-usage.md`.
 #### `MACRLCs` section
 
 - `ulsch_max_frame_inactivity`: maximum number of frames until UE is scheduled
-  automatically even without requesting it. Often at `0` or `1` for lower
+  automatically even without requesting it. Often set to `0` or `1` for lower
   latency, but this is "artificial"
 - `pusch_TargetSNRx10`, `pucch_TargetSNRx10`: target SNRs multiplied by ten for
   these channels; increasing can sometimes stabilize a system
 - `dl_harq_round_max`, `ul_harq_round_max`: maximum number of MAC HARQ rounds
 - `dl_max_mcs`, `ul_max_mcs`: maximum MCS to be scheduled
 
-Other parameters: see `openair2/GNB_APP/MACRLC_nr_paramdef.h`
+Other parameters: see [`openair2/GNB_APP/MACRLC_nr_paramdef.h`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair2/GNB_APP/MACRLC_nr_paramdef.h) in the main repository
 
 #### `RUs` section
 
-- `nb_tx`, `nb_rx`: number transmit/receive antennas to use
-- `max_rxgain`: maximum receive gain to be used, IIRC only used for USRP
+- `nb_tx`, `nb_rx`: number of transmit/receive antennas to use
+- `max_rxgain`: maximum receive gain to be used (IIRC only used for USRP)
 - `att_tx`, `att_rx`: attenuation for transmit/receive signals to be applied at
-  gNB. In many lab scenarios, the receiver of a UE is saturated if the gNB
-  sends with full power, hence you need a value greater than `0` (try, in
+  the gNB. In many lab scenarios, the receiver of a UE is saturated if the gNB
+  sends with full power; hence you need a value greater than `0` (try, in
   order: `6`, `12`, `18`)
 - `sdr_addrs`: arguments to be passed to search for SDR, e.g., IP address for
   N310
 
-- Note: if an option is not given, a default is used (which might or might not
-prevent the gNB from starting)
+#### Notes:
+- If an option is not given, a default is used (which might or might not prevent the gNB from starting)
 - You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
 
 ---
@@ -343,12 +378,12 @@ The scopes allow you to see various channels.
   cmake -DENABLE_NRSCOPE=ON ../../../ && ninja nrscope # alternative
   ```
 - Run `nr-softmodem` and `nr-uesoftmodem` with `-d` switch
-- The error
+- The error:
   ```
   In fl_initialize() [flresource.c:995]: 5G-gNB-scope: Cant open display :0
   In fl_bgn_form() [forms.c:347]: Missing or failed call of fl_initialize()
   ```
-  This can be solved by granting root the right to open the X display:
+  can be solved by granting root the right to open the X display:
   ```
   xhost +si:localuser:root
   ```
@@ -387,12 +422,12 @@ The scopes allow you to see various channels.
 ### Enabling channels
 
 - We will simply add Gaussian noise
-- Uncomment the last line in both the gNB and UE config file:
+- Uncomment the last line in both the gNB and UE config files:
   ```
   @include "channelmod_rfsimu.conf"
   ```
-- Add the options `--rfsimulator.options chanmod --rfsimulator.modelname AWGN` to the gNB and UE command lines and start
-- More info: `openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`, channel models defined in `openair1/SIMULATION/TOOLS/random_channel.c`
+- Add the options `--rfsimulator.options chanmod --rfsimulator.modelname AWGN` to the gNB and UE command lines and start them
+- More info: See [`openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/SIMULATION/TOOLS/DOC/channel_simulation.md) in the main repository, channel models defined in [`openair1/SIMULATION/TOOLS/random_channel.c`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/SIMULATION/TOOLS/random_channel.c)
 
 - Run gNB:
   ```
@@ -415,32 +450,40 @@ The scopes allow you to see various channels.
   cmake ../../..  -DENABLE_TELNETSRV=ON && ninja telnetsrv
   ```
 - Start the `nr-softmodem`/`nr-uesoftmodem` with parameter `--telnetsrv`
-- Note: configure UE telnet port to be different from gNB: `--telnetsrv.listenport 9091`
-- New terminal: connect to gNB/UE: `telnet 127.0.0.1 9090`
+- Note: Configure the UE telnet port to be different from the gNB: `--telnetsrv.listenport 9091`
+- In a new terminal: connect to gNB/UE: `telnet 127.0.0.1 9090`
   - Use `help` to show available commands
   - Use `channelmod show current` to show current channel model configuration
   - Use `channelmod help` to show available parameters to change
-  - Example: change noise using `channelmod modify 1 noise_power_dB -5`, observe in scope!
-- More information: `openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`
+  - Example: change noise using `channelmod modify 1 noise_power_dB -5`
+- More information: See [`openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/SIMULATION/TOOLS/DOC/channel_simulation.md) in the main repository
 
 Example commands:
+
 - gNB
-```
-./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv
-```
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv
+  ```
 - UE
-```
-sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
-```
-- telnet
-```
-telnet 127.0.0.1 9090
-```
+  ```
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
+  ```
+- Connect to the local telnet interface to view or modify channel parameters:
+  ```
+  telnet 127.0.0.1 9090
+  ```
+Once connected, you can display the current channel configuration and adjust parameters as needed:
+  ```
+  channelmod show current
+  channelmod modify 1 noise_power_dB -5
+  ```
+Observe the change of noise_power_dB in the scope to verify the effect of the modification.
+
 ---
 
 ## Multiple UEs
 
-- All the UEs try to open the same interface, which does not work
+- All UEs try to open the same interface, which does not work
 - Create network namespace for each UE to prevent interface name clash
 - Follow instructions from [this link](https://open-cells.com/index.php/2021/02/08/rf-simulator-1-enb-2-ues-all-in-one/) or use the script [multi-ue.sh](./multi-ue.sh)
 - Start first UE as
@@ -449,13 +492,21 @@ telnet 127.0.0.1 9090
   ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.serveraddr 10.201.1.100
   ```
 - Check in Wireshark/UE output that everything is ok
-- Second UE *with different IMSI*
+- Second UE *with a different IMSI*:
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -c2 -e
   ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100
   ```
-- Exercise: Check in Wireshark that both are set up
-- Exercise: Create traffic from/to both UEs
+
+### Exercise
+- Check in Wireshark that both are set up
+- Create traffic from/to both UEs
+- Hints:
+  ```
+  sudo ip netns exec ue1 bash
+  sudo ip netns exec ue2 bash
+  ```
+### Cleanup
 - At the end, remove network namespaces:
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -d1 -d2
@@ -465,7 +516,7 @@ telnet 127.0.0.1 9090
 
 ## How to create a docker image
 
-- Creating a docker image is a 3-step process (due to CI specificities):
+- Creating a Docker image is a 3-step process (due to CI specificities):
   - `ran-base` for dependencies (shared image)
   - `ran-build` for compiling all targets (shared image)
   - Per-target (eNB, gNB, nrUE, lteUE, \dots) images
@@ -478,14 +529,14 @@ telnet 127.0.0.1 9090
   ```
   docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu .
   ```
-- see also `docker/README.md`
+- See also [`docker/README.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/docker/README.md) in the main repository for detailed Docker build instructions
 
 ---
 
 ## CU-DU F1 split
 
-- Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
-- Start the gNB as follows
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
+- Start the gNB as follows:
   ```
   ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
   ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsim
@@ -508,7 +559,7 @@ telnet 127.0.0.1 9090
 
 ## CU-DU F1 + E1 split
 
-- Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap or e1ap`
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
 - Start the gNB as follows
   ```
   ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --rfsim
@@ -532,7 +583,7 @@ telnet 127.0.0.1 9090
 
 ![Architecture of gNB and config](./resources/multi-split-arch.png)
 
-- Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap or e1ap`
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
 - Start the gNB as follows:
   - Start CU-CP
   ```
