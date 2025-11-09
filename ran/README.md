@@ -456,7 +456,7 @@ The scopes allow you to see various channels.
 
 ---
 
-![Screenshot of the nrscope](./resources/scope-screenshot.png)
+![Screenshot of the nrscope](./resources/xform-scope-screenshot.png)
 
 ---
 
@@ -471,7 +471,7 @@ The scopes allow you to see various channels.
   cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib imscope --ninja
   cd ran_build/build/
-  cmake -DENABLE_IMSCOPE=ON .. && ninja imscope # alternative
+  cmake -DENABLE_IMSCOPE=ON ../../.. && ninja imscope # alternative
   ```
 - Run the `nr-softmodem` and `nr-uesoftmodem` with `--imscope` switch
 
