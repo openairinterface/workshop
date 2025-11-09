@@ -445,3 +445,37 @@ sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.
 ---
 
 ![Screenshot of the Wireshark with NG, F1 and E1](./resources/e1+f1.png)
+
+---
+
+## nFAPI + F1 + E1 split
+
+![Architecture of gNB and config](./resources/multi-split-arch.png)
+
+- Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap or e1ap`
+- Start the gNB as follows:
+  - Start CU-CP
+```
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
+```
+  - Start CU-UP
+```
+./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
+```
+  - Start DU-High
+```
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-vnf.sa.band66.u0.25prb.nfapi.conf --nfapi VNF
+```
+  - Start DU-Low
+```
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-pnf.band66.rfsim.conf --nfapi PNF --rfsim
+```
+  - Start UE
+```
+sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 --rfsim -O ~/workshop/oai-workshops/ran/conf/ue.conf
+```
+---
+
+![Screenshot of the Wireshark with NG, F1 and E1](./resources/e1+f1+nfapi.png)
+
+---
