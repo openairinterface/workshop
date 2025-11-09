@@ -112,11 +112,18 @@ cmake .. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig c
 
 ## The RAN repository
 
-- `https://gitlab.eurecom.fr/oai/openairinterface5g`
-- Work happens in the `develop` branch
-- Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2024.w26`
-- `master` for a known stable version - release v2.0.1
-- latest release: `v2.1.0` (February 2024), check [Release Notes](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/CHANGELOG.md)
+- **Repository URL**: `https://gitlab.eurecom.fr/oai/openairinterface5g`
+- **Main branch**: Work happens in the `develop` branch
+- **Release tags**: Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2025.w43`
+- **Stable branch**: `master` branch for a known stable version — release v2.0.1
+- **Latest release**: `v2.3.0` (July 2025), check [Release Notes](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/CHANGELOG.md)
+- **Main README**: See [README.md](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/README.md) in the repository root for general overview
+- **Documentation**: Comprehensive documentation is available in the [`doc/`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/tree/develop/doc) directory:
+  - [Building OAI](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/BUILD.md) - Detailed build instructions
+  - [Running the modems](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/RUNMODEM.md) - How to run gNB and UE
+  - [System Requirements](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/system_requirements.md) - Hardware and software requirements
+  - [Feature Set](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/FEATURE_SET.md) - Implemented 3GPP features
+  - [MAC Usage](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/MAC/mac-usage.md) - MAC layer configuration and statistics
 
 ---
 
@@ -133,30 +140,49 @@ cmake .. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig c
 
 ## Repository structure
 
-- `openair1`: Layer 1 (3GPP LTE Rel-10/12 PHY, NR Rel-15+ PHY)
-- `openair2`: Layer 2 (3GPP LTE Rel-10 MAC/RLC/PDCP/RRC/X2AP, NR Rel-15+ MAC/RLC/PDCP/SDAP/RRC/X2AP/F1AP/E1AP), E2AP!
-- `openair3`: Layer 3 (3GPP LTE Rel-10 S1AP/GTP, NR Rel-15+ NGAP)
-- `charts`/`docker`/`openshift`: for building images
-- `ci-scripts`: everything related to continuous integration/testing, configuration files
-- `cmake_targets`: everything related to compilation, build artifacts in `ran_build/build`
-- `common`: common code, generic libraries (Tpool, logging, configuration modules, \dots)
-- `doc`: some documentation
-- `executables`: LTE and NR executables
-- `nfapi`: (n)FAPI split
-- `radio`: radios and SDRs
-- `targets`: configuration files (`PROJECTS`)
+The OpenAirInterface 5G repository is organized into several main directories:
 
-- Deep dive:
-  - Where is NR PDSCH modulation? Called in `nr_generate_pdsch()`
-  - Where is the NR PDSCH/DLSCH scheduler? See `gNB_dlsch_ulsch_scheduler()`
-  - Where is the NR RRC Reconfiguration message sent? See `rrc_gNB_generate_dedicatedRRCReconfiguration()`
-  - Where is the PDSCH simulation? See `dlschsim.c`
-  - Where is the E2 agent? -> next training
+- `openair1/`: Layer 1 (3GPP LTE Rel-10/12 PHY, NR Rel-15+ PHY)
+- `openair2/`: Layer 2 (3GPP LTE Rel-10 MAC/RLC/PDCP/RRC/X2AP, NR Rel-15+ MAC/RLC/PDCP/SDAP/RRC/X2AP/F1AP/E1AP), E2AP!
+- `openair3/`: Layer 3 (3GPP LTE Rel-10 S1AP/GTP, NR Rel-15+ NGAP)
+  - Core network interfaces (NGAP, S1AP) and GTP-U
+- `common/`: Common code, generic libraries (Tpool, logging, configuration modules, \dots)
+- `executables/`: LTE and NR executables
+  - Main entry points for gNB, eNB, UE applications
+- `radio/`: Radios and SDRs
+  - Support for various SDR platforms (USRP, BladeRF, RFsimulator, FHI72, etc.)
+- `nfapi/`: (n)FAPI split
+- `cmake_targets/`: Everything related to compilation
+  - Build scripts (`build_oai`), build artifacts in `ran_build/build`
+- `doc/`: Documentation
+  - Comprehensive documentation including tutorials, API docs, and design documents
+- `ci-scripts/`: Everything related to CI testing
+  - Test scripts, CI configurations, example config files
+- `docker/`: Docker build files
+  - Dockerfiles for building containerized OAI components
+- `charts/`: Helm charts for Kubernetes/OpenShift deployment
+- `openshift/`: OpenShift deployment configurations
+- `targets/`: Configuration files (`PROJECTS`)
+  - Example configuration files for different deployment scenarios
+
+---
+
+Deep dive:
+
+- **Where is NR PDSCH modulation?** Called in `nr_generate_pdsch()`
+- **Where is the NR PDSCH/DLSCH scheduler?** See `gNB_dlsch_ulsch_scheduler()`
+- **Where is the NR RRC Reconfiguration message sent?** See `rrc_gNB_generate_dedicatedRRCReconfiguration()`
+- **Where is the PDSCH simulation?** See `dlschsim.c`
+- **Where is the E2 agent?** See next training session
+
+For more details on the software architecture, see [`doc/SW_archi.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/SW_archi.md) in the main repository.
+
+---
 
 # Hands-On
 
-- Setup of a working system using simulated SDR
-- Basic understanding, so we can go through E2 agent later
+- Set up a working system using simulated SDR
+- Basic understanding, so we can go through the E2 agent later
 
 ## About the RFsimulator
 
