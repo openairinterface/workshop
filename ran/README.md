@@ -186,11 +186,37 @@ For more details on the software architecture, see [`doc/SW_archi.md`](https://g
 
 ## About the RFsimulator
 
-- Why don't we use real radio?
-- The RFsimulator *simulates* a radio device -- it is a virtual SDR device
-- Easier to set up, yet interchangeable with any other radio
-- Large number of participants, no interference
-- Allows the use of channel models
+The **RFsimulator** is an OAI device that replaces physical radio hardware (e.g., USRP boards). It allows testing OAI without an RF board by forwarding time-domain I/Q samples between gNB and UE over a network interface instead of over the air. This eliminates unpredictable over-the-air perturbations and makes it ideal for checking signal processing algorithms and protocol implementations.
+
+### Key Features
+
+- **Virtual SDR device**: Behaves like a "real" RF board from the perspective of the xNB/UE, but forwards samples between both ends instead of sending them over the air
+- **Channel modeling support**: Can simulate simple channels such as AWGN and other channel models
+- **Non-real-time operation**: Can run faster or slower than real-time depending on CPU availability, allowing the system to be stopped for inspection (e.g., using a debugger)
+- **Easy setup**: No specific hardware required, making it perfect for development and testing
+
+---
+
+### Use Cases
+
+- Development and debugging: Test signal processing and protocol implementations without hardware
+- Workshops and training: Easy setup for multiple participants without interference
+- Channel modeling: Test algorithms under controlled channel conditions
+- Multi-UE testing: Support for connecting multiple UEs to a single gNB
+- NTN simulation: Can simulate satellite propagation delays (e.g., GEO: 238.74 ms one-way)
+
+### Limitations
+
+- Power control: `txgain`/`rxgain` settings are not supported
+- CPU-bound: Performance depends on available CPU resources
+
+### Documentation
+
+For detailed information about the RFsimulator, see:
+
+- [RFsimulator README](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/radio/rfsimulator/README.md) - Complete RFsimulator documentation
+- [Channel Simulation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/SIMULATION/TOOLS/DOC/channel_simulation.md) - Channel modeling details
+- [Running the modems](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/RUNMODEM.md) - General usage information
 
 ---
 
