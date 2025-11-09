@@ -84,15 +84,29 @@ The repositories should be cloned in your home directory.
 In this tutorial, we assume that the main repository is located at `~/openairinterface5g` and the workshop repository at `~/oai-workshops`.
 
 ```
-cd
+cd ~
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-cd openairinterface5g/cmake_targets
-git checkout 2024.w26                        # tested tag
+cd openairinterface5g
+git checkout 2025.w44                        # tested tag
+cd cmake_targets
 ./build_oai --ninja -I                       # install dependencies
-./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
 ```
 
-Note: for USRP support, you have to give the switch `-w USRP`
+Compile RAN executables for gNB and nrUE:
+```
+./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
+```
+Note: For USRP support, you need to use the switch `-w USRP`.
+
+### Alternative:
+
+`build_oai` is a wrapper on top of `cmake`. It is therefore possible to run `cmake` directly:
+
+```
+cd openairinterface5g
+mkdir -p cmake_targets/ran_build/build && cd cmake_targets/ran_build/build
+cmake .. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig coding rfsimulator ldpc
+```
 
 ---
 
