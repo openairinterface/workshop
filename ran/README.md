@@ -176,7 +176,7 @@ Then, start the gNB:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim
 ```
 
 Check that you see the NGAP Setup Request and Response messages in Wireshark.
@@ -187,7 +187,7 @@ Run the nrUE from a second terminal:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O ~/oai-workshops/ran/conf/ue.conf
+sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
 ```
 
 Verify that it is connected: you should see the following output at gNB:
@@ -369,6 +369,15 @@ The scopes allow to see various channels.
 - Add the options `--rfsimulator.options chanmod --rfsimulator.modelname AWGN` to the gNB and UE command lines and start
 - More info: `openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`, channel models defined in `openair1/SIMULATION/TOOLS/random_channel.c`
 
+- Run gNB:
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN
+  ```
+- Run UE:
+  ```
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN
+  ```
+
 ---
 
 ### Dynamically modifying Channel Model Parameters using Telnet
@@ -392,11 +401,11 @@ The scopes allow to see various channels.
 Example commands:
 - gNB
 ```
-sudo -E ./nr-softmodem --rfsim --sa -O ~/MR/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf -d --rfsimulator.serveraddr server --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv
 ```
 - UE
 ```
-sudo -E ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O ~/MR/oai-workshops/ran/conf/ue.conf --rfsimulator.serveraddr 127.0.0.1 -d --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
+sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
 ```
 - telnet
 ```
@@ -412,13 +421,13 @@ telnet 127.0.0.1 9090
 - Start first UE as
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -c1 -e
-  sudo -E LD_LIBRARY_PATH=. ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/oai-workshops/ran/conf/ue.conf --rfsimulator.serveraddr 10.201.1.100
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.serveraddr 10.201.1.100
   ```
 - Check in Wireshark/UE output that everything is ok
 - Second UE *with different IMSI*
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -c2 -e
-  sudo -E LD_LIBRARY_PATH=. ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O /home/richie/oai-workshops/ran/conf/ue.conf --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100
   ```
 - Exercise: Check in Wireshark that both are set up
 - Exercise: Create traffic from/to both UEs
@@ -453,10 +462,14 @@ telnet 127.0.0.1 9090
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap`
 - Start the gNB as follows
   ```
-  sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
-  sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsim
   ```
-- Start the UE as before
+- Start the UE as before:
+  ```
+  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  ```
+
 - Compare the IP addresses in the config with what you have below to understand
   the interfaces
 
@@ -472,12 +485,15 @@ telnet 127.0.0.1 9090
 
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap or e1ap`
 - Start the gNB as follows
-```
-sudo -E ./nr-softmodem --rfsim --sa -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
-sudo -E ./nr-cuup --sa -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
-sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
-```
-- Start the UE as before
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --rfsim
+  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
+  ```
+- Start the UE as before:
+  ```
+  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --band 78 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  ```
 - Compare the IP addresses in the config with what you have below to understand
   the interfaces
 
@@ -494,25 +510,25 @@ sudo -E ./nr-softmodem --sa -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.
 - Start Wireshark with capture filter `sctp` and dispay filter `ngap or f1ap or e1ap`
 - Start the gNB as follows:
   - Start CU-CP
-```
-./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
-```
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
+  ```
   - Start CU-UP
-```
-./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
-```
+  ```
+  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
+  ```
   - Start DU-High
-```
-./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-vnf.sa.band66.u0.25prb.nfapi.conf --nfapi VNF
-```
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-vnf.sa.band66.u0.25prb.nfapi.conf --nfapi VNF
+  ```
   - Start DU-Low
-```
-./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-pnf.band66.rfsim.conf --nfapi PNF --rfsim
-```
-  - Start UE
-```
-sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 --rfsim -O ~/workshop/oai-workshops/ran/conf/ue.conf
-```
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-pnf.band66.rfsim.conf --nfapi PNF --rfsim
+  ```
+- Start UE
+  ```
+  sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  ```
 ---
 
 ![Screenshot of the Wireshark with NG, F1 and E1](./resources/e1+f1+nfapi.png)
