@@ -327,7 +327,7 @@ prevent the gNB from starting)
 
 ## Scopes
 
-The scopes allow to see various channels.
+The scopes allow you to see various channels.
 
 ### Xforms
 
@@ -348,12 +348,37 @@ The scopes allow to see various channels.
   In fl_initialize() [flresource.c:995]: 5G-gNB-scope: Cant open display :0
   In fl_bgn_form() [forms.c:347]: Missing or failed call of fl_initialize()
   ```
-  can be solved by granting root the right to open the X display
+  This can be solved by granting root the right to open the X display:
   ```
   xhost +si:localuser:root
   ```
 
+---
+
 ![Screenshot of the nrscope](./resources/scope-screenshot.png)
+
+---
+
+### ImScope
+
+- Install dependencies:
+  ```
+  sudo apt-get install libglfw3-dev libopengl-dev
+  ```
+- Build scope
+  ```
+  cd ~/openairinterface5g/cmake_targets/
+  ./build_oai --build-lib imscope --ninja
+  cd ran_build/build/
+  cmake -DENABLE_IMSCOPE=ON .. && ninja imscope # alternative
+  ```
+- Run the `nr-softmodem` and `nr-uesoftmodem` with `--imscope` switch
+
+- For more information about scopes and troubleshooting, refer to: [ImScope documentation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/PHY/TOOLS/readme.md)
+
+---
+
+![Screenshot of the imscope](./resources/imscope-screenshot.png)
 
 ---
 
