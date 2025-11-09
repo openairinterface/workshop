@@ -318,28 +318,6 @@ The scopes allow to see various channels.
 
 ---
 
-
-### QtScope
-
-- Install dependencies (note: you need Qt5, not Qt6!)
-  ```
-  sudo apt-get install libqt5charts5-dev
-  ```
-- Build scope
-  ```
-  cd ~/openairinterface5g/cmake_targets/
-  ./build_oai --build-lib nrqtscope --ninja
-  cd ran_build/build/
-  cmake -DENABLE_NRQTSCOPE=ON ../../../ && ninja nrqtscope # alternative
-  ```
-- Run the `nr-softmodem` and `nr-uesoftmodem` with `--dqt` switch
-
-- For more information about scopes and troubleshooting, refer to: [xForms-based Scope documentation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/PHY/TOOLS/readme.md)
-
-![Screenshot of the nrqtscope](./resources/nrqtscope-screenshot.png)
-
----
-
 ## Channel Models
 
 ### Enabling channels
