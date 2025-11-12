@@ -672,3 +672,44 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
 
 ![Architecture of gNB and config](resources/e1+f1+nfapi.png)
 
+---
+
+## F1 Handover (intra-gNB)
+
+![F1 handover setup architecture and config](resources/ho-setup.png)
+
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
+```
+sudo wireshark -k -i any -Y "ngap or f1ap"
+```
+Exercise: Compare configuration files for DUs: `gnb-du.sa.band78.106prb.rfsim.pci0.conf` and `gnb-du.sa.band78.106prb.rfsim.pci1.conf`? Check DU ID, Cell ID, Physical Cell ID
+
+- Start CU:
+```
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf --telnetsrv --telnetsrv.shrmod ci
+```
+- Start DU0:
+```
+sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf --rfsimulator.serveraddr ::1
+```
+Note: You might see following error after the DU1 start,
+```
+[HW    ]  Trying to connect to ::1:4043
+[HW    ]  connect() to ::1:4043 failed, errno(111)
+```
+This message will disappear once connected to RF simulator server - see next step.
+
+- Start the UE (acts as a server)
+```
+sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 --rfsim -O ~/oai-workshops/ran/conf/ue.conf --log_config.global_log_options function --rfsimulator.serveraddr server
+```
+- Start DU1:
+```
+sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci1.conf --rfsimulator.serveraddr ::1
+```
+- Trigger F1 handover
+```
+echo ci trigger_f1_ho | nc 127.0.0.1 9090 && echo
+```
+![Screenshot of the Wireshark capture of HO deployment](resources/ho-pcap.png)
+
