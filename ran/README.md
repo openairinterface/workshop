@@ -456,7 +456,7 @@ The scopes allow you to see various channels.
 
 ---
 
-![Screenshot of the nrscope](./resources/xform-scope-screenshot.png)
+![Screenshot of the nrscope](resources/xform-scope-screenshot.png)
 
 ---
 
@@ -479,7 +479,7 @@ The scopes allow you to see various channels.
 
 ---
 
-![Screenshot of the imscope](./resources/imscope-screenshot.png)
+![Screenshot of the imscope](resources/imscope-screenshot.png)
 
 ---
 
@@ -615,11 +615,11 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
 - Compare the IP addresses in the config with what you have below to understand
   the interfaces
 
-![Architecture of F1 and config](./resources/f1-arch.png)
+![Architecture of F1 and config](resources/f1-arch.png)
 
 ---
 
-![Screenshot of the Wireshark with NG and F1](./resources/f1.png)
+![Screenshot of the Wireshark with NG and F1](resources/f1.png)
 
 ---
 
@@ -641,13 +641,11 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
 
 ---
 
-![Screenshot of the Wireshark with NG, F1 and E1](./resources/e1+f1.png)
+![Screenshot of the Wireshark with NG, F1 and E1](resources/e1+f1.png)
 
 ---
 
 ## nFAPI + F1 + E1 split
-
-![Architecture of gNB and config](./resources/multi-split-arch.png)
 
 - Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
 - Start the gNB as follows:
@@ -671,8 +669,6 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
   ```
   sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
   ```
----
 
-![Screenshot of the Wireshark with NG, F1 and E1](./resources/e1+f1+nfapi.png)
+![Architecture of gNB and config](resources/e1+f1+nfapi.png)
 
----
