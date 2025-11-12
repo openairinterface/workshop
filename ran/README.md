@@ -103,9 +103,9 @@ Note: For USRP support, you need to use the switch `-w USRP`.
 `build_oai` is a wrapper on top of `cmake`. It is therefore possible to run `cmake` directly:
 
 ```
-cd openairinterface5g
+cd ~/openairinterface5g
 mkdir -p cmake_targets/ran_build/build && cd cmake_targets/ran_build/build
-cmake .. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig coding rfsimulator ldpc
+cmake ../../.. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig coding rfsimulator ldpc
 ```
 
 ---
@@ -222,10 +222,20 @@ For detailed information about the RFsimulator, see:
 
 ## How to build
 
-- Use of the `build_oai` script
+You have 2 options:
+
+### Use of the `build_oai` script
   - Is a wrapper for `cmake`
   - Some useful options: `-h`, `--eNB`, `--gNB`, `--UE`, `--nrUE`, `-c`, `--ninja`, `--sanitize-address`, `-g`, `-w`, `-P/--physical_simulators`, ...
-- By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
+  - By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
+
+### Use cmake directly
+```
+cd ~/openairinterface5g
+mkdir -p cmake_targets/ran_build/build && cd cmake_targets/ran_build/build
+cmake ../../.. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig coding rfsimulator ldpc
+```
+
 - To rebuild more quickly, issue
   ```
   ninja nr-softmodem nr-uesoftmodem dfts ldpc params_libconfig coding rfsimulator
@@ -441,7 +451,7 @@ The scopes allow you to see various channels.
   cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib nrscope --ninja
   cd ran_build/build/
-  cmake -DENABLE_NRSCOPE=ON ../../../ && ninja nrscope # alternative
+  cmake -DENABLE_NRSCOPE=ON ../../.. && ninja nrscope # alternative
   ```
 - Run `nr-softmodem` and `nr-uesoftmodem` with `-d` switch
 - The error:
@@ -513,7 +523,7 @@ The scopes allow you to see various channels.
   cd ~/openairinterface5g/cmake_targets/
   ./build_oai --build-lib telnetsrv --ninja
   cd ran_build/build/
-  cmake ../../..  -DENABLE_TELNETSRV=ON && ninja telnetsrv
+  cmake ../../.. -DENABLE_TELNETSRV=ON && ninja telnetsrv
   ```
 - Start the `nr-softmodem`/`nr-uesoftmodem` with parameter `--telnetsrv`
 - Note: Configure the UE telnet port to be different from the gNB: `--telnetsrv.listenport 9091`
