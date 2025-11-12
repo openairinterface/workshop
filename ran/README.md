@@ -28,6 +28,7 @@ The aim of this tutorial is to:
 6. Start with the DU-CU/F1 split
 7. Start with the DU-CU/F1+E1 split
 8. Start with the nFAPI+F1+E1 split
+9. Test F1 Handover
 
 Note: this file can be converted to a presentation using
 
@@ -114,9 +115,8 @@ cmake ../../.. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libco
 
 - **Repository URL**: `https://gitlab.eurecom.fr/oai/openairinterface5g`
 - **Main branch**: Work happens in the `develop` branch
-- **Release tags**: Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2025.w43`
-- **Stable branch**: `master` branch for a known stable version — release v2.0.1
 - **Latest release**: `v2.3.0` (July 2025), check [Release Notes](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/CHANGELOG.md)
+- **Weekly tags**: Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2025.w43`
 - **Main README**: See [README.md](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/README.md) in the repository root for general overview
 - **Documentation**: Comprehensive documentation is available in the [`doc/`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/tree/develop/doc) directory:
   - [Building OAI](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/BUILD.md) - Detailed build instructions
@@ -182,7 +182,7 @@ For more details on the software architecture, see [`doc/SW_archi.md`](https://g
 # Hands-On
 
 - Set up a working system using simulated SDR
-- Basic understanding, so we can go through the E2 agent later
+- Develop basic and advanced understanding of various aspects of OAI to facilitate special trainings later (vrtsim, E2 agent, USRPs, security).
 
 ## About the RFsimulator
 
@@ -192,7 +192,7 @@ The **RFsimulator** is an OAI device that replaces physical radio hardware (e.g.
 
 - **Virtual SDR device**: Behaves like a "real" RF board from the perspective of the xNB/UE, but forwards samples between both ends instead of sending them over the air
 - **Channel modeling support**: Can simulate simple channels such as AWGN and other channel models
-- **Non-real-time operation**: Can run faster or slower than real-time depending on CPU availability, allowing the system to be stopped for inspection (e.g., using a debugger)
+- **Non-real-time operation**: Can run faster or slower than real-time depending on CPU and fronthaul availability, allowing the system to be stopped for inspection (e.g., using a debugger)
 - **Easy setup**: No specific hardware required, making it perfect for development and testing
 
 ---
