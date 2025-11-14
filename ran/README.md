@@ -618,7 +618,7 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
 
 ---
 
-![Screenshot of the Wireshark with NG and F1](resources/f1.png)
+![Screenshot of the Wireshark with NG and F1](resources/f1-pcap.png)
 
 ---
 
@@ -638,9 +638,11 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
 - Compare the IP addresses in the config with what you have below to understand
   the interfaces
 
+![Architecture of F1+E1 and config](resources/e1+f1-arch.png)
+
 ---
 
-![Screenshot of the Wireshark with NG, F1 and E1](resources/e1+f1.png)
+![Screenshot of the Wireshark with NG, F1 and E1](resources/e1+f1-pcap.png)
 
 ---
 
@@ -669,13 +671,11 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
   sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
   ```
 
-![Architecture of gNB and config](resources/e1+f1+nfapi.png)
+![Architecture of gNB and config](resources/e1+f1+nfapi-arch.png)
 
 ---
 
 ## F1 Handover (intra-gNB)
-
-![F1 handover setup architecture and config](resources/ho-setup.png)
 
 - Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
 ```
@@ -710,5 +710,12 @@ sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.
 ```
 echo ci trigger_f1_ho | nc 127.0.0.1 9090 && echo
 ```
+
+![F1 handover setup architecture and config](resources/ho-setup.png)
+
+---
+
 ![Screenshot of the Wireshark capture of HO deployment](resources/ho-pcap.png)
+
+---
 
