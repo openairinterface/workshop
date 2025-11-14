@@ -8,13 +8,13 @@ The aim of this tutorial is to:
 
 1. Understand the code repository organization
 2. Set up an end-to-end 5G/NR SA setup with RFsimulator from source
-3. Use the scope(s) + basic channel modeling
-4. Connect multiple UEs
-5. Build Docker containers of the RAN
-6. Start with the DU-CU/F1 split
-7. Start with the DU-CU/F1+E1 split
-8. Start with the nFAPI+F1+E1 split
-9. Test F1 Handover
+3. Start with the DU-CU/F1 split
+4. Start with the DU-CU/F1+E1 split
+5. Start with the nFAPI+F1+E1 split
+6. Test F1 Handover
+7. Connect multiple UEs
+8. Use the scope(s) + basic channel modeling
+9. NTN
 
 > Note: this file can be converted to a presentation using
 
@@ -231,6 +231,25 @@ cmake ../../.. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libco
 
 ---
 
+## How to create a docker image
+
+- Creating a Docker image is a 3-step process (due to CI specificities):
+  - `ran-base` for dependencies (shared image)
+  - `ran-build` for compiling all targets (shared image)
+  - Per-target (eNB, gNB, nrUE, lteUE, \dots) images
+- First, build the shared images:
+  ```
+  docker build --target ran-base --tag ran-base:latest --file docker/Dockerfile.base.ubuntu .
+  docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.build.ubuntu .
+  ```
+- Then, build the target images, e.g., gNB and nrUE (as used in the CN session):
+  ```
+  docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu .
+  ```
+- See also [`docker/README.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/docker/README.md) in the main repository for detailed Docker build instructions
+
+---
+
 ## Basic end-to-end setup
 
 ### Startup
@@ -336,6 +355,83 @@ Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Doc
 
 ---
 
+## CU-DU F1 split
+
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
+- Start the gNB as follows:
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsim
+  ```
+- Start the UE as before:
+  ```
+  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  ```
+
+- Compare the IP addresses in the config with what you have below to understand
+  the interfaces
+
+![Architecture of F1 and config](resources/f1-arch.png)
+
+---
+
+![Screenshot of the Wireshark with NG and F1](resources/f1-pcap.png)
+
+---
+
+## CU-DU F1 + E1 split
+
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
+- Start the gNB as follows
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --rfsim
+  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
+  ```
+- Start the UE as before:
+  ```
+  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --band 78 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  ```
+- Compare the IP addresses in the config with what you have below to understand
+  the interfaces
+
+![Architecture of F1+E1 and config](resources/e1+f1-arch.png)
+
+---
+
+![Screenshot of the Wireshark with NG, F1 and E1](resources/e1+f1-pcap.png)
+
+---
+
+## nFAPI + F1 + E1 split
+
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
+- Start the gNB as follows:
+  - Start CU-CP
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
+  ```
+  - Start CU-UP
+  ```
+  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
+  ```
+  - Start DU-High
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-vnf.sa.band66.u0.25prb.nfapi.conf --nfapi VNF
+  ```
+  - Start DU-Low
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-pnf.band66.rfsim.conf --nfapi PNF --rfsim
+  ```
+- Start UE
+  ```
+  sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  ```
+
+![Architecture of gNB and config](resources/e1+f1+nfapi-arch.png)
+
+---
+
 ### A closer look at the gNB periodic output
 The scheduler periodically outputs statistics that can help assess the radio channel quality and explain why a UE may not perform as expected.
 
@@ -423,9 +519,109 @@ Other parameters: see [`openair2/GNB_APP/MACRLC_nr_paramdef.h`](https://gitlab.e
 
 ---
 
+## F1 Handover (intra-gNB)
+
+- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
+```
+sudo wireshark -k -i any -Y "ngap or f1ap"
+```
+Exercise: Compare configuration files for DUs: `gnb-du.sa.band78.106prb.rfsim.pci0.conf` and `gnb-du.sa.band78.106prb.rfsim.pci1.conf`? Check DU ID, Cell ID, Physical Cell ID
+
+- Start CU:
+```
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf --telnetsrv --telnetsrv.shrmod ci
+```
+- Start DU0:
+```
+sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf --rfsimulator.serveraddr ::1
+```
+> Note: You might see following error after the DU1 start,
+> ```
+> [HW    ]  Trying to connect to ::1:4043
+> [HW    ]  connect() to ::1:4043 failed, errno(111)
+> ```
+> This message will disappear once connected to RF simulator server - see next step.
+
+- Start the UE (acts as a server)
+```
+sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 --rfsim -O ~/oai-workshops/ran/conf/ue.conf --log_config.global_log_options function --rfsimulator.serveraddr server
+```
+- Start DU1:
+```
+sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci1.conf --rfsimulator.serveraddr ::1
+```
+- Trigger F1 handover
+```
+echo ci trigger_f1_ho | nc 127.0.0.1 9090 && echo
+```
+
+![F1 handover setup architecture and config](resources/ho-setup.png)
+
+---
+
+![Screenshot of the Wireshark capture of HO deployment](resources/ho-pcap.png)
+
+---
+
+## Multiple UEs
+
+- All UEs try to open the same interface, which does not work
+- Create network namespace for each UE to prevent interface name clash
+- Follow instructions from [this link](https://open-cells.com/index.php/2021/02/08/rf-simulator-1-enb-2-ues-all-in-one/) or use the script [multi-ue.sh](./multi-ue.sh)
+- Start first UE as
+  ```
+  sudo ~/oai-workshops/ran/multi-ue.sh -c1 -e
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.serveraddr 10.201.1.100
+  ```
+- Check in Wireshark/UE output that everything is ok
+- Second UE *with a different IMSI*:
+  ```
+  sudo ~/oai-workshops/ran/multi-ue.sh -c2 -e
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100
+  ```
+
+### Exercise
+- Check in Wireshark that both are set up
+- Create traffic from/to both UEs
+- Hints:
+  ```
+  sudo ip netns exec ue1 bash
+  sudo ip netns exec ue2 bash
+  ```
+### Cleanup
+- At the end, remove network namespaces:
+  ```
+  sudo ~/oai-workshops/ran/multi-ue.sh -d1 -d2
+  ```
+
+---
+
 ## Scopes
 
 The scopes allow you to see various channels.
+
+### ImScope
+
+- Install dependencies:
+  ```
+  sudo apt-get install libglfw3-dev libopengl-dev
+  ```
+- Build scope
+  ```
+  cd ~/openairinterface5g/cmake_targets/
+  ./build_oai --build-lib imscope --ninja
+  cd ran_build/build/
+  cmake -DENABLE_IMSCOPE=ON ../../.. && ninja imscope # alternative
+  ```
+- Run the `nr-softmodem` and `nr-uesoftmodem` with `--imscope` switch
+
+- For more information about scopes and troubleshooting, refer to: [ImScope documentation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/PHY/TOOLS/readme.md)
+
+---
+
+![Screenshot of the imscope](resources/imscope-screenshot.png)
+
+---
 
 ### Xforms
 
@@ -454,29 +650,6 @@ The scopes allow you to see various channels.
 ---
 
 ![Screenshot of the nrscope](resources/xform-scope-screenshot.png)
-
----
-
-### ImScope
-
-- Install dependencies:
-  ```
-  sudo apt-get install libglfw3-dev libopengl-dev
-  ```
-- Build scope
-  ```
-  cd ~/openairinterface5g/cmake_targets/
-  ./build_oai --build-lib imscope --ninja
-  cd ran_build/build/
-  cmake -DENABLE_IMSCOPE=ON ../../.. && ninja imscope # alternative
-  ```
-- Run the `nr-softmodem` and `nr-uesoftmodem` with `--imscope` switch
-
-- For more information about scopes and troubleshooting, refer to: [ImScope documentation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/PHY/TOOLS/readme.md)
-
----
-
-![Screenshot of the imscope](resources/imscope-screenshot.png)
 
 ---
 
@@ -546,176 +719,6 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
 
 ---
 
-## Multiple UEs
-
-- All UEs try to open the same interface, which does not work
-- Create network namespace for each UE to prevent interface name clash
-- Follow instructions from [this link](https://open-cells.com/index.php/2021/02/08/rf-simulator-1-enb-2-ues-all-in-one/) or use the script [multi-ue.sh](./multi-ue.sh)
-- Start first UE as
-  ```
-  sudo ~/oai-workshops/ran/multi-ue.sh -c1 -e
-  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.serveraddr 10.201.1.100
-  ```
-- Check in Wireshark/UE output that everything is ok
-- Second UE *with a different IMSI*:
-  ```
-  sudo ~/oai-workshops/ran/multi-ue.sh -c2 -e
-  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100
-  ```
-
-### Exercise
-- Check in Wireshark that both are set up
-- Create traffic from/to both UEs
-- Hints:
-  ```
-  sudo ip netns exec ue1 bash
-  sudo ip netns exec ue2 bash
-  ```
-### Cleanup
-- At the end, remove network namespaces:
-  ```
-  sudo ~/oai-workshops/ran/multi-ue.sh -d1 -d2
-  ```
+## NTN setup
 
 ---
-
-## How to create a docker image
-
-- Creating a Docker image is a 3-step process (due to CI specificities):
-  - `ran-base` for dependencies (shared image)
-  - `ran-build` for compiling all targets (shared image)
-  - Per-target (eNB, gNB, nrUE, lteUE, \dots) images
-- First, build the shared images:
-  ```
-  docker build --target ran-base --tag ran-base:latest --file docker/Dockerfile.base.ubuntu .
-  docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.build.ubuntu .
-  ```
-- Then, build the target images, e.g., gNB and nrUE (as used in the CN session):
-  ```
-  docker build --target oai-gnb --tag oai-gnb:latest --file docker/Dockerfile.gNB.ubuntu .
-  ```
-- See also [`docker/README.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/docker/README.md) in the main repository for detailed Docker build instructions
-
----
-
-## CU-DU F1 split
-
-- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
-- Start the gNB as follows:
-  ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsim
-  ```
-- Start the UE as before:
-  ```
-  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
-  ```
-
-- Compare the IP addresses in the config with what you have below to understand
-  the interfaces
-
-![Architecture of F1 and config](resources/f1-arch.png)
-
----
-
-![Screenshot of the Wireshark with NG and F1](resources/f1-pcap.png)
-
----
-
-## CU-DU F1 + E1 split
-
-- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
-- Start the gNB as follows
-  ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --rfsim
-  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
-  ```
-- Start the UE as before:
-  ```
-  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --band 78 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
-  ```
-- Compare the IP addresses in the config with what you have below to understand
-  the interfaces
-
-![Architecture of F1+E1 and config](resources/e1+f1-arch.png)
-
----
-
-![Screenshot of the Wireshark with NG, F1 and E1](resources/e1+f1-pcap.png)
-
----
-
-## nFAPI + F1 + E1 split
-
-- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
-- Start the gNB as follows:
-  - Start CU-CP
-  ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
-  ```
-  - Start CU-UP
-  ```
-  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
-  ```
-  - Start DU-High
-  ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-vnf.sa.band66.u0.25prb.nfapi.conf --nfapi VNF
-  ```
-  - Start DU-Low
-  ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-pnf.band66.rfsim.conf --nfapi PNF --rfsim
-  ```
-- Start UE
-  ```
-  sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
-  ```
-
-![Architecture of gNB and config](resources/e1+f1+nfapi-arch.png)
-
----
-
-## F1 Handover (intra-gNB)
-
-- Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
-```
-sudo wireshark -k -i any -Y "ngap or f1ap"
-```
-Exercise: Compare configuration files for DUs: `gnb-du.sa.band78.106prb.rfsim.pci0.conf` and `gnb-du.sa.band78.106prb.rfsim.pci1.conf`? Check DU ID, Cell ID, Physical Cell ID
-
-- Start CU:
-```
-./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf --telnetsrv --telnetsrv.shrmod ci
-```
-- Start DU0:
-```
-sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf --rfsimulator.serveraddr ::1
-```
-> Note: You might see following error after the DU1 start,
-> ```
-> [HW    ]  Trying to connect to ::1:4043
-> [HW    ]  connect() to ::1:4043 failed, errno(111)
-> ```
-> This message will disappear once connected to RF simulator server - see next step.
-
-- Start the UE (acts as a server)
-```
-sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 --rfsim -O ~/oai-workshops/ran/conf/ue.conf --log_config.global_log_options function --rfsimulator.serveraddr server
-```
-- Start DU1:
-```
-sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci1.conf --rfsimulator.serveraddr ::1
-```
-- Trigger F1 handover
-```
-echo ci trigger_f1_ho | nc 127.0.0.1 9090 && echo
-```
-
-![F1 handover setup architecture and config](resources/ho-setup.png)
-
----
-
-![Screenshot of the Wireshark capture of HO deployment](resources/ho-pcap.png)
-
----
-
