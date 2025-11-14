@@ -615,6 +615,18 @@ The scopes allow you to see various channels.
   ```
 - Run the `nr-softmodem` and `nr-uesoftmodem` with `--imscope` switch
 
+Example commands:
+
+- Run gNB:
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope
+  ```
+
+- Run UE:
+  ```
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope
+  ```
+
 - For more information about scopes and troubleshooting, refer to: [ImScope documentation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/PHY/TOOLS/readme.md)
 
 ---
@@ -645,6 +657,17 @@ The scopes allow you to see various channels.
   can be solved by granting root the right to open the X display:
   ```
   xhost +si:localuser:root
+  ```
+Example commands:
+
+- Run gNB:
+  ```
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim -d
+  ```
+
+- Run UE:
+  ```
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim -d
   ```
 
 ---
