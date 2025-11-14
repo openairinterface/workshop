@@ -418,8 +418,8 @@ Other parameters: see [`openair2/GNB_APP/MACRLC_nr_paramdef.h`](https://gitlab.e
   N310
 
 > #### Notes:
-> If an option is not given, a default is used (which might or might not prevent the gNB from starting)
-> You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
+> - If an option is not given, a default is used (which might or might not prevent the gNB from starting)
+> - You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
 
 ---
 
@@ -692,11 +692,11 @@ Exercise: Compare configuration files for DUs: `gnb-du.sa.band78.106prb.rfsim.pc
 sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf --rfsimulator.serveraddr ::1
 ```
 > Note: You might see following error after the DU1 start,
-```
-[HW    ]  Trying to connect to ::1:4043
-[HW    ]  connect() to ::1:4043 failed, errno(111)
-```
-This message will disappear once connected to RF simulator server - see next step.
+> ```
+> [HW    ]  Trying to connect to ::1:4043
+> [HW    ]  connect() to ::1:4043 failed, errno(111)
+> ```
+> This message will disappear once connected to RF simulator server - see next step.
 
 - Start the UE (acts as a server)
 ```
