@@ -1,20 +1,6 @@
-% RAN Hands-On
-% Robert Schmidt, Jaroslava Fiedlerova
-% November 18, 2025
+# OpenAirInterface 5G RAN Workshop 2025
 
-<table style="border-collapse: collapse; border: none;">
-  <tr style="border-collapse: collapse; border: none;">
-    <td style="border-collapse: collapse; border: none;">
-      <a href="http://www.openairinterface.org/">
-         <img src="./resources/oai_final_logo.png" alt="" border=3 height=50 width=150>
-         </img>
-      </a>
-    </td>
-    <td style="border-collapse: collapse; border: none; vertical-align: center;">
-      <b><font size = "5">OpenAirInterface 5G RAN Workshop 2025</font></b>
-    </td>
-  </tr>
-</table>
+> Author: Robert Schmidt, Jaroslava Fiedlerova (November 18, 2025)
 
 **What do we cover in the RAN Hands-On?**
 
@@ -33,7 +19,7 @@ The aim of this tutorial is to:
 Note: this file can be converted to a presentation using
 
 ```
-pandoc -t slidy --template ran.slidy -s README.md -o README.html
+pandoc -t slidy --template ran.slidy -s README.md -o README.html   --metadata title="OpenAirInterface 5G RAN Workshop 2025" --metadata date="November 18, 2025"
 ```
 
 ---
@@ -542,7 +528,7 @@ Example commands:
   ```
 - UE
   ```
-  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
   ```
 - Connect to the local telnet interface to view or modify channel parameters:
   ```
