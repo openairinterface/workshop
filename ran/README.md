@@ -555,7 +555,7 @@ sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.
 echo ci trigger_f1_ho | nc 127.0.0.1 9090 && echo
 ```
 
-![F1 handover setup architecture and config](resources/ho-setup.png)
+![F1 handover setup architecture and config](resources/ho-arch.png)
 
 ---
 
