@@ -16,7 +16,7 @@ The aim of this tutorial is to:
 8. Start with the nFAPI+F1+E1 split
 9. Test F1 Handover
 
-Note: this file can be converted to a presentation using
+> Note: this file can be converted to a presentation using
 
 ```
 pandoc -t slidy --template ran.slidy -s README.md -o README.html   --metadata title="OpenAirInterface 5G RAN Workshop 2025" --metadata date="November 18, 2025"
@@ -37,7 +37,8 @@ pandoc -t slidy --template ran.slidy -s README.md -o README.html   --metadata ti
 
 1. Operating system: Linux is required — no Windows or macOS (Intel/M1/M2/M3). We recommend Ubuntu 24.04. While other distributions may work, we cannot guarantee support for them.
 2. Docker: version 25.04 or higher must be pre-installed.
-Note: Other necessary software will be installed.
+
+> Note: Other necessary software will be installed.
 
 **Reading time**: ~30mins
 
@@ -83,7 +84,7 @@ Compile RAN executables for gNB and nrUE:
 ```
 ./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
 ```
-Note: For USRP support, you need to use the switch `-w USRP`.
+> Note: For USRP support, you need to use the switch `-w USRP`.
 
 ### Alternative:
 
@@ -416,9 +417,9 @@ Other parameters: see [`openair2/GNB_APP/MACRLC_nr_paramdef.h`](https://gitlab.e
 - `sdr_addrs`: arguments to be passed to search for SDR, e.g., IP address for
   N310
 
-#### Notes:
-- If an option is not given, a default is used (which might or might not prevent the gNB from starting)
-- You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
+> #### Notes:
+> If an option is not given, a default is used (which might or might not prevent the gNB from starting)
+> You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
 
 ---
 
@@ -512,7 +513,9 @@ The scopes allow you to see various channels.
   cmake ../../.. -DENABLE_TELNETSRV=ON && ninja telnetsrv
   ```
 - Start the `nr-softmodem`/`nr-uesoftmodem` with parameter `--telnetsrv`
-- Note: Configure the UE telnet port to be different from the gNB: `--telnetsrv.listenport 9091`
+
+> Note: Configure the UE telnet port to be different from the gNB: `--telnetsrv.listenport 9091`
+
 - In a new terminal: connect to gNB/UE: `telnet 127.0.0.1 9090`
   - Use `help` to show available commands
   - Use `channelmod show current` to show current channel model configuration
@@ -688,7 +691,7 @@ Exercise: Compare configuration files for DUs: `gnb-du.sa.band78.106prb.rfsim.pc
 ```
 sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf --rfsimulator.serveraddr ::1
 ```
-Note: You might see following error after the DU1 start,
+> Note: You might see following error after the DU1 start,
 ```
 [HW    ]  Trying to connect to ::1:4043
 [HW    ]  connect() to ::1:4043 failed, errno(111)
