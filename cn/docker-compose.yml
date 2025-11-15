@@ -1,8 +1,8 @@
-version: '3.8'
+### OAI official container registry is docker hub docker.io/oaisoftwarealliance but for this workshop we are using our ghcr.io/openairinterface registry to avoid issues with docker hub limitation
 services:
     mysql:
         container_name: "mysql"
-        image: mysql:8.0
+        image: ghcr.io/openairinterface/mysql:8.0
         volumes:
             - ./database/oai_db.sql:/docker-entrypoint-initdb.d/oai_db.sql
             - ./healthscripts/mysql-healthcheck.sh:/tmp/mysql-healthcheck.sh
@@ -20,9 +20,23 @@ services:
         networks:
             public_net:
                 ipv4_address: 192.168.70.131
+    ims:
+        container_name: "ims"
+        image: ghcr.io/openairinterface/ims:latest
+        volumes:
+            - ./conf/sip.conf:/etc/asterisk/sip.conf
+            - ./conf/users.conf:/etc/asterisk/users.conf
+        healthcheck:
+            test: /bin/bash -c "pgrep asterisk"
+            interval: 5s
+            timeout: 2s
+            retries: 10
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.139
     oai-udr:
         container_name: "oai-udr"
-        image: oaisoftwarealliance/oai-udr:2024-june
+        image: ghcr.io/openairinterface/oai-udr:develop
         expose:
             - 80/tcp
             - 8080/tcp
@@ -38,7 +52,7 @@ services:
                 ipv4_address: 192.168.70.136
     oai-udm:
         container_name: "oai-udm"
-        image: oaisoftwarealliance/oai-udm:2024-june
+        image: ghcr.io/openairinterface/oai-udm:develop
         expose:
             - 80/tcp
             - 8080/tcp
@@ -53,7 +67,7 @@ services:
                 ipv4_address: 192.168.70.137
     oai-ausf:
         container_name: "oai-ausf"
-        image: oaisoftwarealliance/oai-ausf:2024-june
+        image: ghcr.io/openairinterface/oai-ausf:develop
         expose:
             - 80/tcp
             - 8080/tcp
@@ -68,7 +82,7 @@ services:
                 ipv4_address: 192.168.70.138
     oai-nrf:
         container_name: "oai-nrf"
-        image: oaisoftwarealliance/oai-nrf:2024-june
+        image: ghcr.io/openairinterface/oai-nrf:develop
         expose:
             - 80/tcp
             - 8080/tcp
@@ -81,7 +95,7 @@ services:
                 ipv4_address: 192.168.70.130
     oai-amf:
         container_name: "oai-amf"
-        image: oaisoftwarealliance/oai-amf:2024-june
+        image: ghcr.io/openairinterface/oai-amf:develop
         expose:
             - 80/tcp
             - 8080/tcp
@@ -99,7 +113,7 @@ services:
                 ipv4_address: 192.168.70.132
     oai-smf:
         container_name: "oai-smf"
-        image: oaisoftwarealliance/oai-smf:2024-june
+        image: ghcr.io/openairinterface/oai-smf:develop
         expose:
             - 80/tcp
             - 8080/tcp
@@ -116,8 +130,9 @@ services:
                 ipv4_address: 192.168.70.133
     oai-upf:
         container_name: "oai-upf"
-        image: oaisoftwarealliance/oai-upf:2024-june
+        image: ghcr.io/openairinterface/oai-upf:develop
         expose:
+            - 80/tcp
             - 2152/udp
             - 8805/udp
         volumes:
@@ -140,15 +155,16 @@ services:
         privileged: true
         init: true
         container_name: oai-ext-dn
-        image: oaisoftwarealliance/trf-gen-cn5g:latest
-        entrypoint: /bin/bash -c \
-              "ip route add 10.0.0.0/16 via 192.168.70.134 dev eth0; ip route; sleep infinity"
-        command: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
+        image: ghcr.io/openairinterface/trf-gen-cn5g:latest
+        environment:
+            - UPF_FQDN=oai-upf
+            - UE_NETWORK=12.1.1.0/24
+            - USE_FQDN=yes
         healthcheck:
-            test: /bin/bash -c "ip r | grep 10.0.0"
-            interval: 5s
-            timeout: 2s
-            retries: 10
+            test: /bin/bash -c "ip r | grep 12.1.1"
+            interval: 10s
+            timeout: 5s
+            retries: 5
         networks:
             public_net:
                 ipv4_address: 192.168.70.135

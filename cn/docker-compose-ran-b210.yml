@@ -1,30 +1,33 @@
-version: '3.8'
+### OAI official container registry is docker hub docker.io/oaisoftwarealliance but for this workshop we are using our ghcr.io/openairinterface registry to avoid issues with docker hub limitation
 services:
     oai-gnb:
-        image: oaisoftwarealliance/oai-gnb:2024.w26
-        privileged: true
-        container_name: oai-gnb
+        image: ghcr.io/openairinterface/oai-gnb:2025.w45
+        container_name: sa-b200-gnb
+        cap_drop:
+            - ALL
+        cap_add:
+            - SYS_NICE
+            - IPC_LOCK
+        ulimits:
+          core: -1 # for core dumps
         environment:
             USE_B2XX: 'yes'
-            USE_VOLUMED_CONF: True
-            USE_ADDITIONAL_OPTIONS: --sa --continuous-tx --log_config.global_log_options level,nocolor,time,line_num,function
+            ## You need to use uhd_usrp_probe and then use the serial number of your USRP
+            USE_ADDITIONAL_OPTIONS: --RUs.[0].sdr_addrs serial=XXXXXX --continuous-tx --log_config.global_log_options level,nocolor,time,line_num,function
+        devices:
+            - /dev/bus/usb/:/dev/bus/usb/
         volumes:
-            -  /dev/bus/usb/:/dev/bus/usb/
-            - ./conf/gnb.sa.bandn78.fr1.51PRB.usrpb210.conf:/opt/oai-gnb/etc/mounted.conf
-        networks:
-            public_net:
-                ipv4_address: 192.168.70.160
+            - ./conf/gnb.sa.bandn78.fr1.51PRB.usrpb210.yaml:/opt/oai-gnb/etc/gnb.yaml
+        network_mode: "host"
+        #entrypoint: /bin/bash -c "sleep infinity"
         healthcheck:
-            test: /bin/bash -c "pgrep nr-softmodem"
+            # pgrep does NOT work
+            test: /bin/bash -c "ps aux | grep -v grep | grep -c softmodem"
             interval: 10s
             timeout: 5s
             retries: 5
 networks:
     public_net:
-        driver: bridge
         name: oaiworkshop
-        ipam:
-            config:
-                - subnet: 192.168.70.128/26
-        driver_opts:
-            com.docker.network.bridge.name: "oaiworkshop"
+        external: true
+
