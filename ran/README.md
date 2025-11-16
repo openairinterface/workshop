@@ -288,20 +288,20 @@ sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-wor
 Verify that it is connected: you should see the following output at gNB:
 
 ```
-[NR_RRC]  [UL] (cellID bc614e, UE ID 1 RNTI 6be9) Received RRCReconfigurationComplete
-[NR_RRC]  PDU Session Setup: ID=10, outgoing TEID=0xd2a789b8, Addr=192.168.70.129
-[NR_RRC]  NGAP_PDUSESSION_SETUP_RESP: sending the message
-[NR_MAC]  DU received confirmation of successful RRC Reconfiguration
+[19:23:26.397078] [NR_RRC] [UL] (cellID bc614e, UE ID 1 RNTI c2d2) Received RRCReconfigurationComplete
+[19:23:26.397127] [NR_RRC] PDU Session Setup: ID=10, outgoing TEID=0x8bbb99de, Addr=192.168.70.129
+[19:23:26.397133] [NR_RRC] NGAP_PDUSESSION_SETUP_RESP: sending the message
+[19:23:26.397436] [NR_MAC] DU received confirmation of successful RRC Reconfiguration
 ```
 
 and nrUE:
 
 ```
-[NR_RRC]  rrcReconfigurationComplete Encoded 10 bits (2 bytes)
-[NR_RRC]   Logical Channel UL-DCCH (SRB1), Generating RRCReconfigurationComplete (bytes 2)
-[NAS   ]  Received PDU Session Establishment Accept, UE IPv4: 10.0.0.3
+[19:23:26.377172] [NR_RRC] rrcReconfigurationComplete Encoded 10 bits (2 bytes)
+[19:23:26.377178] [NR_RRC]  Logical Channel UL-DCCH (SRB1), Generating RRCReconfigurationComplete (bytes 2)
+[19:23:26.377185] [NAS]    Received PDU Session Establishment Accept, UE IPv4: 10.0.0.2
 Unknown IEI 129
-[OIP   ]  Interface oaitun_ue1 successfully configured, IPv4 10.0.0.3, IPv6 (null)
+[19:23:26.377806] [OIP]    Interface oaitun_ue1 successfully configured, IPv4 10.0.0.2, IPv6 (null)
 ```
 
 Correspondingly, an interface should have been brought up:
