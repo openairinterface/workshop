@@ -271,7 +271,7 @@ Then, start the gNB:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim
+./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --log_config.global_log_options utc_time
 ```
 
 Check that you see the NGAP Setup Request and Response messages in Wireshark.
@@ -280,7 +280,7 @@ Run the nrUE from a second terminal:
 
 ```
 cd ~/openairinterface5g/cmake_targets/ran_build/build
-sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --log_config.global_log_options utc_time
 ```
 
 ---
@@ -360,12 +360,12 @@ Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Doc
 - Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
 - Start the gNB as follows:
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsim
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf --log_config.global_log_options utc_time
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --rfsim --log_config.global_log_options utc_time
   ```
 - Start the UE as before:
   ```
-  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --log_config.global_log_options utc_time
   ```
 
 - Compare the IP addresses in the config with what you have below to understand
@@ -384,13 +384,13 @@ Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Doc
 - Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
 - Start the gNB as follows
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --rfsim
-  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --rfsim --log_config.global_log_options utc_time
+  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf --log_config.global_log_options utc_time
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.conf --log_config.global_log_options utc_time
   ```
 - Start the UE as before:
   ```
-  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --band 78 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  sudo ./nr-uesoftmodem -C 3319680000 -r 106 --numerology 1 --band 78 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --log_config.global_log_options utc_time
   ```
 - Compare the IP addresses in the config with what you have below to understand
   the interfaces
@@ -409,23 +409,23 @@ Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Doc
 - Start the gNB as follows:
   - Start CU-CP
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --log_config.global_log_options utc_time
   ```
   - Start CU-UP
   ```
-  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf
+  ./nr-cuup -O ~/oai-workshops/ran/conf/gnb-cuup.sa.f1.rfsim.conf --log_config.global_log_options utc_time
   ```
   - Start DU-High
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-vnf.sa.band66.u0.25prb.nfapi.conf --nfapi VNF
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-vnf.sa.band66.u0.25prb.nfapi.conf --nfapi VNF --log_config.global_log_options utc_time
   ```
   - Start DU-Low
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-pnf.band66.rfsim.conf --nfapi PNF --rfsim
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-pnf.band66.rfsim.conf --nfapi PNF --rfsim --log_config.global_log_options utc_time
   ```
 - Start UE
   ```
-  sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 -O ~/oai-workshops/ran/conf/ue.conf --rfsim
+  sudo ./nr-uesoftmodem -C 2152680000 --CO -400000000 -r 25 --numerology 0 --band 66 --ssb 48 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --log_config.global_log_options utc_time
   ```
 
 ![Architecture of gNB and config](resources/e1+f1+nfapi-arch.png)
@@ -571,13 +571,13 @@ echo ci trigger_f1_ho | nc 127.0.0.1 9090 && echo
 - Start first UE as
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -c1 -e
-  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.serveraddr 10.201.1.100
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.serveraddr 10.201.1.100 --log_config.global_log_options utc_time
   ```
 - Check in Wireshark/UE output that everything is ok
 - Second UE *with a different IMSI*:
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -c2 -e
-  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100 --log_config.global_log_options utc_time
   ```
 
 ### Exercise
@@ -619,12 +619,12 @@ Example commands:
 
 - Run gNB:
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --log_config.global_log_options utc_time
   ```
 
 - Run UE:
   ```
-  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope --log_config.global_log_options utc_time
   ```
 
 - For more information about scopes and troubleshooting, refer to: [ImScope documentation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/PHY/TOOLS/readme.md)
@@ -662,12 +662,12 @@ Example commands:
 
 - Run gNB:
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim -d
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim -d --log_config.global_log_options utc_time
   ```
 
 - Run UE:
   ```
-  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim -d
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim -d --log_config.global_log_options utc_time
   ```
 
 ---
@@ -690,11 +690,11 @@ Example commands:
 
 - Run gNB:
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --log_config.global_log_options utc_time
   ```
 - Run UE:
   ```
-  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN --log_config.global_log_options utc_time
   ```
 
 ---
@@ -723,11 +723,11 @@ Example commands:
 
 - gNB
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --log_config.global_log_options utc_time
   ```
 - UE
   ```
-  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091 --log_config.global_log_options utc_time
   ```
 - Connect to the local telnet interface to view or modify channel parameters:
   ```
