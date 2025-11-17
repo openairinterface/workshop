@@ -320,6 +320,10 @@ Some other things to check:
 
 ---
 
+![Screenshot of the Wireshark with monolithic gNB](resources/mono-pcap.png)
+
+---
+
 ### Inject traffic
 - Check the UE's IP address on interface `oaitun_ue1` using:
   ```
@@ -358,6 +362,9 @@ Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Doc
 ## CU-DU F1 split
 
 - Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap`
+```
+sudo wireshark -k -i any -f "sctp" -Y "ngap or f1ap"
+```
 - Start the gNB as follows:
   ```
   ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cu.sa.f1.conf --log_config.global_log_options utc_time
@@ -375,13 +382,16 @@ Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Doc
 
 ---
 
-![Screenshot of the Wireshark with NG and F1](resources/f1-pcap.png)
+![Screenshot of the Wireshark with NG and F1](resources/f1-pcap-updated.png)
 
 ---
 
 ## CU-DU F1 + E1 split
 
 - Start Wireshark with capture filter `sctp` and display filter `ngap or f1ap or e1ap`
+```
+sudo wireshark -k -i any -f "sctp" -Y "ngap or f1ap or e1ap"
+```
 - Start the gNB as follows
   ```
   ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb-cucp.sa.f1.rfsim.conf --rfsim --log_config.global_log_options utc_time
@@ -399,7 +409,7 @@ Iperf3 can be used to test UL and DL throughput between the `oai-ext-dn` (in Doc
 
 ---
 
-![Screenshot of the Wireshark with NG, F1 and E1](resources/e1+f1-pcap.png)
+![Screenshot of the Wireshark with NG, F1 and E1](resources/e1+f1-pcap-updated.png)
 
 ---
 
