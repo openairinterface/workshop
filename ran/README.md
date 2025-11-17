@@ -770,14 +770,14 @@ this workshop.
 
 - Run the gNB:
   ```
-  ./nr-softmodem --rfsim -O ../ci-scripts/conf_files/gnb.sa.band254.u0.25prb.rfsim.ntn.conf`
+  ./nr-softmodem --rfsim -O ../../../ci-scripts/conf_files/gnb.sa.band254.u0.25prb.rfsim.ntn.conf
   ```
   Note: you have to potentially adapt PLMN, and AMF and gNB IP addresses, to
   make this connect reliably. The rest is set in the config (no additional
   command line parameters required.
 - Run the UE:
   ```
-  sudo ./nr-uesoftmodem --rfsim --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60 --rfsimulator.prop_delay 238.74 --num-ul-actors 1 --num-dl-actors 1 -O ../ci-scripts/conf_files/nrue.uicc.conf
+  sudo ./nr-uesoftmodem --rfsim --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60 --rfsimulator.prop_delay 238.74 --num-ul-actors 1 --num-dl-actors 1 -O ../../../ci-scripts/conf_files/nrue.uicc.conf
   ```
   Also here, you might need to change the IMSI and other authentication-related
   parameters.
