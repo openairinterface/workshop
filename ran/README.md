@@ -2,6 +2,8 @@
 
 > Author: Robert Schmidt, Jaroslava Fiedlerova (November 18, 2025)
 
+Note: this repository is hosted at [this Gitlab repository](https://gitlab.eurecom.fr/oai/trainings/oai-workshops).
+
 **What do we cover in the RAN Hands-On?**
 
 The aim of this tutorial is to:
@@ -173,14 +175,21 @@ For more details on the software architecture, see [`doc/SW_archi.md`](https://g
 
 ## About the RFsimulator
 
-The **RFsimulator** is an OAI device that replaces physical radio hardware (e.g., USRP boards). It allows testing OAI without an RF board by forwarding time-domain I/Q samples between gNB and UE over a network interface instead of over the air. This eliminates unpredictable over-the-air perturbations and makes it ideal for checking signal processing algorithms and protocol implementations.
+- Virtual SDR device: replaces physical radio hardware (e.g., USRP boards)
+- Easy setup: test OAI without an RF board by forwarding time-domain I/Q
+  samples
+- Simple: eliminates unpredictable over-the-air perturbations
+- Debugging: perfect for development/testing
+- Non-realtime: ideal for checking signal processing algorithms and protocol
+  implementations
+- Channel modeling support: simulate simple channels such as AWGN and other
+  channel models
 
-### Key Features
+## Other radios
 
-- **Virtual SDR device**: Behaves like a "real" RF board from the perspective of the xNB/UE, but forwards samples between both ends instead of sending them over the air
-- **Channel modeling support**: Can simulate simple channels such as AWGN and other channel models
-- **Non-real-time operation**: Can run faster or slower than real-time depending on CPU and fronthaul availability, allowing the system to be stopped for inspection (e.g., using a debugger)
-- **Easy setup**: No specific hardware required, making it perfect for development and testing
+- virtual real-time radio: `vrtsim`, can be used for softwarized performance
+  evaluation/test throughput
+- hardware-based: USRPs, O-RUs/O-RAN 7.2 FHI
 
 ---
 
@@ -212,6 +221,7 @@ For detailed information about the RFsimulator, see:
 You have 2 options:
 
 ### Use of the `build_oai` script
+  - "Historical" build tool
   - Is a wrapper for `cmake`
   - Some useful options: `-h`, `--eNB`, `--gNB`, `--UE`, `--nrUE`, `-c`, `--ninja`, `--sanitize-address`, `-g`, `-w`, `-P/--physical_simulators`, ...
   - By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
