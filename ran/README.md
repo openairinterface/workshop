@@ -77,7 +77,7 @@ In this tutorial, we assume that the main repository is located at `~/openairint
 cd ~
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
 cd openairinterface5g
-git checkout 2025.w44                        # tested tag
+git checkout 2025.w46                        # tested tag
 cd cmake_targets
 ./build_oai --ninja -I                       # install dependencies
 ```
