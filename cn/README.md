@@ -77,6 +77,7 @@ docker compose pull
   Pulling oai-udr            ... done
   Pulling oai-udm            ... done
   Pulling oai-ausf           ... done
+  Pulling ims                ... done
   Pulling oai-amf            ... done
   Pulling oai-smf            ... done
   Pulling oai-upf            ... done
@@ -1101,7 +1102,22 @@ Now you can stop the gNB as well
 docker compose -f docker-compose.yml down -t2
 ```
 
-## 10. Command line tool
+## 10. Graphical traffic testing tool 
+
+If you want to use a graphical speed testing tool locally instead of the public speed test websites then you can launch a container of [Openspeedtest](https://openspeedtest.com/) locally in your system: 
+
+```yaml
+## just after oai-traffic-server
+    speedtest:
+        restart: unless-stopped
+        container_name: openspeedtest
+        ports:
+            - '3000:3000'
+            - '3001:3001'
+        image: openspeedtest/latest
+```
+
+## 11. Command line tool
 
 The command line tool is designed to interact with OAI core network currently it only shows the numbers of users and amf/smf configuration file. 
 
