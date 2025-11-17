@@ -1,0 +1,143 @@
+Active_gNBs: 
+  - "gNB-in-docker"
+
+Asn1_verbosity: "none"
+
+gNBs:
+  - gNB_ID: 0xe00
+    gNB_name: "gNB-in-docker"
+
+    tracking_area_code: 1
+    plmn_list:
+      - mcc: 001
+        mnc: 01
+        mnc_length: 2
+        snssaiList:
+          - sst: 1
+            sd: 0xffffff
+
+    nr_cellid: 12345678
+
+    servingCellConfigCommon:
+      - physCellId: 0
+
+        absoluteFrequencySSB: 640704
+        dl_frequencyBand: 78
+        dl_absoluteFrequencyPointA: 639996
+
+        dl_offstToCarrier: 0
+        dl_subcarrierSpacing: 1
+        dl_carrierBandwidth: 51
+
+        initialDLBWPlocationAndBandwidth: 13750
+        initialDLBWPsubcarrierSpacing: 1
+        initialDLBWPcontrolResourceSetZero: 12
+        initialDLBWPsearchSpaceZero: 0
+
+        ul_frequencyBand: 78
+        ul_offstToCarrier: 0
+        ul_subcarrierSpacing: 1
+        ul_carrierBandwidth: 51
+        pMax: 20
+
+        initialULBWPlocationAndBandwidth: 13750
+        initialULBWPsubcarrierSpacing: 1
+
+        prach_ConfigurationIndex: 98
+        prach_msg1_FDM: 0
+        prach_msg1_FrequencyStart: 0
+        zeroCorrelationZoneConfig: 13
+        preambleReceivedTargetPower: -96
+        preambleTransMax: 6
+
+        powerRampingStep: 1
+        ssb_perRACH_OccasionAndCB_PreamblesPerSSB_PR: 4
+        ssb_perRACH_OccasionAndCB_PreamblesPerSSB: 14
+        ra_ContentionResolutionTimer: 7
+        rsrp_ThresholdSSB: 19
+        prach_RootSequenceIndex_PR: 2
+        prach_RootSequenceIndex: 1
+        msg1_SubcarrierSpacing: 1
+        restrictedSetConfig: 0
+
+        msg3_DeltaPreamble: 1
+        p0_NominalWithGrant: -90
+
+        pucchGroupHopping: 0
+        hoppingId: 40
+        p0_nominal: -90
+
+        ssb_PositionsInBurst_Bitmap: 1
+        ssb_periodicityServingCell: 2
+        dmrs_TypeA_Position: 0
+        subcarrierSpacing: 1
+
+        referenceSubcarrierSpacing: 1
+        dl_UL_TransmissionPeriodicity: 6
+        nrofDownlinkSlots: 7
+        nrofDownlinkSymbols: 6
+        nrofUplinkSlots: 2
+        nrofUplinkSymbols: 4
+
+        ssPBCH_BlockPower: -25
+
+    SCTP:
+      SCTP_INSTREAMS: 2
+      SCTP_OUTSTREAMS: 2
+
+    amf_ip_address:
+      - ipv4: "192.168.70.132"
+
+    NETWORK_INTERFACES:
+      GNB_IPV4_ADDRESS_FOR_NG_AMF: "192.168.70.128"
+      GNB_IPV4_ADDRESS_FOR_NGU: "192.168.70.128"
+      GNB_PORT_FOR_S1U: 2152
+
+MACRLCs:
+  - num_cc: 1
+    tr_s_preference: "local_L1"
+    tr_n_preference: "local_RRC"
+    pusch_TargetSNRx10: 200
+    pucch_TargetSNRx10: 200
+    ul_prbblack_SNR_threshold: 10
+
+L1s:
+  - num_cc: 1
+    tr_n_preference: "local_mac"
+    prach_dtx_threshold: 120
+    pucch0_dtx_threshold: 100
+    ofdm_offset_divisor: 8
+
+RUs:
+  - local_rf: "yes"
+    nb_tx: 1
+    nb_rx: 1
+    att_tx: 14
+    att_rx: 14
+    bands: [78]
+    max_pdschReferenceSignalPower: -27
+    max_rxgain: 114
+    eNB_instances: [0]
+    clock_src: "internal"
+
+security:
+  ciphering_algorithms:
+    - "nea0"
+
+  integrity_algorithms:
+    - "nia2"
+    - "nia0"
+
+  drb_ciphering: "yes"
+  drb_integrity: "no"
+
+log_config:
+  global_log_level: "info"
+  hw_log_level: "info"
+  phy_log_level: "info"
+  mac_log_level: "info"
+  rlc_log_level: "info"
+  pdcp_log_level: "info"
+  rrc_log_level: "info"
+  ngap_log_level: "debug"
+  f1ap_log_level: "debug"

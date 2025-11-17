@@ -23,18 +23,20 @@ git clone https://gitlab.eurecom.fr/oai/trainings/oai-workshops.git
 
 **Hardware Requirements**
 
-1. A laptop or remote server with minimum 8vCPU and 16GB of RAM and 4GB of storage. Most of the CPU and RAM is consumed by OAI gNB and NR-UE RFSimulator. Core network requires minimum 2vCPU and 4GB RAM.
-2. Make sure your laptop/remote server cpu supports `avx2`. You can check via `lscpu | grep avx2`
-3. Operating System: Ubuntu 20.04 or 22.04.
-4. Note: macOS and new M1/M2 laptops are not yet tested and Windows Linux Subsystem (WSL) is not yet tested
+1. A laptop or remote server with minimum 4vCPU and 8GB of RAM and 4GB of storage. 
+2. Make sure your laptop/remote server CPU supports `avx2` as it is needed by gNB/NR-UE containers. You can check via `lscpu | grep avx2`
+3. Operating System: Ubuntu 22.04/24.04, RHEL 9/10, Fedora 40+, other linux based OS may work as well.  
+4. **Note**: Apple M1/M2/M3 laptops and Windows Linux Subsystem (WSL) are not yet tested.
 
 **Software Prerequisites**
 
-|Software      |Version                                       |
-|:-------------|:---------------------------------------------|
-|docker engine |Minimum 19.03.6                               |
-|tshark        |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
-|wireshark     |Minimum 3.6.2 (Git v3.6.2 packaged as 3.6.2-2)|
+|Software      |Version       |
+|:-------------|:-------------|
+|Docker engine |Minimum 25.04 |
+|tshark        |Minimum 4.6.0 |
+|wireshark     |Minimum 4.6.0 |
+
+**Recommendation**: You can download terminal application terminator or similar application to open multiple terminals in the same screen. 
 
 In case you do not have docker and wireshark you can download, 
 
