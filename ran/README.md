@@ -762,6 +762,58 @@ Observe the change of noise_power_dB in the scope to verify the effect of the mo
 
 ---
 
-## NTN setup
+## NTN setup (Exercise)
+
+Exercise: simulate non-terrestrial communication for a geostationary satellite
+(only signal delay, no other impairments) using the knowledge you acquired in
+this workshop.
+
+- Run the gNB:
+  ```
+  ./nr-softmodem --rfsim -O ../ci-scripts/conf_files/gnb.sa.band254.u0.25prb.rfsim.ntn.conf`
+  ```
+  Note: you have to potentially adapt PLMN, and AMF and gNB IP addresses, to
+  make this connect reliably. The rest is set in the config (no additional
+  command line parameters required.
+- Run the UE:
+  ```
+  sudo ./nr-uesoftmodem --rfsim --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60 --rfsimulator.prop_delay 238.74 --num-ul-actors 1 --num-dl-actors 1 -O ../ci-scripts/conf_files/nrue.uicc.conf
+  ```
+  Also here, you might need to change the IMSI and other authentication-related
+  parameters.
+- If you run this, notice that it runs much faster than what you would expect.
+  Explain this.
+- You might be interested to run this with normal (real-time) speed. Apply and
+  compile the below patch, which will slow down RFsim. What do you observe now?
+
+```
+  diff --git a/radio/rfsimulator/simulator.c b/radio/rfsimulator/simulator.c
+index 94234a755f..6cd7a69c93 100644
+--- a/radio/rfsimulator/simulator.c
++++ b/radio/rfsimulator/simulator.c
+@@ -1067,6 +1067,22 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
+     LOG_D(HW, "Rfsimulator: velocity %.2f Msps, realtime requirements %.2f Msps\n", average / 1e6, t->sample_rate / 1e6);
+   }
+
++  static struct timespec now;
++  if (now.tv_nsec == 0) {
++    // first time here: initialize to current time
++    int r = clock_gettime(CLOCK_MONOTONIC, &now);
++    DevAssert(r == 0);
++  } else {
++    // advance by half a millisecond
++    now.tv_nsec += 1000000;
++    if (now.tv_nsec > 999999999) {
++      now.tv_nsec -= 1000000000;
++      now.tv_sec++;
++    }
++  }
++  int r = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &now, NULL);
++  DevAssert(r == 0);
++
+   *ptimestamp = t->nextRxTstamp; // return the time of the first sample
+   t->nextRxTstamp += nsamps;
+   LOG_D(HW,
+```
 
 ---
