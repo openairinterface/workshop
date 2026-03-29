@@ -1,6 +1,6 @@
-# OpenAirInterface 5G RAN Workshop 2025
+# OpenAirInterface 5G RAN @ Open6G+AI School
 
-> Author: Robert Schmidt, Jaroslava Fiedlerova (November 18, 2025)
+> Author: Robert Schmidt (March 30, 2026)
 
 Note: this repository is hosted at [this Gitlab repository](https://gitlab.eurecom.fr/oai/trainings/oai-workshops).
 
@@ -26,11 +26,17 @@ pandoc -t slidy --template ran.slidy -s README.md -o README.html   --metadata ti
 
 ---
 
+**TABLE OF CONTENTS**
+
+[[_TOC_]]
+
+---
+
 **Hardware Requirements**
 
 1. Your laptop/remote server must have at least an 8-core CPU (or equivalent), and a minimum of 16 GB of RAM.
 2. Make sure your laptop/remote server CPU supports `avx2`.
-    - How to check for AVX2 support: Check /proc/cpuinfo for the AVX2 flag (`lscpu | grep avx2`)
+    - How to check for AVX2 support: Check `/proc/cpuinfo` for the AVX2 flag (`lscpu | grep avx2`)
 3. Disk space:
     - If Ubuntu 24.04 is already installed, ensure at least 20 GB of free space.
     - If not, prepare a free partition with at least 100 GB to install Ubuntu 24.04.
@@ -48,12 +54,6 @@ pandoc -t slidy --template ran.slidy -s README.md -o README.html   --metadata ti
 
 ---
 
-**TABLE OF CONTENTS**
-
-[[_TOC_]]
-
----
-
 # Preparation for RAN training session
 
 In this session we will:
@@ -65,47 +65,13 @@ Please don't hesitate to ask questions!
 
 ---
 
-## Installation of dependencies and compilation
-
-Install the RAN dependencies and compile it, as this takes some time.
-
-The repositories should be cloned in your home directory.
-
-In this tutorial, we assume that the main repository is located at `~/openairinterface5g` and the workshop repository at `~/oai-workshops`.
-
-```
-cd ~
-git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-cd openairinterface5g
-git checkout 2025.w46                        # tested tag
-cd cmake_targets
-./build_oai --ninja -I                       # install dependencies
-```
-
-Compile RAN executables for gNB and nrUE:
-```
-./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
-```
-> Note: For USRP support, you need to use the switch `-w USRP`.
-
-### Alternative:
-
-`build_oai` is a wrapper on top of `cmake`. It is therefore possible to run `cmake` directly:
-
-```
-cd ~/openairinterface5g
-mkdir -p cmake_targets/ran_build/build && cd cmake_targets/ran_build/build
-cmake ../../.. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig coding rfsimulator ldpc
-```
-
----
-
 ## The RAN repository
 
 - **Repository URL**: `https://gitlab.eurecom.fr/oai/openairinterface5g`
 - **Main branch**: Work happens in the `develop` branch
-- **Latest release**: `v2.3.0` (July 2025), check [Release Notes](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/CHANGELOG.md)
-- **Weekly tags**: Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2025.w43`
+- **Latest release**: `v2.4.0` (December 2025), check [Release Notes](https://gitlab.eurecom.fr/oai/openairinterface5g/-/releases/v2.4.0)
+- **Weekly tags**: Usually one integration branch per week, tagged in the format `YYYY-wWW`, e.g., `2026.w13`
+- **Developers**: Use `develop`
 - **Main README**: See [README.md](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/README.md) in the repository root for general overview
 - **Documentation**: Comprehensive documentation is available in the [`doc/`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/tree/develop/doc) directory:
   - [Building OAI](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/BUILD.md) - Detailed build instructions
@@ -113,17 +79,6 @@ cmake ../../.. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libco
   - [System Requirements](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/system_requirements.md) - Hardware and software requirements
   - [Feature Set](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/FEATURE_SET.md) - Implemented 3GPP features
   - [MAC Usage](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/MAC/mac-usage.md) - MAC layer configuration and statistics
-
----
-
-## How to contribute
-
-- Anyone can contribute! You are here to contribute!
-- You have to sign a [Contributor License Agreement](https://openairinterface.org/legal/oai-license-model/)
-- Contributions go through
-  - Peer review on Gitlab
-  - Continuous Integration Build and Testing
-- Useful information on how to contribute to OAI --> [Contributing policies](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/code-style-contrib.md)
 
 ---
 
@@ -156,7 +111,9 @@ The OpenAirInterface 5G repository is organized into several main directories:
 
 ---
 
-Deep dive:
+### Repository: Some examples
+
+Examples:
 
 - **Where is NR PDSCH modulation?** Called in `nr_generate_pdsch()`
 - **Where is the NR PDSCH/DLSCH scheduler?** See `gNB_dlsch_ulsch_scheduler()`
@@ -165,6 +122,66 @@ Deep dive:
 - **Where is the E2 agent?** See next training session
 
 For more details on the software architecture, see [`doc/SW_archi.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/SW_archi.md) in the main repository.
+
+---
+
+## Installation of dependencies and compilation
+
+We assume that the main repository is located at `~/openairinterface5g` and the workshop repository at `~/oai-workshops`.
+
+```
+cd ~
+git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
+cd openairinterface5g
+git checkout 2025.w46                        # tested tag
+cd cmake_targets
+./build_oai --ninja -I                       # install dependencies
+```
+
+Compile RAN executables for gNB and nrUE:
+
+    ./build_oai --ninja --gNB --nrUE -w SIMU -c  # compile gNB and nrUE
+
+  - "Historical" build tool
+  - Some useful options: `-h`, `--eNB`, `--gNB`, `--UE`, `--nrUE`, `-c`, `--ninja`, `--sanitize-address`, `-g`, `-w`, `-P/--physical_simulators`, ...
+  - By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
+
+> Note: For USRP support, you need to use the switch `-w USRP`. For O-RAN, use
+> `-t oran_fhlib_5g` 
+
+---
+
+### Alternative compilation: cmake (recommended)
+
+`build_oai` is a wrapper on top of `cmake`. It is possible to run `cmake` directly:
+
+```
+cd ~/openairinterface5g
+mkdir build && cd build
+cmake ../ -GNinja
+ninja
+```
+
+You can check additional options available for compilation:
+
+```
+ccmake .
+```
+
+---
+
+### Main executables
+
+After build, you will find, in the build directory:
+
+- `nr-softmodem`: main NR gNB/CU/DU executable
+- `nr-uesoftmodem`: NR UE executable
+- `libdfts.so`: (i)FFT library
+- `libldpc.so`: LDPC library (multiple implementations)
+- `librfsimulator.so`/`liboai_usrpdevif.so`/...: radio libraries
+- `nr_*sim`: 5G unitary/physical simulators
+- `nr-cuup`: CU-UP
+- `lte-softmodem`/`lte-uesoftmodem`/other `*sim`: LTE executables
 
 ---
 
@@ -213,31 +230,6 @@ For detailed information about the RFsimulator, see:
 - [RFsimulator README](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/radio/rfsimulator/README.md) - Complete RFsimulator documentation
 - [Channel Simulation](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/SIMULATION/TOOLS/DOC/channel_simulation.md) - Channel modeling details
 - [Running the modems](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/RUNMODEM.md) - General usage information
-
----
-
-## How to build
-
-You have 2 options:
-
-### Use of the `build_oai` script
-  - "Historical" build tool
-  - Is a wrapper for `cmake`
-  - Some useful options: `-h`, `--eNB`, `--gNB`, `--UE`, `--nrUE`, `-c`, `--ninja`, `--sanitize-address`, `-g`, `-w`, `-P/--physical_simulators`, ...
-  - By default, build artifacts are in `cmake_targets/ran_build/build` (`ran_build/` configurable, see `-d` switch)
-
-### Use cmake directly
-```
-cd ~/openairinterface5g
-mkdir -p cmake_targets/ran_build/build && cd cmake_targets/ran_build/build
-cmake ../../.. -GNinja && ninja nr-softmodem nr-uesoftmodem nr-cuup params_libconfig coding rfsimulator ldpc
-```
-
-- To rebuild more quickly, issue
-  ```
-  ninja nr-softmodem nr-uesoftmodem dfts ldpc params_libconfig coding rfsimulator
-  ```
-- Also interesting: `lte-softmodem`, `lte-uesoftmodem`
 
 ---
 
@@ -510,6 +502,13 @@ For other parameters, see [`doc/MAC/mac-usage.md`](https://gitlab.eurecom.fr/oai
 - TDD configuration is in `nrofDownlinkSlots`, `nrofUplinkSlots`,
   `nrofDownlinkSymbols` and `nrofUplinkSymbols`
 
+> Notes:
+> - If an option is not given, a default is used (which might or might not prevent the gNB from starting)
+> - You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
+
+
+---
+
 #### `MACRLCs` section
 
 - `ulsch_max_frame_inactivity`: maximum number of frames until UE is scheduled
@@ -522,6 +521,8 @@ For other parameters, see [`doc/MAC/mac-usage.md`](https://gitlab.eurecom.fr/oai
 
 Other parameters: see [`openair2/GNB_APP/MACRLC_nr_paramdef.h`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair2/GNB_APP/MACRLC_nr_paramdef.h) in the main repository
 
+---
+
 #### `RUs` section
 
 - `nb_tx`, `nb_rx`: number of transmit/receive antennas to use
@@ -533,9 +534,17 @@ Other parameters: see [`openair2/GNB_APP/MACRLC_nr_paramdef.h`](https://gitlab.e
 - `sdr_addrs`: arguments to be passed to search for SDR, e.g., IP address for
   N310
 
-> #### Notes:
-> - If an option is not given, a default is used (which might or might not prevent the gNB from starting)
-> - You can override many options on the command line. Example: `./nr-softmodem -O gnb.conf --MACRLCs.[0].dl_max_mcs 20`
+---
+
+#### `fhi_72` section
+
+- `dpdk_devices`: PCI addresses of virtual function (VF) NICs
+- `system_core`/`io_core`/`worker_cores`: cores for DPDK/xran workloads
+- `ru_addr`: array of RU addresses, on per VF
+- `fh_config`: array of RU configuration
+  * `ru_config`:
+    - `iq_width`: IQ bitwidth. 16=uncompressed, <16=compressed mode.
+    - `iq_width_prach`: same for PRACH
 
 ---
 
