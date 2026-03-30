@@ -132,9 +132,7 @@ We assume that the main repository is located at `~/openairinterface5g` and the 
 ```
 cd ~
 git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
-cd openairinterface5g
-git checkout 2025.w46                        # tested tag
-cd cmake_targets
+cd openairinterface5g/cmake_targets
 ./build_oai --ninja -I                       # install dependencies
 ```
 
@@ -545,6 +543,7 @@ Other parameters: see [`openair2/GNB_APP/MACRLC_nr_paramdef.h`](https://gitlab.e
   * `ru_config`:
     - `iq_width`: IQ bitwidth. 16=uncompressed, <16=compressed mode.
     - `iq_width_prach`: same for PRACH
+- `dpdk_mem_size`: size of pre-allocated huge pages
 
 ---
 
