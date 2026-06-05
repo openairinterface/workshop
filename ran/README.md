@@ -561,7 +561,7 @@ Exercise: Compare configuration files for DUs: `gnb-du.sa.band78.106prb.rfsim.pc
 ```
 - Start DU0:
 ```
-sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf --rfsimulator.serveraddr ::1
+sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf --rfsimulator.[0].serveraddr ::1
 ```
 > Note: You might see following error after the DU1 start,
 > ```
@@ -572,11 +572,11 @@ sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.
 
 - Start the UE (acts as a server)
 ```
-sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 --rfsim -O ~/oai-workshops/ran/conf/ue.conf --log_config.global_log_options function --rfsimulator.serveraddr server
+sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 --rfsim -O ~/oai-workshops/ran/conf/ue.conf --log_config.global_log_options function --rfsimulator.[0].serveraddr server
 ```
 - Start DU1:
 ```
-sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci1.conf --rfsimulator.serveraddr ::1
+sudo ./nr-softmodem --rfsim -O ~/oai-workshops/ran/conf/gnb-du.sa.band78.106prb.rfsim.pci1.conf --rfsimulator.[0].serveraddr ::1
 ```
 - Trigger F1 handover
 ```
@@ -599,13 +599,13 @@ echo ci trigger_f1_ho | nc 127.0.0.1 9090 && echo
 - Start first UE as
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -c1 -e
-  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.serveraddr 10.201.1.100 --log_config.global_log_options utc_time
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.[0].serveraddr 10.201.1.100 --log_config.global_log_options utc_time
   ```
 - Check in Wireshark/UE output that everything is ok
 - Second UE *with a different IMSI*:
   ```
   sudo ~/oai-workshops/ran/multi-ue.sh -c2 -e
-  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.serveraddr 10.202.1.100 --log_config.global_log_options utc_time
+  ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 -O /home/oai/oai-workshops/ran/conf/ue.conf --rfsim --uicc0.imsi 001010000000102 --rfsimulator.[0].serveraddr 10.202.1.100 --log_config.global_log_options utc_time
   ```
 
 ### Exercise
@@ -713,16 +713,16 @@ Example commands:
   ```
   @include "channelmod_rfsimu.conf"
   ```
-- Add the options `--rfsimulator.options chanmod --rfsimulator.modelname AWGN` to the gNB and UE command lines and start them
+- Add the options `--rfsimulator.[0].options chanmod --rfsimulator.[0].modelname AWGN` to the gNB and UE command lines and start them
 - More info: See [`openair1/SIMULATION/TOOLS/DOC/channel_simulation.md`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/SIMULATION/TOOLS/DOC/channel_simulation.md) in the main repository, channel models defined in [`openair1/SIMULATION/TOOLS/random_channel.c`](https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/openair1/SIMULATION/TOOLS/random_channel.c)
 
 - Run gNB:
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --log_config.global_log_options utc_time
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.[0].options chanmod --rfsimulator.[0].modelname AWGN --log_config.global_log_options utc_time
   ```
 - Run UE:
   ```
-  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.options chanmod --rfsimulator.modelname AWGN --log_config.global_log_options utc_time
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --rfsimulator.[0].options chanmod --rfsimulator.[0].modelname AWGN --log_config.global_log_options utc_time
   ```
 
 ---
@@ -751,11 +751,11 @@ Example commands:
 
 - gNB
   ```
-  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --log_config.global_log_options utc_time
+  ./nr-softmodem -O ~/oai-workshops/ran/conf/gnb.sa.band78.106prb.rfsim.conf --rfsim --imscope --rfsimulator.[0].options chanmod --rfsimulator.[0].modelname AWGN --telnetsrv --log_config.global_log_options utc_time
   ```
 - UE
   ```
-  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope --rfsimulator.options chanmod --rfsimulator.modelname AWGN --telnetsrv --telnetsrv.listenport 9091 --log_config.global_log_options utc_time
+  sudo ./nr-uesoftmodem -C 3619200000 -r 106 --numerology 1 --ssb 516 -O ~/oai-workshops/ran/conf/ue.conf --rfsim --imscope --rfsimulator.[0].options chanmod --rfsimulator.[0].modelname AWGN --telnetsrv --telnetsrv.listenport 9091 --log_config.global_log_options utc_time
   ```
 - Connect to the local telnet interface to view or modify channel parameters:
   ```
@@ -785,7 +785,7 @@ this workshop.
   command line parameters required.
 - Run the UE:
   ```
-  sudo ./nr-uesoftmodem --rfsim --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60 --rfsimulator.prop_delay 238.74 --num-ul-actors 1 --num-dl-actors 1 -O ../../../ci-scripts/conf_files/nrue.uicc.conf
+  sudo ./nr-uesoftmodem --rfsim --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60 --rfsimulator.[0].prop_delay 238.74 --num-ul-actors 1 --num-dl-actors 1 -O ../../../ci-scripts/conf_files/nrue.uicc.conf
   ```
   Also here, you might need to change the IMSI and other authentication-related
   parameters.

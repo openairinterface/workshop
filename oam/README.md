@@ -569,14 +569,14 @@ based on the configuration of the slices.
   ```bash
   cd openairinterface5g/cmake_targets/ran_build/build
   sudo <path-to/multi-ue.sh> -c1 -e  # create namespace
-  sudo LD_LIBRARY_PATH=. ./nr-uesoftmodem --rfsimulator.serveraddr 10.201.1.100 -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/slicing_demo/ue_1.conf> -E
+  sudo LD_LIBRARY_PATH=. ./nr-uesoftmodem --rfsimulator.[0].serveraddr 10.201.1.100 -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/slicing_demo/ue_1.conf> -E
   ```
 
 * Start UE#2
   ```bash
   cd openairinterface5g/cmake_targets/ran_build/build
   sudo <path-to/multi-ue.sh> -c2 -e  # create namespace
-  sudo LD_LIBRARY_PATH=. ./nr-uesoftmodem --rfsimulator.serveraddr 10.202.1.100 -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/slicing_demo/ue_2.conf> -E
+  sudo LD_LIBRARY_PATH=. ./nr-uesoftmodem --rfsimulator.[0].serveraddr 10.202.1.100 -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa -O <path-to/oai-workshops/oam/conf/slicing_demo/ue_2.conf> -E
   ```
 
 * Start KPM xApp (optional, to check if the thp is equal to the one in iperf3 logs)

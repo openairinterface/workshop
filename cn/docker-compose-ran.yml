@@ -29,7 +29,7 @@ services:
             - SYS_NICE
         container_name: oai-nr-ue1
         environment: 
-            USE_ADDITIONAL_OPTIONS: -E --rfsim -r 106 --numerology 1 --uicc0.imsi 001010000000101 -C 3319680000 --rfsimulator.serveraddr 192.168.70.160 --log_config.global_log_options level,nocolor,time
+            USE_ADDITIONAL_OPTIONS: -E --rfsim -r 106 --numerology 1 --uicc0.imsi 001010000000101 -C 3319680000 --rfsimulator.[0].serveraddr 192.168.70.160 --log_config.global_log_options level,nocolor,time
         volumes:
             - ./conf/nr-ue.yaml:/opt/oai-nr-ue/etc/nr-ue.yaml
         devices:
@@ -56,7 +56,7 @@ services:
         depends_on:
             - oai-gnb
         environment:
-            USE_ADDITIONAL_OPTIONS: -E --rfsim -r 106 --numerology 1 --uicc0.imsi 001010000000102 -C 3319680000 --rfsimulator.serveraddr 192.168.70.160 --log_config.global_log_options level,nocolor,time
+            USE_ADDITIONAL_OPTIONS: -E --rfsim -r 106 --numerology 1 --uicc0.imsi 001010000000102 -C 3319680000 --rfsimulator.[0].serveraddr 192.168.70.160 --log_config.global_log_options level,nocolor,time
         devices:
              - /dev/net/tun:/dev/net/tun
         volumes:
