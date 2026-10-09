@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: MIT
+# NEF: the only door your AF uses into the 5G core. Start after the core.
+services:
+    oai-nef:
+        container_name: oai-nef
+        image: oaisoftwarealliance/oai-nef:pre-develop-u24
+        volumes:
+            - ./conf/nef_config.yaml:/openair-nef/etc/config.yaml
+        environment:
+            - TZ=Europe/Paris
+        # lets the NEF send notifications to an AF running on the host:
+        # use http://af-host:<port>/... as your notification URL
+        extra_hosts:
+            - "af-host:host-gateway"
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.145
+networks:
+    public_net:
+        external:
+            name: demo-oai-public-net

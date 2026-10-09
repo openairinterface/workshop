@@ -1,0 +1,41 @@
+log_level:
+  general: debug
+register_nf:
+  general: yes
+nfs:
+  nrf:
+    host: oai-nrf
+    sbi: {port: 8080, api_version: v1, interface_name: eth0}
+  amf:
+    host: oai-amf
+    sbi: {port: 8080, api_version: v1, interface_name: eth0}
+  smf:
+    host: oai-smf
+    sbi: {port: 8080, api_version: v1, interface_name: eth0}
+  pcf:
+    host: oai-pcf
+    sbi: {port: 8080, api_version: v1, interface_name: eth0}
+  udr:
+    host: oai-udr
+    sbi: {port: 8080, api_version: v1, interface_name: eth0}
+  nwdaf:
+    host: oai-nwdaf-nbi-events
+    sbi: {port: 8080, api_version: v1, interface_name: eth0}
+  nef:
+    host: oai-nef
+    sbi: {port: 8080, api_version: v1, interface_name: eth0}
+nef:
+  support_features: >
+    nnef-eventexposure,
+    nnef-pfdmanagement,
+    nnef-trafficinfluence,
+    nnef-bdtpolicycontrol,
+    nnef-qosmonitoring,
+    nnef-analyticsexposure
+  # Untrusted AFs: only the AFs listed here, each limited to its APIs.
+  af_whitelist:
+    - af_id: "hackathon-af"
+      allowed_apis: [qos_monitoring, monitoring_event, analytics_exposure]
+  security:
+    jwt_secret: "REPLACE_WITH_SECRET"
+    insecure_dev_mode: false
