@@ -25,7 +25,10 @@ functions.
 - **OS:** Ubuntu 24.04 (amd64 or arm64)
 - `sudo` access, and internet access so the package manager can download the
   dependencies (MySQL or MariaDB, boost, SCTP and others).
-- The package file for your system:
+- Use below packages based on your jupyter pod profile 
+   - CPU Standard, use amd64.deb
+   - GPU Small (1g.18gb), use arm64.deb
+   - A100 MIG Small (1g.10gb), use amd64.deb
 
 ```
 packages/

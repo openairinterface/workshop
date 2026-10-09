@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: MIT
+# Simulated gNB + 2 UEs (UERANSIM). Start after the core and NWDAF.
+#   ue1: imsi-208950000000035   ue2: imsi-208950000000034
+
+services:
+    ueransim-gnb:
+        privileged: true
+        init: true
+        container_name: ueransim-gnb
+        image: oaisoftwarealliance/ueransim:v3.2.6
+        command: nr-gnb -c /home/config-gnb.yaml
+        volumes:
+            - ./ran/gnb.yaml:/home/config-gnb.yaml
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.141
+    ueransim-ue1:
+        privileged: true
+        init: true
+        container_name: ueransim-ue1
+        image: oaisoftwarealliance/ueransim:v3.2.6
+        cap_add:
+        - NET_ADMIN
+        - SYS_ADMIN
+        - SYS_RESOURCE # setrlimit
+        command:
+        - bash
+        - -c
+        - |
+            apt install ethtool -y;
+            ethtool -K eth0 tx off;
+            nr-ue -c /home/config-ue.yaml;
+        volumes:
+            - ./ran/ue1.yaml:/home/config-ue.yaml
+        depends_on:
+          - ueransim-gnb
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.142
+    ueransim-ue2:
+        privileged: true
+        init: true
+        container_name: ueransim-ue2
+        image: oaisoftwarealliance/ueransim:v3.2.6
+        cap_add:
+        - NET_ADMIN
+        - SYS_ADMIN
+        - SYS_RESOURCE # setrlimit
+        command:
+        - bash
+        - -c
+        - |
+            apt install ethtool -y;
+            ethtool -K eth0 tx off;
+            nr-ue -c /home/config-ue.yaml;
+        volumes:
+            - ./ran/ue2.yaml:/home/config-ue.yaml
+        depends_on:
+          - ueransim-gnb
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.143
+
+networks:
+    public_net:
+        external:
+            name: demo-oai-public-net
