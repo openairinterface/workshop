@@ -8,6 +8,9 @@ how communication and sensing objectives interact across the full mobile network
 
 ## Hackathon Infrastructure
 
+Please refer to the [Infrastructure Guide](./infra.md) for detailed instructions on setting up
+and using the hackathon infrastructure.
+
 ## Core Network for Hackathon
 
 If you are using the hackathon infrastructure then you will be inside a pod. 
