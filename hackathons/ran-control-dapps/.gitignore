@@ -1,0 +1,5 @@
+# run outputs of tools/run_scenario.py
+results/
+# built by make in tools/incumbent-injector
+tools/incumbent-injector/incumbent-injector
+__pycache__/

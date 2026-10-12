@@ -1,0 +1,11 @@
+{
+  "name": "seed31337_level4",
+  "comment": "weak_1: PRBs 38-45, -48 dBFS, 23-66 s, 4 ms on every 8 ms",
+  "seed": 31337,
+  "level": 4,
+  "duration_s": 120,
+  "noise_dbfs": -60,
+  "components": [
+    {"id": "weak_1", "shape": "sweep", "prb": 38, "width_prb": 8, "sweep_period_us": 50, "amplitude_dbfs": -48, "start_s": 23, "stop_s": 66, "duty": {"period_ms": 8, "on_ms": 4, "offset_ms": 0}}
+  ]
+}

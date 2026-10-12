@@ -1,0 +1,7 @@
+{
+  "name": "noise_floor",
+  "comment": "Background noise only, no incumbent and no end: keeps a realistic noise floor at the gNB between scenario runs. Level with --noise-dbfs.",
+  "seed": 7,
+  "noise_dbfs": -60,
+  "components": []
+}

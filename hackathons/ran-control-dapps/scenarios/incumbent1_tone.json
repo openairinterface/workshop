@@ -1,0 +1,10 @@
+{
+  "name": "incumbent1_tone",
+  "comment": "A fixed continuous narrowband tone in PRB 72. Quiet for 20 s, on for 60 s, quiet for 40 s.",
+  "seed": 1,
+  "duration_s": 120,
+  "noise_dbfs": -60,
+  "components": [
+    { "id": "tone", "shape": "tone", "prb": 72, "amplitude_dbfs": -40, "start_s": 20, "stop_s": 80 }
+  ]
+}

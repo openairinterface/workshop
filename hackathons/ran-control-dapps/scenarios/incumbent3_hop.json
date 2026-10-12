@@ -1,0 +1,11 @@
+{
+  "name": "incumbent3_hop",
+  "comment": "A tone hopping between three PRBs every 3 s, from 20 s to 80 s.",
+  "seed": 3,
+  "duration_s": 100,
+  "noise_dbfs": -60,
+  "components": [
+    { "id": "hop", "shape": "tone", "amplitude_dbfs": -40, "start_s": 20, "stop_s": 80,
+      "hop": { "prbs": [30, 66, 90], "dwell_s": 3, "seed": 11 } }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "incumbent5_weak",
+  "comment": "A weak 10-PRB wide signal that is only on for 2 ms of every 5 ms.",
+  "seed": 5,
+  "duration_s": 100,
+  "noise_dbfs": -60,
+  "components": [
+    { "id": "weak", "shape": "sweep", "prb": 12, "width_prb": 10, "sweep_period_us": 50, "amplitude_dbfs": -62,
+      "start_s": 20, "stop_s": 80, "duty": { "period_ms": 5, "on_ms": 2.5, "offset_ms": 0 } }
+  ]
+}

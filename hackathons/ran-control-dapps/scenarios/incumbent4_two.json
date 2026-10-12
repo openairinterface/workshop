@@ -1,0 +1,11 @@
+{
+  "name": "incumbent4_two",
+  "comment": "Two incumbents at once with different power and bandwidth.",
+  "seed": 4,
+  "duration_s": 110,
+  "noise_dbfs": -60,
+  "components": [
+    { "id": "narrow", "shape": "tone", "prb": 25, "amplitude_dbfs": -44, "start_s": 20, "stop_s": 70 },
+    { "id": "wide", "shape": "sweep", "prb": 92, "width_prb": 8, "sweep_period_us": 50, "amplitude_dbfs": -34, "start_s": 40, "stop_s": 100 }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "incumbent2_band",
+  "comment": "A 6-PRB wide signal (PRBs 85-90) that switches on and off. On 20-50 s and 70-100 s.",
+  "seed": 2,
+  "duration_s": 120,
+  "noise_dbfs": -60,
+  "components": [
+    { "id": "band_a", "shape": "sweep", "prb": 85, "width_prb": 6, "sweep_period_us": 50, "amplitude_dbfs": -30, "start_s": 20, "stop_s": 50 },
+    { "id": "band_b", "shape": "sweep", "prb": 85, "width_prb": 6, "sweep_period_us": 50, "amplitude_dbfs": -30, "start_s": 70, "stop_s": 100 }
+  ]
+}

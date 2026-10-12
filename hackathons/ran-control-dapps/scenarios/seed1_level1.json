@@ -1,0 +1,11 @@
+{
+  "name": "seed1_level1",
+  "comment": "tone_1: PRB 74, -39 dBFS, 34-69 s",
+  "seed": 1,
+  "level": 1,
+  "duration_s": 120,
+  "noise_dbfs": -60,
+  "components": [
+    {"id": "tone_1", "shape": "tone", "prb": 74, "amplitude_dbfs": -39, "start_s": 34, "stop_s": 69}
+  ]
+}

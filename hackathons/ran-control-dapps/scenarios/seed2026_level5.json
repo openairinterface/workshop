@@ -1,0 +1,12 @@
+{
+  "name": "seed2026_level5",
+  "comment": "hop_1: PRBs [49, 23, 69] (hop every 5 s), -46 dBFS, 30-75 s; tone_2: PRB 33, -45 dBFS, 29-49 s, 10 ms on every 20 ms",
+  "seed": 2026,
+  "level": 5,
+  "duration_s": 120,
+  "noise_dbfs": -60,
+  "components": [
+    {"id": "hop_1", "shape": "tone", "amplitude_dbfs": -46, "start_s": 30, "stop_s": 75, "hop": {"prbs": [49, 23, 69], "dwell_s": 5, "seed": 1331506666}},
+    {"id": "tone_2", "shape": "tone", "prb": 33, "amplitude_dbfs": -45, "start_s": 29, "stop_s": 49, "duty": {"period_ms": 20, "on_ms": 10, "offset_ms": 0}}
+  ]
+}

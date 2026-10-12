@@ -1,0 +1,12 @@
+{
+  "name": "seed4711_level3",
+  "comment": "wide_1: PRBs 87-93, -35 dBFS, 37-97 s; narrow_2: PRB 34, -42 dBFS, 52-94 s",
+  "seed": 4711,
+  "level": 3,
+  "duration_s": 120,
+  "noise_dbfs": -60,
+  "components": [
+    {"id": "wide_1", "shape": "sweep", "prb": 87, "width_prb": 7, "sweep_period_us": 50, "amplitude_dbfs": -35, "start_s": 37, "stop_s": 97},
+    {"id": "narrow_2", "shape": "tone", "prb": 34, "amplitude_dbfs": -42, "start_s": 52, "stop_s": 94}
+  ]
+}
