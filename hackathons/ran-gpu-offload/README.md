@@ -145,7 +145,7 @@ Note that early record may have lower performance than later records
 
 ## Deliverables
 
-Participants should submit the following:
+Participants should submit the following to <oaicicdteam@openairinterface.org>:
 
 1. `srs_est_cuda.cu`, either as the full file or as a patch.
 2. The `nmse.json` file from your end-to-end run (at least 500 records).
