@@ -45,11 +45,11 @@ Software and hardware:
 for `sudo`, and nothing after it does:
 
 ```bash
-git clone --branch 0.2.3 https://github.com/wineslab/libe3 ~/libe3
+git clone --branch 0.2.4 https://github.com/wineslab/libe3 ~/libe3
 cd ~/libe3
 ./build_libe3 -I                          # build dependencies, first time only
 ./build_libe3 --all-encodings --install   # into /usr/local
-pkg-config --modversion libe3             # 0.2.3
+pkg-config --modversion libe3             # 0.2.4
 ```
 
 `--all-encodings` builds ASN.1, JSON and Protocol Buffers: the gNB serves whichever one the dApp uses.
@@ -57,7 +57,7 @@ pkg-config --modversion libe3             # 0.2.3
 ## Starting Point
 
 * Repository: https://github.com/duranta-project/openairinterface5g (gNB), https://github.com/wineslab/dApp-library (dApp), https://github.com/wineslab/libe3 (E3 library)
-* Branch/tag: OAI pull request #495, `dApp-library` tag `0.3.0`, `libe3` tag `0.2.3`
+* Branch/tag: OAI pull request #495, `dApp-library` tag `0.3.1`, `libe3` tag `0.2.4`
 * Configuration: provided in this directory: `conf/` (gNB with the E3 agent, UE), `scenarios/` (ten sample incumbents and the noise floor), `tools/` (injector, scenario generator, scoring)
 * Test environment: locally, RF simulator (no radio), OAI 5G Core in Docker, one UE
 
@@ -207,14 +207,15 @@ The dApp always ignores the PRBs next to the centre (50 to 56).
 
 ### Tools & Frameworks
 
-**dApp library**, in a virtual environment (no `sudo`). Its E3 binding, `libe3py`, comes from PyPI as a
-dependency and is built against the libe3 from the Prerequisites. Install it editable, from a clone, because the
-file you edit is in it:
+**dApp library**, in a virtual environment (no `sudo`). Its E3 binding, `libe3py`, comes from PyPI and is built
+against the libe3 from the Prerequisites, so it must be the same version: the `libe3py==$(pkg-config ...)` below
+asks for exactly that (without it pip takes the newest `libe3py`, and the build stops with a version mismatch).
+Install it editable, from a clone, because the file you edit is in it:
 
 ```bash
 python3 -m venv ~/dapp-venv && source ~/dapp-venv/bin/activate
-git clone --branch 0.3.0 https://github.com/wineslab/dApp-library ~/dApp-library
-cd ~/dApp-library && pip install -e ".[gui]"            # [gui]: the dashboard
+git clone --branch 0.3.1 https://github.com/wineslab/dApp-library ~/dApp-library
+cd ~/dApp-library && pip install -e ".[gui]" "libe3py==$(pkg-config --modversion libe3)"   # [gui]: the dashboard
 ```
 
 **Your dApp.** The stub is `examples/hackathon_policy.py` in the clone:
